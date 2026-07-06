@@ -130,6 +130,7 @@ FinishedMaterial(mat, _pbr=my_pbr)                            # explicit overrid
 
 - Working, ruff-clean, `main.py` runs.
 - Now a **standalone repo** at `~/Development/CAD/bd_materials/` (see Layout), with a
-  single squashed initial commit combining the prior 4. No GitHub remote wired up yet.
+  single squashed initial commit combining the prior 4. Pushed to
+  `origin` = `git@github.com:bernhard-42/bd_materials.git` (`main`).
 - **Pending user review:** the draft metal **hardness values** — a few are nominal
   (e.g. 304/316 HRB, A36) and copper is left blank.
