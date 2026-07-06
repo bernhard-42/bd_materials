@@ -22,6 +22,10 @@ scrape and backfilled with typical MatWeb-class reference values.
 
 ## Layout
 
+This directory (`~/Development/CAD/bd_materials/`) **is the standalone git repo
+root** — its own `.git`, ready to push to GitHub. (Extracted 2026-07-06 from the old
+`3D-Projects/scratch/pcbway/`, which had no `.git` of its own.)
+
 ```
 pyproject.toml          setuptools>=81; package = bd_materials; deps: none
                         (viz extra = threejs-materials)
@@ -38,8 +42,11 @@ bd_materials/
   finishes.py           Finish spec + finish FUNCTIONS + AppliedFinish
   finished.py           FinishedMaterial (user touch point) + Process enum
   pbr.py                get_pbr_properties() -- the three.js bridge (needs viz)
-inputs/                 OLD PCBWay scrapes; NOT committed, do not depend on them
 ```
+
+The OLD PCBWay scrapes (`inputs/`) were **left behind** in the old
+`3D-Projects/scratch/pcbway/` folder — they are not part of this repo and nothing
+depends on them.
 
 ## Type hierarchy (one file per material *class*)
 
@@ -121,8 +128,8 @@ FinishedMaterial(mat, _pbr=my_pbr)                            # explicit overrid
 
 ## Status / pending
 
-- Working, ruff-clean, `main.py` runs. Committed on `main`.
+- Working, ruff-clean, `main.py` runs.
+- Now a **standalone repo** at `~/Development/CAD/bd_materials/` (see Layout), with a
+  single squashed initial commit combining the prior 4. No GitHub remote wired up yet.
 - **Pending user review:** the draft metal **hardness values** — a few are nominal
   (e.g. 304/316 HRB, A36) and copper is left blank.
-- When split into its own GitHub repo, `bd_materials/` + `pyproject.toml` become the
-  root (they currently sit inside a larger `3D-Projects` git repo).
