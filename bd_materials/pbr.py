@@ -20,7 +20,7 @@ from __future__ import annotations
 from threejs_materials import coats, glass, metal, paper, plastic, textile, wood
 
 from . import finishes as fin
-from .base import Material
+from .core import RangeMaterial
 from .finished import Process
 from .finishes import AppliedFinish
 
@@ -83,7 +83,7 @@ def _color_value(color):
     return color  # (r, g, b) tuple/list
 
 
-def _metal_name(material: Material) -> str:
+def _metal_name(material: RangeMaterial) -> str:
     fam = material.family
     if fam in _BARE_METALS:
         return fam
@@ -92,40 +92,43 @@ def _metal_name(material: Material) -> str:
     return "stainless"  # last-resort fallback
 
 
-def _is_carbon(material: Material) -> bool:
-    return "carbon" in (material.grade or "").lower() or material.family == "CFRP"
+def _is_carbon(material: RangeMaterial) -> bool:
+    return material.family == "CFRP"
 
 
-def _metal_tex_base(material: Material, texture):
+def _metal_tex_base(material: RangeMaterial, texture):
     """Bare metal, optionally with a brushed/matte relief variant."""
     name = _metal_name(material)
     return getattr(metal, f"{name}_{texture}")() if texture else getattr(metal, name)()
 
 
-def _plain_base(material: Material, texture, rgb):
-    """Look with no colour finish -- substrate + optional texture."""
+def _plain_base(material: RangeMaterial, texture, rgb, thickness):
+    """Look with no colour finish -- substrate + optional texture.
+
+    Wood/paper/textile pick a bundled factory by ``family`` (the factory key),
+    falling back to a generic factory for grades three.js doesn't bundle
+    (e.g. pine, the wood generics). ``thickness`` (per part) feeds transmissive
+    materials -- glass and any material flagged ``transparent``.
+    """
     cat = material.category
+    fam = material.family or ""
     if cat == "metal":
         return _metal_tex_base(material, texture)
     if cat == "wood":
-        return getattr(wood, material.name.lower())(color=rgb)
+        return (getattr(wood, fam, None) or wood.oak)(color=rgb)
     if cat == "glass":
-        # thickness_mm feeds the transmissive volume; None -> factory default
-        return glass.glass(color=rgb, thickness=getattr(material, "thickness_mm", None))
+        return glass.glass(color=rgb, thickness=thickness)
     if cat == "paper":
-        return getattr(paper, material.name.lower().replace(" ", "_"))(color=rgb)
+        return (getattr(paper, fam, None) or paper.paper)(color=rgb)
     if cat == "textile":
-        return getattr(textile, _TEXTILE[material.name])(color=rgb)
-    # plastic / composite / resin
-    if material.family in ("PMMA", "PC"):
+        return (getattr(textile, fam, None) or textile.fabric_weave)(color=rgb)
+    # plastic / resin (composites stay in this branch)
+    if material.transparent:
         # transmissive: refraction depends on pane thickness (three.js acrylic
-        # approximates both; PC's ior ~1.585 vs acrylic 1.49 is close enough)
-        return plastic.acrylic(
-            color=rgb, thickness=getattr(material, "thickness_mm", None)
-        )
-    if cat == "composite":
-        fn = plastic.carbon_fiber if _is_carbon(material) else plastic.plastic_rough
-        return fn(color=rgb)
+        # approximates both PMMA and PC well enough)
+        return plastic.acrylic(color=rgb, thickness=thickness)
+    if _is_carbon(material):
+        return plastic.carbon_fiber(color=rgb)
     if texture:
         return plastic.plastic_rough(color=rgb)
     return plastic.plastic_clean(color=rgb)
@@ -156,7 +159,7 @@ def _black_oxide(m, rgb, texture):
 def _dyeing(m, rgb, texture):
     if m.family == "aluminum":
         return _anodized(m, rgb, texture)
-    return _plain_base(m, texture, rgb)  # dyed polymer: base tinted by colour
+    return _plain_base(m, texture, rgb, None)  # dyed polymer: base tinted by colour
 
 
 def _chrome(m, rgb, texture):
@@ -236,7 +239,12 @@ def _normalize(finish):
 
 
 def get_pbr_properties(
-    material: Material, finish=None, process=None, color=None, pbr=None
+    material: RangeMaterial,
+    finish=None,
+    process=None,
+    color=None,
+    thickness_mm=None,
+    pbr=None,
 ):
     """Resolve a bundled three.js ``PbrProperties`` for a finished material.
 
@@ -264,11 +272,9 @@ def get_pbr_properties(
         texture = "matte"  # as-printed / as-built relief
 
     if surface is None:
-        # No covering/colouring finish -> use the per-part colour override, else
-        # the material's own base colour (a plastic's ``.color``). Bare metals
-        # carry no ``color`` and ignore it (colour is intrinsic).
-        base_color = color if color is not None else getattr(material, "color", None)
-        return _plain_base(material, texture, _color_value(base_color))
+        # No covering/colouring finish -> the per-part colour (case-2 selection);
+        # bare metals pass color=None and render their intrinsic look.
+        return _plain_base(material, texture, _color_value(color), thickness_mm)
     rgb = _color_value(surface_color)
     return _SURFACE[surface](material, rgb, texture)
 

@@ -1,30 +1,35 @@
-"""Engineering materials for build123d models.
+"""Range-based engineering-materials catalog for build123d.
 
-A *typical-values* library: figures are representative, not certified allowables
-(materials are highly manufacturing- and vendor-specific). Materials are reached
-through **category namespaces** -- the code and its tab-completion are the
-catalog; there is no string-keyed registry to search::
+Typical-value **ranges** (min-max), not single points -- honest about real
+variation and free of the vendor/datasheet-licensing trap (a published band is
+common knowledge). Materials are reached through category namespaces; a family
+function returns a :class:`FinishedMaterial` (the part touch point): ``.material``
+is the physics (a shared, immutable range table), ``.pbr`` is the three.js look.
 
-    from bd_materials import metals, plastics, finishes, FinishedMaterial, Process
+    from bd_materials import metals, plastics, finishes
     from bd_materials.metals import Alu
 
-    metals.aluminum()                     # 6061-T6 (default)
-    metals.aluminum(Alu.G7075_T6)         # a MetalMaterial
-    plastics.pla(color="red")             # a coloured PlasticMaterial
-    finishes.anodize("champagne")         # an AppliedFinish
+    metals.aluminum()                                  # FinishedMaterial (6061 default)
+    metals.aluminum(Alu.G7075_T6, finishes.anodize("champagne"))
+    plastics.pla(color="red")                          # selectable colour (case 2)
+    plastics.pmma(color="clear", thickness_mm=3)       # transparent -> pane thickness
 
-    FinishedMaterial(metals.aluminum()).pbr           # resolved three.js look
+    print(metals.aluminum().material)                  # typical-value dump (__str__)
+    metals.aluminum().pbr                              # resolved look (needs threejs_materials)
 
-Each category exposes family functions (metals/plastics) or per-material
-functions (wood/paper/textile/glass/resins), plus ``all()`` to enumerate it.
-Custom materials are just the dataclasses: ``metals.MetalMaterial(...)`` or
-``metals.aluminum().with_overrides(...)``.
+Intrinsic identity (``family``, ``category``, ``transparent``) lives on the
+``Material``; per-part choices (``color``, ``thickness_mm``, ``finish``,
+``process``) live on the ``FinishedMaterial`` (``finish`` and ``process`` are
+mutually exclusive). Each category exposes grade enums + family functions +
+``ALL_<CATEGORY>`` + its ``<Cat>Material`` class. Shared primitives (``Range``,
+``NOT_SUITABLE``, ``PROPERTY_UNITS``, ``RangeMaterial``) live in ``core``.
 """
 
 from __future__ import annotations
 
-from . import (
-    finishes,
+from . import core, finishes
+from .finished import FinishedMaterial, Process
+from .materials import (
     glass,
     metals,
     paper,
@@ -33,23 +38,19 @@ from . import (
     textile,
     wood,
 )
-from .base import ArealMaterial, IsotropicSolidMaterial, Material
-from .finished import FinishedMaterial, Process
 
 __all__ = [
-    # category namespaces (the catalog); finish functions live under `finishes`
+    # category namespaces (the catalog)
     "metals",
     "plastics",
     "resins",
+    "glass",
     "wood",
     "paper",
     "textile",
-    "glass",
+    # finishes + shared core primitives
     "finishes",
-    # base types (for isinstance checks / building custom materials)
-    "Material",
-    "IsotropicSolidMaterial",
-    "ArealMaterial",
+    "core",
     # user touch points
     "FinishedMaterial",
     "Process",

@@ -19,7 +19,7 @@ from dataclasses import dataclass
 
 from collections.abc import Iterable
 
-from .base import Material, _slug
+from .core import RangeMaterial
 
 # --- substrate groups (for hints only) -------------------------------------
 FERROUS = frozenset({"mild_steel", "alloy_steel", "tool_steel", "spring_steel"})
@@ -70,7 +70,7 @@ class Finish:
     colors: tuple[str, ...] = ()  # standard palette; () = N/A / substrate colour
     notes: str | None = None
 
-    def is_typical_for(self, material: Material) -> bool:
+    def is_typical_for(self, material: RangeMaterial) -> bool:
         """Hint only -- is this finish *typically* used on this material?
 
         Never a constraint: any finish may still be applied to any material.
@@ -82,6 +82,17 @@ class Finish:
 
 
 FINISHES: dict[str, Finish] = {}
+
+
+def _slug(text: str) -> str:
+    """Lowercase, alnum-only slug (spaces/punctuation collapse to single '-')."""
+    out: list[str] = []
+    for ch in text.lower():
+        if ch.isalnum():
+            out.append(ch)
+        elif out and out[-1] != "-":
+            out.append("-")
+    return "".join(out).strip("-")
 
 
 def _f(finish: Finish) -> Finish:
@@ -295,17 +306,17 @@ SILKSCREEN = _f(
 
 
 # --- queries (hints, not constraints) --------------------------------------
-def typical_finishes_for(material: Material) -> list[Finish]:
+def typical_finishes_for(material: RangeMaterial) -> list[Finish]:
     """Finishes *typically* used on this material (a hint; not exhaustive)."""
     return [f for f in FINISHES.values() if f.is_typical_for(material)]
 
 
 def typical_materials_for(
-    finish: Finish, materials: Iterable[Material]
-) -> list[Material]:
+    finish: Finish, materials: Iterable[RangeMaterial]
+) -> list[RangeMaterial]:
     """Which of ``materials`` this finish is *typically* used on (a hint).
 
-    Pass the candidate set explicitly (e.g. ``metals.all() + plastics.all()``);
+    Pass the candidate set explicitly (e.g. ``metals.ALL_METALS + plastics.ALL_PLASTICS``);
     there is no central registry to enumerate.
     """
     return [m for m in materials if finish.is_typical_for(m)]
