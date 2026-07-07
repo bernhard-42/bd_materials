@@ -1,18 +1,32 @@
-"""Metal materials.
+"""Metal materials, accessed by family functions (not by constant name).
 
-Named by grade + temper (``ALU_6061_T6``), never by manufacturing process.
-PCBWay strength values backfilled with typical reference (MatWeb-class)
-E / nu / G / rho / cp / k. ``condition`` is the heat-treat / temper state and
-``hardness`` a self-describing string (e.g. "60 HRC", "197 HB"). Each entry is
-one common variant -- clone with ``.with_overrides(...)`` for a different
-temper/grade.
+Identity (grade + condition) lives only in each material's fields, never in a
+Python name. Each family is a dict keyed by its variant enum (``Alu.G6061_T6``);
+the function just returns ``_FAMILY[variant]``, defaulting to the common one
+(``aluminum()`` -> 6061-T6). Because the enum member *is* the key, the selector
+and the data are written together and an invalid combination (6061 + hardened)
+is simply unrepresentable. Families follow the source (PCBWay) taxonomy: mild
+and alloy steel stay distinct. Every family is modelled the same way regardless
+of how many grades it currently holds -- a one-grade family (brass, copper,
+spring steel) still has an enum and a default, so adding a grade later is just a
+new member, not a signature change.
+
+    from bd_materials import metals
+    from bd_materials.metals import Alu, Stainless
+
+    metals.aluminum()                       # 6061-T6 (default)
+    metals.aluminum(Alu.G7075_T6)           # 7075-T6
+    metals.stainless(Stainless.G316L_AS_BUILT)
+    metals.brass()                          # Brass.C360_HALF_HARD (default)
+    metals.all()                            # every metal instance
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum, auto
 
-from .base import IsotropicSolidMaterial, _reg
+from .base import IsotropicSolidMaterial
 
 
 @dataclass(frozen=True)
@@ -22,6 +36,23 @@ class MetalMaterial(IsotropicSolidMaterial):
     hardness: str | None = None
 
     def fatigue_safety_factor(self, alternating_stress_pa: float) -> float | None:
+        """Safety factor against fatigue, ``SF = fatigue_strength / S_alt``.
+
+        Margin against failure under cyclic loading: the alternating stress
+        amplitude is compared to the material's fatigue (endurance) strength,
+        with SF > 1 meaning the part should survive indefinitely. The stored
+        ``fatigue_strength_pa`` is a nominal endurance figure with no defined
+        cycle count or R-ratio, so treat this as a screening indicator, not a
+        certified fatigue-life prediction.
+
+        Args:
+            alternating_stress_pa: Alternating stress amplitude in Pa (half the
+                peak-to-peak stress range). Must be > 0.
+
+        Returns:
+            Dimensionless fatigue safety factor, or ``None`` if
+            ``fatigue_strength_pa`` is unset or ``alternating_stress_pa <= 0``.
+        """
         if self.fatigue_strength_pa is None or alternating_stress_pa <= 0:
             return None
         return self.fatigue_strength_pa / alternating_stress_pa
@@ -30,8 +61,16 @@ class MetalMaterial(IsotropicSolidMaterial):
 # ===========================================================================
 # Aluminum
 # ===========================================================================
-ALU_6061_T6 = _reg(
-    MetalMaterial(
+class Alu(Enum):
+    G6061_T6 = auto()
+    G7075_T6 = auto()
+    G5052_H32 = auto()
+    G2A12_T4 = auto()
+    ALSI10MG_AS_BUILT = auto()
+
+
+_ALUMINUM = {
+    Alu.G6061_T6: MetalMaterial(
         name="Aluminum 6061-T6",
         family="aluminum",
         grade="6061",
@@ -48,10 +87,8 @@ ALU_6061_T6 = _reg(
         thermal_expansion_per_k=23.6e-6,
         thermal_conductivity_w_mk=167.0,
         specific_heat_j_kgk=896.0,
-    )
-)
-ALU_7075_T6 = _reg(
-    MetalMaterial(
+    ),
+    Alu.G7075_T6: MetalMaterial(
         name="Aluminum 7075-T6",
         family="aluminum",
         grade="7075",
@@ -68,10 +105,8 @@ ALU_7075_T6 = _reg(
         thermal_expansion_per_k=23.6e-6,
         thermal_conductivity_w_mk=130.0,
         specific_heat_j_kgk=960.0,
-    )
-)
-ALU_5052_H32 = _reg(
-    MetalMaterial(
+    ),
+    Alu.G5052_H32: MetalMaterial(
         name="Aluminum 5052-H32",
         family="aluminum",
         grade="5052",
@@ -87,10 +122,8 @@ ALU_5052_H32 = _reg(
         thermal_expansion_per_k=23.8e-6,
         thermal_conductivity_w_mk=138.0,
         specific_heat_j_kgk=880.0,
-    )
-)
-ALU_2A12 = _reg(
-    MetalMaterial(
+    ),
+    Alu.G2A12_T4: MetalMaterial(
         name="Aluminum 2A12",
         family="aluminum",
         grade="2A12",
@@ -105,10 +138,8 @@ ALU_2A12 = _reg(
         fatigue_strength_pa=105e6,
         thermal_conductivity_w_mk=121.0,
         specific_heat_j_kgk=875.0,
-    )
-)
-ALU_ALSI10MG = _reg(
-    MetalMaterial(
+    ),
+    Alu.ALSI10MG_AS_BUILT: MetalMaterial(
         name="Aluminum AlSi10Mg",
         family="aluminum",
         grade="AlSi10Mg",
@@ -121,15 +152,28 @@ ALU_ALSI10MG = _reg(
         ultimate_tensile_strength_pa=330e6,
         thermal_conductivity_w_mk=130.0,
         specific_heat_j_kgk=900.0,
-    )
-)
+    ),
+}
+
+
+def aluminum(variant: Alu = Alu.G6061_T6) -> MetalMaterial:
+    return _ALUMINUM[variant]
 
 
 # ===========================================================================
 # Stainless steel
 # ===========================================================================
-STAINLESS_304 = _reg(
-    MetalMaterial(
+class Stainless(Enum):
+    G304_ANNEALED = auto()
+    G316L_ANNEALED = auto()
+    G316L_AS_BUILT = auto()
+    G303_ANNEALED = auto()
+    G430_ANNEALED = auto()
+    G201_ANNEALED = auto()
+
+
+_STAINLESS = {
+    Stainless.G304_ANNEALED: MetalMaterial(
         name="Stainless Steel 304",
         family="stainless",
         grade="304",
@@ -145,10 +189,8 @@ STAINLESS_304 = _reg(
         thermal_conductivity_w_mk=16.2,
         specific_heat_j_kgk=500.0,
         continuous_service_temp_c=925.0,
-    )
-)
-STAINLESS_316L = _reg(
-    MetalMaterial(
+    ),
+    Stainless.G316L_ANNEALED: MetalMaterial(
         name="Stainless Steel 316/316L",
         family="stainless",
         grade="316/316L",
@@ -163,10 +205,8 @@ STAINLESS_316L = _reg(
         thermal_conductivity_w_mk=16.3,
         specific_heat_j_kgk=500.0,
         continuous_service_temp_c=925.0,
-    )
-)
-STAINLESS_316L_AS_BUILT = _reg(
-    MetalMaterial(
+    ),
+    Stainless.G316L_AS_BUILT: MetalMaterial(
         name="Stainless Steel 316L (as-built)",
         family="stainless",
         grade="316L",
@@ -178,10 +218,8 @@ STAINLESS_316L_AS_BUILT = _reg(
         ultimate_tensile_strength_pa=560e6,
         thermal_conductivity_w_mk=15.0,
         specific_heat_j_kgk=500.0,
-    )
-)
-STAINLESS_303 = _reg(
-    MetalMaterial(
+    ),
+    Stainless.G303_ANNEALED: MetalMaterial(
         name="Stainless Steel 303",
         family="stainless",
         grade="303",
@@ -196,10 +234,8 @@ STAINLESS_303 = _reg(
         thermal_expansion_per_k=17.3e-6,
         thermal_conductivity_w_mk=16.3,
         specific_heat_j_kgk=500.0,
-    )
-)
-STAINLESS_430 = _reg(
-    MetalMaterial(
+    ),
+    Stainless.G430_ANNEALED: MetalMaterial(
         name="Stainless Steel 430",
         family="stainless",
         grade="430",
@@ -214,10 +250,8 @@ STAINLESS_430 = _reg(
         thermal_conductivity_w_mk=26.3,
         specific_heat_j_kgk=460.0,
         continuous_service_temp_c=870.0,
-    )
-)
-STAINLESS_201 = _reg(
-    MetalMaterial(
+    ),
+    Stainless.G201_ANNEALED: MetalMaterial(
         name="Stainless Steel 201",
         family="stainless",
         grade="201",
@@ -231,88 +265,25 @@ STAINLESS_201 = _reg(
         ultimate_tensile_strength_pa=685e6,
         thermal_conductivity_w_mk=16.0,
         specific_heat_j_kgk=500.0,
-    )
-)
+    ),
+}
+
+
+def stainless(variant: Stainless = Stainless.G304_ANNEALED) -> MetalMaterial:
+    return _STAINLESS[variant]
 
 
 # ===========================================================================
-# Brass / copper
+# Mild / carbon steel
 # ===========================================================================
-BRASS_C360 = _reg(
-    MetalMaterial(
-        name="Brass C360",
-        family="brass",
-        grade="C360",
-        condition="half-hard",
-        hardness="78 HRB",
-        source="PCBWay + MatWeb",
-        density_kg_m3=8500.0,
-        youngs_modulus_pa=97e9,
-        poissons_ratio=0.34,
-        ultimate_tensile_strength_pa=140e6,
-        thermal_conductivity_w_mk=29.0,
-        specific_heat_j_kgk=380.0,
-    )
-)
-COPPER_C110 = _reg(
-    MetalMaterial(
-        name="Copper C110",
-        family="copper",
-        grade="C110",
-        condition="annealed",
-        source="PCBWay + MatWeb",
-        density_kg_m3=8960.0,
-        youngs_modulus_pa=117e9,
-        poissons_ratio=0.34,
-        thermal_conductivity_w_mk=391.0,
-        specific_heat_j_kgk=420.0,
-    )
-)
+class MildSteel(Enum):
+    G1018_COLD_DRAWN = auto()
+    G1045_COLD_DRAWN = auto()
+    GA36_HOT_ROLLED = auto()
 
 
-# ===========================================================================
-# Titanium
-# ===========================================================================
-TITANIUM_6AL_4V = _reg(
-    MetalMaterial(
-        name="Titanium Ti-6Al-4V (Gr5/TC4)",
-        family="titanium",
-        grade="Gr5",
-        condition="annealed",
-        hardness="334 HB",
-        source="PCBWay + MatWeb",
-        density_kg_m3=4470.0,
-        youngs_modulus_pa=113.8e9,
-        poissons_ratio=0.34,
-        yield_strength_pa=880e6,
-        ultimate_tensile_strength_pa=950e6,
-        thermal_conductivity_w_mk=6.7,
-        specific_heat_j_kgk=526.0,
-    )
-)
-TITANIUM_6AL_4V_AS_BUILT = _reg(
-    MetalMaterial(
-        name="Titanium Ti-6Al-4V (as-built)",
-        family="titanium",
-        grade="TC4",
-        condition="as-built",
-        hardness="349 HB",
-        source="PCBWay + MatWeb",
-        density_kg_m3=4430.0,
-        youngs_modulus_pa=110e9,
-        poissons_ratio=0.34,
-        ultimate_tensile_strength_pa=600e6,
-        thermal_conductivity_w_mk=7.0,
-        specific_heat_j_kgk=526.0,
-    )
-)
-
-
-# ===========================================================================
-# Carbon / mild / alloy steel
-# ===========================================================================
-STEEL_1018 = _reg(
-    MetalMaterial(
+_MILD_STEEL = {
+    MildSteel.G1018_COLD_DRAWN: MetalMaterial(
         name="Steel 1018",
         family="mild_steel",
         grade="1018",
@@ -327,10 +298,8 @@ STEEL_1018 = _reg(
         ultimate_tensile_strength_pa=440e6,
         thermal_conductivity_w_mk=51.9,
         specific_heat_j_kgk=486.0,
-    )
-)
-STEEL_1045 = _reg(
-    MetalMaterial(
+    ),
+    MildSteel.G1045_COLD_DRAWN: MetalMaterial(
         name="Steel 1045",
         family="mild_steel",
         grade="1045",
@@ -345,10 +314,8 @@ STEEL_1045 = _reg(
         ultimate_tensile_strength_pa=680e6,
         thermal_conductivity_w_mk=49.8,
         specific_heat_j_kgk=486.0,
-    )
-)
-STEEL_A36 = _reg(
-    MetalMaterial(
+    ),
+    MildSteel.GA36_HOT_ROLLED: MetalMaterial(
         name="Steel A36",
         family="mild_steel",
         grade="A36",
@@ -363,10 +330,25 @@ STEEL_A36 = _reg(
         ultimate_tensile_strength_pa=550e6,
         thermal_conductivity_w_mk=51.9,
         specific_heat_j_kgk=486.0,
-    )
-)
-STEEL_4140 = _reg(
-    MetalMaterial(
+    ),
+}
+
+
+def mild_steel(variant: MildSteel = MildSteel.G1018_COLD_DRAWN) -> MetalMaterial:
+    return _MILD_STEEL[variant]
+
+
+# ===========================================================================
+# Alloy steel
+# ===========================================================================
+class AlloySteel(Enum):
+    G4140_QUENCHED_TEMPERED = auto()
+    G4340_QUENCHED_TEMPERED = auto()
+    G1215_COLD_DRAWN = auto()
+
+
+_ALLOY_STEEL = {
+    AlloySteel.G4140_QUENCHED_TEMPERED: MetalMaterial(
         name="Steel 4140",
         family="alloy_steel",
         grade="4140",
@@ -381,10 +363,8 @@ STEEL_4140 = _reg(
         ultimate_tensile_strength_pa=1130e6,
         thermal_conductivity_w_mk=42.6,
         specific_heat_j_kgk=473.0,
-    )
-)
-STEEL_4340 = _reg(
-    MetalMaterial(
+    ),
+    AlloySteel.G4340_QUENCHED_TEMPERED: MetalMaterial(
         name="Steel 4340",
         family="alloy_steel",
         grade="4340",
@@ -399,10 +379,8 @@ STEEL_4340 = _reg(
         ultimate_tensile_strength_pa=820e6,
         thermal_conductivity_w_mk=44.5,
         specific_heat_j_kgk=475.0,
-    )
-)
-STEEL_1215 = _reg(
-    MetalMaterial(
+    ),
+    AlloySteel.G1215_COLD_DRAWN: MetalMaterial(
         name="Steel 1215",
         family="alloy_steel",
         grade="1215",
@@ -417,15 +395,31 @@ STEEL_1215 = _reg(
         ultimate_tensile_strength_pa=540e6,
         thermal_conductivity_w_mk=51.9,
         specific_heat_j_kgk=486.0,
-    )
-)
+    ),
+}
+
+
+def alloy_steel(
+    variant: AlloySteel = AlloySteel.G4140_QUENCHED_TEMPERED,
+) -> MetalMaterial:
+    return _ALLOY_STEEL[variant]
 
 
 # ===========================================================================
-# Tool / spring steel
+# Tool steel
 # ===========================================================================
-TOOL_STEEL_D2 = _reg(
-    MetalMaterial(
+class ToolSteel(Enum):
+    D2_HARDENED = auto()
+    A2_HARDENED = auto()
+    O1_HARDENED = auto()
+    A3_HARDENED = auto()
+    S7_HARDENED = auto()
+    H13_HARDENED = auto()
+    GENERIC_AS_BUILT = auto()
+
+
+_TOOL_STEEL = {
+    ToolSteel.D2_HARDENED: MetalMaterial(
         name="Tool Steel D2",
         family="tool_steel",
         grade="D2",
@@ -440,10 +434,8 @@ TOOL_STEEL_D2 = _reg(
         thermal_conductivity_w_mk=20.0,
         specific_heat_j_kgk=460.0,
         continuous_service_temp_c=245.0,
-    )
-)
-TOOL_STEEL_A2 = _reg(
-    MetalMaterial(
+    ),
+    ToolSteel.A2_HARDENED: MetalMaterial(
         name="Tool Steel A2",
         family="tool_steel",
         grade="A2",
@@ -458,10 +450,8 @@ TOOL_STEEL_A2 = _reg(
         thermal_conductivity_w_mk=24.0,
         specific_heat_j_kgk=460.0,
         continuous_service_temp_c=245.0,
-    )
-)
-TOOL_STEEL_O1 = _reg(
-    MetalMaterial(
+    ),
+    ToolSteel.O1_HARDENED: MetalMaterial(
         name="Tool Steel O1",
         family="tool_steel",
         grade="O1",
@@ -476,10 +466,8 @@ TOOL_STEEL_O1 = _reg(
         thermal_conductivity_w_mk=45.0,
         specific_heat_j_kgk=460.0,
         continuous_service_temp_c=215.0,
-    )
-)
-TOOL_STEEL_A3 = _reg(
-    MetalMaterial(
+    ),
+    ToolSteel.A3_HARDENED: MetalMaterial(
         name="Tool Steel A3",
         family="tool_steel",
         grade="A3",
@@ -493,10 +481,8 @@ TOOL_STEEL_A3 = _reg(
         ultimate_tensile_strength_pa=2380e6,
         thermal_conductivity_w_mk=37.0,
         specific_heat_j_kgk=460.0,
-    )
-)
-TOOL_STEEL_S7 = _reg(
-    MetalMaterial(
+    ),
+    ToolSteel.S7_HARDENED: MetalMaterial(
         name="Tool Steel S7",
         family="tool_steel",
         grade="S7",
@@ -511,10 +497,8 @@ TOOL_STEEL_S7 = _reg(
         thermal_conductivity_w_mk=44.0,
         specific_heat_j_kgk=460.0,
         continuous_service_temp_c=215.0,
-    )
-)
-TOOL_STEEL_H13 = _reg(
-    MetalMaterial(
+    ),
+    ToolSteel.H13_HARDENED: MetalMaterial(
         name="Tool Steel H13",
         family="tool_steel",
         grade="H13",
@@ -528,10 +512,8 @@ TOOL_STEEL_H13 = _reg(
         ultimate_tensile_strength_pa=1590e6,
         thermal_conductivity_w_mk=25.5,
         specific_heat_j_kgk=460.0,
-    )
-)
-TOOL_STEEL_AS_BUILT = _reg(
-    MetalMaterial(
+    ),
+    ToolSteel.GENERIC_AS_BUILT: MetalMaterial(
         name="Tool Steel (as-built)",
         family="tool_steel",
         grade="generic",
@@ -543,10 +525,68 @@ TOOL_STEEL_AS_BUILT = _reg(
         ultimate_tensile_strength_pa=1090e6,
         thermal_conductivity_w_mk=20.0,
         specific_heat_j_kgk=460.0,
-    )
-)
-SPRING_STEEL = _reg(
-    MetalMaterial(
+    ),
+}
+
+
+def tool_steel(variant: ToolSteel = ToolSteel.A2_HARDENED) -> MetalMaterial:
+    return _TOOL_STEEL[variant]
+
+
+# ===========================================================================
+# Titanium
+# ===========================================================================
+class Titanium(Enum):
+    GR5_ANNEALED = auto()
+    TC4_AS_BUILT = auto()
+
+
+_TITANIUM = {
+    Titanium.GR5_ANNEALED: MetalMaterial(
+        name="Titanium Ti-6Al-4V (Gr5/TC4)",
+        family="titanium",
+        grade="Gr5",
+        condition="annealed",
+        hardness="334 HB",
+        source="PCBWay + MatWeb",
+        density_kg_m3=4470.0,
+        youngs_modulus_pa=113.8e9,
+        poissons_ratio=0.34,
+        yield_strength_pa=880e6,
+        ultimate_tensile_strength_pa=950e6,
+        thermal_conductivity_w_mk=6.7,
+        specific_heat_j_kgk=526.0,
+    ),
+    Titanium.TC4_AS_BUILT: MetalMaterial(
+        name="Titanium Ti-6Al-4V (as-built)",
+        family="titanium",
+        grade="TC4",
+        condition="as-built",
+        hardness="349 HB",
+        source="PCBWay + MatWeb",
+        density_kg_m3=4430.0,
+        youngs_modulus_pa=110e9,
+        poissons_ratio=0.34,
+        ultimate_tensile_strength_pa=600e6,
+        thermal_conductivity_w_mk=7.0,
+        specific_heat_j_kgk=526.0,
+    ),
+}
+
+
+def titanium(variant: Titanium = Titanium.GR5_ANNEALED) -> MetalMaterial:
+    return _TITANIUM[variant]
+
+
+# ===========================================================================
+# Spring steel
+# ===========================================================================
+class SpringSteel(Enum):
+    GENERIC_QUENCHED_TEMPERED = auto()
+
+
+_SPRING_STEEL = {
+    SpringSteel.GENERIC_QUENCHED_TEMPERED: MetalMaterial(
         name="Spring Steel",
         family="spring_steel",
         grade="generic",
@@ -560,45 +600,110 @@ SPRING_STEEL = _reg(
         ultimate_tensile_strength_pa=980e6,
         thermal_conductivity_w_mk=25.5,
         specific_heat_j_kgk=480.0,
-    )
+    ),
+}
+
+
+def spring_steel(
+    variant: SpringSteel = SpringSteel.GENERIC_QUENCHED_TEMPERED,
+) -> MetalMaterial:
+    return _SPRING_STEEL[variant]
+
+
+# ===========================================================================
+# Brass
+# ===========================================================================
+class Brass(Enum):
+    C360_HALF_HARD = auto()
+
+
+_BRASS = {
+    Brass.C360_HALF_HARD: MetalMaterial(
+        name="Brass C360",
+        family="brass",
+        grade="C360",
+        condition="half-hard",
+        hardness="78 HRB",
+        source="PCBWay + MatWeb",
+        density_kg_m3=8500.0,
+        youngs_modulus_pa=97e9,
+        poissons_ratio=0.34,
+        ultimate_tensile_strength_pa=140e6,
+        thermal_conductivity_w_mk=29.0,
+        specific_heat_j_kgk=380.0,
+    ),
+}
+
+
+def brass(variant: Brass = Brass.C360_HALF_HARD) -> MetalMaterial:
+    return _BRASS[variant]
+
+
+# ===========================================================================
+# Copper
+# ===========================================================================
+class Copper(Enum):
+    C110_ANNEALED = auto()
+
+
+_COPPER = {
+    Copper.C110_ANNEALED: MetalMaterial(
+        name="Copper C110",
+        family="copper",
+        grade="C110",
+        condition="annealed",
+        source="PCBWay + MatWeb",
+        density_kg_m3=8960.0,
+        youngs_modulus_pa=117e9,
+        poissons_ratio=0.34,
+        thermal_conductivity_w_mk=391.0,
+        specific_heat_j_kgk=420.0,
+    ),
+}
+
+
+def copper(variant: Copper = Copper.C110_ANNEALED) -> MetalMaterial:
+    return _COPPER[variant]
+
+
+# ===========================================================================
+_ALL = (
+    *_ALUMINUM.values(),
+    *_STAINLESS.values(),
+    *_MILD_STEEL.values(),
+    *_ALLOY_STEEL.values(),
+    *_TOOL_STEEL.values(),
+    *_SPRING_STEEL.values(),
+    *_TITANIUM.values(),
+    *_BRASS.values(),
+    *_COPPER.values(),
 )
+
+
+def all() -> tuple[MetalMaterial, ...]:
+    """Every curated metal instance (for tooling / the self-check)."""
+    return _ALL
 
 
 __all__ = [
     "MetalMaterial",
-    # aluminum
-    "ALU_6061_T6",
-    "ALU_7075_T6",
-    "ALU_5052_H32",
-    "ALU_2A12",
-    "ALU_ALSI10MG",
-    # stainless
-    "STAINLESS_304",
-    "STAINLESS_316L",
-    "STAINLESS_316L_AS_BUILT",
-    "STAINLESS_303",
-    "STAINLESS_430",
-    "STAINLESS_201",
-    # brass / copper
-    "BRASS_C360",
-    "COPPER_C110",
-    # titanium
-    "TITANIUM_6AL_4V",
-    "TITANIUM_6AL_4V_AS_BUILT",
-    # carbon / mild / alloy steel
-    "STEEL_1018",
-    "STEEL_1045",
-    "STEEL_A36",
-    "STEEL_4140",
-    "STEEL_4340",
-    "STEEL_1215",
-    # tool / spring steel
-    "TOOL_STEEL_D2",
-    "TOOL_STEEL_A2",
-    "TOOL_STEEL_O1",
-    "TOOL_STEEL_A3",
-    "TOOL_STEEL_S7",
-    "TOOL_STEEL_H13",
-    "TOOL_STEEL_AS_BUILT",
-    "SPRING_STEEL",
+    "aluminum",
+    "stainless",
+    "mild_steel",
+    "alloy_steel",
+    "tool_steel",
+    "spring_steel",
+    "titanium",
+    "brass",
+    "copper",
+    "all",
+    "Alu",
+    "Stainless",
+    "MildSteel",
+    "AlloySteel",
+    "ToolSteel",
+    "SpringSteel",
+    "Titanium",
+    "Brass",
+    "Copper",
 ]

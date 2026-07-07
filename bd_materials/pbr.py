@@ -1,6 +1,6 @@
 """Bridge from a finished material to a bundled three.js PBR material.
 
-``get_pbr_properties(material, finish, process, pbr)`` resolves the right
+``get_pbr_properties(material, finish, process, color, pbr)`` resolves the right
 ``threejs_materials`` factory for how a part looks -- the function behind
 the ``FinishedMaterial.pbr`` property (the user-facing entry, in ``finished``).
 
@@ -110,14 +110,19 @@ def _plain_base(material: Material, texture, rgb):
     if cat == "wood":
         return getattr(wood, material.name.lower())(color=rgb)
     if cat == "glass":
-        return glass.glass(color=rgb)
+        # thickness_mm feeds the transmissive volume; None -> factory default
+        return glass.glass(color=rgb, thickness=getattr(material, "thickness_mm", None))
     if cat == "paper":
         return getattr(paper, material.name.lower().replace(" ", "_"))(color=rgb)
     if cat == "textile":
         return getattr(textile, _TEXTILE[material.name])(color=rgb)
     # plastic / composite / resin
-    if material.family == "PMMA":
-        return plastic.acrylic(color=rgb)
+    if material.family in ("PMMA", "PC"):
+        # transmissive: refraction depends on pane thickness (three.js acrylic
+        # approximates both; PC's ior ~1.585 vs acrylic 1.49 is close enough)
+        return plastic.acrylic(
+            color=rgb, thickness=getattr(material, "thickness_mm", None)
+        )
     if cat == "composite":
         fn = plastic.carbon_fiber if _is_carbon(material) else plastic.plastic_rough
         return fn(color=rgb)
@@ -230,13 +235,18 @@ def _normalize(finish):
     return out
 
 
-def get_pbr_properties(material: Material, finish=None, process=None, pbr=None):
+def get_pbr_properties(
+    material: Material, finish=None, process=None, color=None, pbr=None
+):
     """Resolve a bundled three.js ``PbrProperties`` for a finished material.
 
     ``finish`` is an ``AppliedFinish`` (from a finish function like
     ``spray_paint("blue")``) or a list of them -- each carries its own colour.
     ``process`` (a ``Process``) nudges the default surface (printed -> rough).
-    ``pbr`` (if given) is returned unchanged.
+    ``color`` is the material's own base colour, applied only when no surface
+    finish covers it (e.g. a coloured filament or tinted resin); it has no
+    effect on bare metals, whose colour is intrinsic. ``pbr`` (if given) is
+    returned unchanged.
     """
     if pbr is not None:
         return pbr
@@ -253,9 +263,13 @@ def get_pbr_properties(material: Material, finish=None, process=None, pbr=None):
     if texture is None and process in _ROUGH_PROCESSES:
         texture = "matte"  # as-printed / as-built relief
 
-    rgb = _color_value(surface_color)
     if surface is None:
-        return _plain_base(material, texture, rgb)
+        # No covering/colouring finish -> use the per-part colour override, else
+        # the material's own base colour (a plastic's ``.color``). Bare metals
+        # carry no ``color`` and ignore it (colour is intrinsic).
+        base_color = color if color is not None else getattr(material, "color", None)
+        return _plain_base(material, texture, _color_value(base_color))
+    rgb = _color_value(surface_color)
     return _SURFACE[surface](material, rgb, texture)
 
 

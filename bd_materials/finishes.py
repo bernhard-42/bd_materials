@@ -17,7 +17,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .base import REGISTRY, Material, MaterialRegistry, _slug
+from collections.abc import Iterable
+
+from .base import Material, _slug
 
 # --- substrate groups (for hints only) -------------------------------------
 FERROUS = frozenset({"mild_steel", "alloy_steel", "tool_steel", "spring_steel"})
@@ -299,10 +301,14 @@ def typical_finishes_for(material: Material) -> list[Finish]:
 
 
 def typical_materials_for(
-    finish: Finish, registry: MaterialRegistry = REGISTRY
+    finish: Finish, materials: Iterable[Material]
 ) -> list[Material]:
-    """Registered materials this finish is *typically* used on (a hint)."""
-    return [m for m in registry.all() if finish.is_typical_for(m)]
+    """Which of ``materials`` this finish is *typically* used on (a hint).
+
+    Pass the candidate set explicitly (e.g. ``metals.all() + plastics.all()``);
+    there is no central registry to enumerate.
+    """
+    return [m for m in materials if finish.is_typical_for(m)]
 
 
 # --- applied finishes: functions bind a colour to a finish (public API) -----

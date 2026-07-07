@@ -1,53 +1,56 @@
 """Engineering materials for build123d models.
 
-A *typical-values* database: figures are representative, not certified allowables
-(materials are highly manufacturing- and vendor-specific). ``source`` records
-origin -- PCBWay scrape values backfilled with typical reference (MatWeb-class)
-values for omitted structure-insensitive fields (E, nu, rho, cp, k), tagged
-"... + MatWeb"; ``condition`` records the temper/heat-treat/cure state that the
-PCBWay strength values correspond to.
+A *typical-values* library: figures are representative, not certified allowables
+(materials are highly manufacturing- and vendor-specific). Materials are reached
+through **category namespaces** -- the code and its tab-completion are the
+catalog; there is no string-keyed registry to search::
 
-Usage::
+    from bd_materials import metals, plastics, finishes, FinishedMaterial, Process
+    from bd_materials.metals import Alu
 
-    from bd_materials import REGISTRY, ALU_6061_T6
-    ALU_6061_T6.mass_g_from_volume_mm3(part.volume)
-    REGISTRY.filter(family="aluminum", condition="T6")
+    metals.aluminum()                     # 6061-T6 (default)
+    metals.aluminum(Alu.G7075_T6)         # a MetalMaterial
+    plastics.pla(color="red")             # a coloured PlasticMaterial
+    finishes.anodize("champagne")         # an AppliedFinish
+
+    FinishedMaterial(metals.aluminum()).pbr           # resolved three.js look
+
+Each category exposes family functions (metals/plastics) or per-material
+functions (wood/paper/textile/glass/resins), plus ``all()`` to enumerate it.
+Custom materials are just the dataclasses: ``metals.MetalMaterial(...)`` or
+``metals.aluminum().with_overrides(...)``.
 """
 
 from __future__ import annotations
 
-from . import finishes, glass, metals, paper, plastics, resins, textile, wood
-from .finishes import *  # noqa: F401,F403  (Finish + finish instances + queries)
-from .base import (
-    ArealMaterial,
-    IsotropicSolidMaterial,
-    Material,
-    MaterialRegistry,
-    REGISTRY,
+from . import (
+    finishes,
+    glass,
+    metals,
+    paper,
+    plastics,
+    resins,
+    textile,
+    wood,
 )
+from .base import ArealMaterial, IsotropicSolidMaterial, Material
 from .finished import FinishedMaterial, Process
-from .glass import *  # noqa: F401,F403  (glass instance)
-from .metals import *  # noqa: F401,F403  (MetalMaterial + metal instances)
-from .paper import *  # noqa: F401,F403  (PaperMaterial + paper instances)
-from .plastics import *  # noqa: F401,F403  (PlasticMaterial + thermoplastics + composites)
-from .resins import *  # noqa: F401,F403  (resin instances)
-from .textile import *  # noqa: F401,F403  (TextileMaterial + textile instances)
-from .wood import *  # noqa: F401,F403  (WoodMaterial + wood instances)
 
 __all__ = [
+    # category namespaces (the catalog); finish functions live under `finishes`
+    "metals",
+    "plastics",
+    "resins",
+    "wood",
+    "paper",
+    "textile",
+    "glass",
+    "finishes",
+    # base types (for isinstance checks / building custom materials)
     "Material",
     "IsotropicSolidMaterial",
     "ArealMaterial",
-    "MaterialRegistry",
-    "REGISTRY",
+    # user touch points
     "FinishedMaterial",
     "Process",
 ]
-__all__ += metals.__all__
-__all__ += plastics.__all__
-__all__ += resins.__all__
-__all__ += wood.__all__
-__all__ += paper.__all__
-__all__ += textile.__all__
-__all__ += glass.__all__
-__all__ += finishes.__all__

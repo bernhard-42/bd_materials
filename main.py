@@ -3,78 +3,89 @@
 from __future__ import annotations
 
 from bd_materials import (
-    REGISTRY,
     FinishedMaterial,
+    IsotropicSolidMaterial,
     Process,
-    anodize,
-    bead_blast,
-    brushed,
+    finishes,
+    glass,
     metals,
-    nickel_plate,
+    paper,
     plastics,
-    powder_coat,
+    resins,
+    textile,
+    wood,
 )
-from bd_materials.base import IsotropicSolidMaterial
 
-print(f"registered materials: {len(REGISTRY)}")
-for cat in (
-    "metal",
-    "plastic",
-    "resin",
-    "composite",
-    "wood",
-    "glass",
-    "paper",
-    "textile",
-):
-    print(f"  {cat:10s}: {len(REGISTRY.filter(category=cat))}")
+# Category counts -- each module enumerates itself via all(); composites are
+# PlasticMaterial with category="composite", so split them out of "plastic".
+_plastics = plastics.all()
+_categories = {
+    "metal": metals.all(),
+    "plastic": tuple(m for m in _plastics if m.category == "plastic"),
+    "composite": tuple(m for m in _plastics if m.category == "composite"),
+    "resin": resins.all(),
+    "wood": wood.all(),
+    "glass": glass.all(),
+    "paper": paper.all(),
+    "textile": textile.all(),
+}
+_all_materials = [m for items in _categories.values() for m in items]
 
-# quick demo: mass of parts in a few materials
-for key in ("aluminum-6061-t6", "titanium-ti-6al-4v-gr5-tc4", "pla"):
-    m = REGISTRY.get(key)
-    if m:
-        print(f"  {m.name:24s} 20mm cube = {m.mass_g_from_volume_mm3(8000):6.1f} g")
-paper = REGISTRY.get("paper")
-if paper:
-    print(
-        f"  {paper.name:24s} A4 sheet  = {paper.mass_g_from_area_mm2(210 * 297):6.2f} g"
-    )
+print(f"registered materials: {len(_all_materials)}")
+for cat, items in _categories.items():
+    print(f"  {cat:10s}: {len(items)}")
+
+# quick demo: mass of a 20mm cube in a few materials
+for m in (metals.aluminum(), metals.titanium(), plastics.pla(color="black")):
+    print(f"  {m.name:28s} 20mm cube = {m.mass_g_from_volume_mm3(8000):6.1f} g")
+_sheet = paper.paper()
+print(
+    f"  {_sheet.name:28s} A4 sheet  = {_sheet.mass_g_from_area_mm2(210 * 297):6.2f} g"
+)
 
 # completeness: density/thermal apply to all; elastic only to isotropic solids
-universal = ["density_kg_m3", "thermal_conductivity_w_mk", "specific_heat_j_kgk"]
-elastic = ["youngs_modulus_pa", "poissons_ratio"]
-for f in universal:
-    missing = [m.name for m in REGISTRY.all() if getattr(m, f, None) is None]
+_universal = ["density_kg_m3", "thermal_conductivity_w_mk", "specific_heat_j_kgk"]
+_elastic = ["youngs_modulus_pa", "poissons_ratio"]
+for f in _universal:
+    missing = [m.name for m in _all_materials if getattr(m, f, None) is None]
     print(f"  missing {f:24s}: {len(missing)}" + (f" -> {missing}" if missing else ""))
-for f in elastic:
+for f in _elastic:
     missing = [
         m.name
-        for m in REGISTRY.all()
+        for m in _all_materials
         if isinstance(m, IsotropicSolidMaterial) and getattr(m, f) is None
     ]
     print(f"  missing {f:24s}: {len(missing)}" + (f" -> {missing}" if missing else ""))
 
 
 # --- visualization: FinishedMaterial -> three.js PBR ------------------------
-# Building a FinishedMaterial needs no threejs; only .to_pbr_properties() does.
+# Building a FinishedMaterial needs no threejs; only the .pbr property does.
 _looks = [
-    ("aluminium, bare", FinishedMaterial(metals.ALU_6061_T6)),
-    ("aluminium, anodized", FinishedMaterial(metals.ALU_6061_T6, anodize("champagne"))),
+    ("aluminium, bare", FinishedMaterial(metals.aluminum())),
     (
-        "aluminium, brushed + anodized",
-        FinishedMaterial(metals.ALU_6061_T6, [brushed(), anodize("blue")]),
+        "aluminium, anodized",
+        FinishedMaterial(metals.aluminum(), finishes.anodize("champagne")),
     ),
     (
-        "aluminium, bead-blast + anodized",
-        FinishedMaterial(metals.ALU_6061_T6, [bead_blast(), anodize("red")]),
+        "aluminium, brushed + anodized",
+        FinishedMaterial(
+            metals.aluminum(), [finishes.brushed(), finishes.anodize("blue")]
+        ),
     ),
     (
         "steel, powder-coat matt",
-        FinishedMaterial(metals.STEEL_1018, powder_coat("green", matt=True)),
+        FinishedMaterial(metals.mild_steel(), finishes.powder_coat("green", matt=True)),
     ),
-    ("steel, nickel plating", FinishedMaterial(metals.STEEL_1018, nickel_plate())),
-    ("PLA, FDM (rough)", FinishedMaterial(plastics.PLA, process=Process.FDM)),
-    ("oak", FinishedMaterial(REGISTRY.get("oak"))),
+    (
+        "steel, nickel plating",
+        FinishedMaterial(metals.mild_steel(), finishes.nickel_plate()),
+    ),
+    ("PLA, red filament", FinishedMaterial(plastics.pla(color="red"))),
+    (
+        "PLA, FDM (rough)",
+        FinishedMaterial(plastics.pla(color="gray"), process=Process.FDM),
+    ),
+    ("oak", FinishedMaterial(wood.oak())),
 ]
 try:
     print("\nPBR look resolution (FinishedMaterial.pbr):")
