@@ -45,7 +45,7 @@ _looks = [
     ("aluminium, anodized", metals.aluminum(finish=finishes.anodize("champagne"))),
     (
         "steel, powder-coat",
-        metals.mild_steel(finish=finishes.powder_coat("green", matt=True)),
+        metals.mild_steel(finish=finishes.powder_coat("green", finishes.Sheen.MATTE)),
     ),
     ("PLA, red (FDM)", plastics.pla(color="red", process=Process.FDM)),
     ("PMMA, clear 3mm", plastics.pmma(color="clear", thickness_mm=3)),

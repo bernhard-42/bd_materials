@@ -27,7 +27,8 @@ mutually exclusive). Each category exposes grade enums + family functions +
 
 from __future__ import annotations
 
-from . import core, finishes
+from . import applicability, core, finishes
+from .applicability import typical_finishes, typical_materials
 from .finished import FinishedMaterial, Process
 from .materials import (
     glass,
@@ -51,6 +52,10 @@ __all__ = [
     # finishes + shared core primitives
     "finishes",
     "core",
+    # material<->finish applicability (advisory hints)
+    "applicability",
+    "typical_finishes",
+    "typical_materials",
     # user touch points
     "FinishedMaterial",
     "Process",

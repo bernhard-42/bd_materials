@@ -15,7 +15,7 @@ Every property is a **min-max `Range`**, not a single point. Two reasons:
   product form, and (for AM) process. A range states that spread.
 
 (This replaced an earlier single-point-value design; the point-value modules are
-preserved in the `checkpoint:` commit `7a7852b` on branch `range-based-catalog`.)
+preserved in the `checkpoint:` commit `7a7852b` in history.)
 
 ## Working style (important)
 
@@ -36,8 +36,12 @@ pyproject.toml   setuptools; package = bd_materials; deps: none (viz extra = thr
 main.py          self-check / demo:  python main.py
 bd_materials/
   core.py        SHARED core: Range, NOT_SUITABLE, PROPERTY_UNITS, Category/
-                 ALLOWED_CATEGORIES, RangeMaterial mixin + Solid/Polymer/Areal bases
-  finishes.py    Finish spec + finish FUNCTIONS + AppliedFinish + _slug helper
+                 ALLOWED_CATEGORIES, FERROUS + substrate groupings, RangeMaterial
+                 mixin + Solid/Polymer/Areal bases
+  finishes.py    Finish catalog (5 process-group enums + <GROUP>_FINISHES dicts) +
+                 flat verb functions + AppliedFinish + Sheen
+  applicability.py  material<->finish TYPICAL_SUBSTRATES table + typical_finishes /
+                 typical_materials queries (advisory)
   finished.py    FinishedMaterial (user touch point) + Process enum
   pbr.py         get_pbr_properties() -- the three.js bridge (needs viz)
   materials/     the category catalogs (re-exported at the package top level)
@@ -168,6 +172,33 @@ process=None, pbr=None)`. `.material` = physics; `.pbr` = look (lazy-imports
 - `pbr=` is a full override, mutually exclusive with the rest.
 - `process` only nudges the *bare* surface: `{FDM, SLS, MJF, SLM}` -> rough.
 
+## Finishes & applicability
+
+A `Finish` is **intrinsic spec only** (`name`, `colors` palette, `notes`). Finishes
+are grouped by process into enums -- `Mechanical`, `Chemical`, `MetalPlating`,
+`Coating`, `Marking` -- each backed by a `<GROUP>_FINISHES` dict (the maintenance
+backbone). The **public API is the flat verb functions** (`anodize("blue")`,
+`powder_coat(...)`), which bind per-part appearance to a finish and return an
+`AppliedFinish`.
+
+Two per-part appearance choices ride on the `AppliedFinish` (not the `Finish`):
+
+- `color` -- from `STANDARD_COLORS` (or `CUSTOM`). `"natural"`/`"clear"` map to *no
+  tint* in PBR (the factory/substrate look), not a grey.
+- `sheen` -- `Sheen.GLOSS` (default) / `Sheen.MATTE`, meaningful for paints/coats
+  (`powder_coat`, `spray_paint`, `vacuum_plating`); drives PBR roughness.
+
+Colour is honest per finish: **mandatory** where the finish is defined by it (`dye`,
+`powder_coat`, `spray_paint`, `vacuum_plating`, `anodize`); a **sensible default**
+where a natural look exists (`pvd="clear"`, `zinc_plate="clear"`, `silkscreen="black"`);
+**absent** where fixed (`electrophoresis` is always black; plating colours are inherent).
+
+**Applicability is a separate concern**, in `applicability.py`: one central
+`TYPICAL_SUBSTRATES` table (finish enum -> the `category`/`family` substrate keys it is
+typically used on) read by two advisory queries -- `typical_finishes(material)` and
+`typical_materials(finish)` (no candidate arg; it sees the whole catalog via
+`materials.ALL_MATERIALS`). Advisory only: any finish may be applied to any material.
+
 ## PBR bridge (pbr.py)
 
 `get_pbr_properties(material, finish, process, color, thickness_mm)` dispatches on
@@ -182,9 +213,10 @@ process=None, pbr=None)`. `.material` = physics; `.pbr` = look (lazy-imports
 
 ## Status / pending
 
-- Working, ruff-clean, `ty`-clean, `main.py` runs. 82 materials across 7 categories.
-- On branch **`range-based-catalog`**; the range-based library is the canonical one
-  (the point-value library lives on in checkpoint commit `7a7852b`).
+- Working, ruff-clean, `ty`-clean, `main.py` runs. 82 materials across 7 categories;
+  26 finishes across 5 process groups.
+- On **`main`** (the range-based library is canonical; the point-value library lives
+  on in checkpoint commit `7a7852b`).
 - **Pending review (user reviews values):** the wood/paper/textile bands are the
   roughest; several derived values across families (shear strengths, tool-steel
   yields, resin/glass thermal bands) are estimates. Also spot-check the intrinsic

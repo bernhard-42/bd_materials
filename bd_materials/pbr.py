@@ -20,7 +20,7 @@ from __future__ import annotations
 from threejs_materials import coats, glass, metal, paper, plastic, textile, wood
 
 from . import finishes as fin
-from .core import RangeMaterial
+from .core import FERROUS, RangeMaterial
 from .finished import Process
 from .finishes import AppliedFinish
 
@@ -64,10 +64,11 @@ _TEXTILE = {
 }
 
 # mechanical finishes -> metal surface-relief variant (None elsewhere = smooth)
+_MECH = fin.MECHANICAL_FINISHES
 _TEXTURE = {
-    fin.BRUSHED: "brushed",
-    fin.BEAD_BLAST: "matte",
-    fin.FINE_SANDING: "matte",
+    _MECH[fin.Mechanical.BRUSHED]: "brushed",
+    _MECH[fin.Mechanical.BEAD_BLAST]: "matte",
+    _MECH[fin.Mechanical.FINE_SANDING]: "matte",
 }
 
 
@@ -87,7 +88,7 @@ def _metal_name(material: RangeMaterial) -> str:
     fam = material.family
     if fam in _BARE_METALS:
         return fam
-    if fam in fin.FERROUS:
+    if fam in FERROUS:
         return "steel"
     return "stainless"  # last-resort fallback
 
@@ -134,107 +135,107 @@ def _plain_base(material: RangeMaterial, texture, rgb, thickness):
     return plastic.plastic_clean(color=rgb)
 
 
-# --- surface (colour) finishes: (material, rgb, texture) -> PbrProperties ---
-def _anodized(m, rgb, texture):
+# --- surface (colour) finishes: (material, rgb, texture, sheen) -> PbrProperties ---
+# All handlers share this signature; sheen (gloss/matte) is only used by the
+# paint/coat handler, ignored by the rest.
+def _anodized(m, rgb, texture, sheen):
     if m.family == "aluminum" and texture is None:
         return metal.aluminum_anodized(color=rgb)  # tuned preset for the common case
     base = _metal_tex_base(m, texture)  # keep relief; scalar recolour
     return base.override(color=rgb, roughness=0.3) if rgb else base
 
 
-def _pvd(m, rgb, texture):
+def _pvd(m, rgb, texture, sheen):
     if rgb is None:
-        return metal.gold()  # PVD default: decorative gold
+        return _metal_tex_base(m, texture)  # clear PVD: bright substrate metal
     if texture:  # keep the brushed/blasted relief
         return _metal_tex_base(m, texture).override(color=rgb, roughness=0.15)
     return coats.metallic_coat_gloss(color=rgb)
 
 
-def _black_oxide(m, rgb, texture):
+def _black_oxide(m, rgb, texture, sheen):
     if texture:  # keep the blasted/brushed relief
         return _metal_tex_base(m, texture).override(color="#141414", roughness=0.5)
     return coats.metallic_coat_matte(color="#141414")
 
 
-def _dyeing(m, rgb, texture):
+def _dyeing(m, rgb, texture, sheen):
     if m.family == "aluminum":
-        return _anodized(m, rgb, texture)
+        return _anodized(m, rgb, texture, sheen)
     return _plain_base(m, texture, rgb, None)  # dyed polymer: base tinted by colour
 
 
-def _chrome(m, rgb, texture):
+def _chrome(m, rgb, texture, sheen):
     return coats.chrome()
 
 
-def _gold(m, rgb, texture):
+def _gold(m, rgb, texture, sheen):
     return metal.gold()
 
 
-def _silver(m, rgb, texture):
+def _silver(m, rgb, texture, sheen):
     return metal.silver()
 
 
-def _nickel(m, rgb, texture):
+def _nickel(m, rgb, texture, sheen):
     fn = getattr(metal, "nickel", None)  # adopt metal.nickel once bundled
     return fn() if fn else metal.silver().override(color="#b9b9b2")
 
 
-def _tin(m, rgb, texture):
+def _tin(m, rgb, texture, sheen):
     return metal.tin()
 
 
-def _zinc(m, rgb, texture):
+def _zinc(m, rgb, texture, sheen):
     fn = getattr(metal, "zinc", None)  # prefer a real zinc factory if present
     base = fn() if fn else metal.silver_matte()
     return base.override(color=rgb) if rgb else base
 
 
-def _coat_gloss(m, rgb, texture):
-    return coats.coat_gloss(color=rgb)
+def _coat(m, rgb, texture, sheen):
+    fn = coats.coat_matte if sheen == fin.Sheen.MATTE else coats.coat_gloss
+    return fn(color=rgb)
 
 
-def _coat_matte(m, rgb, texture):
-    return coats.coat_matte(color=rgb)
-
-
-def _ecoat(m, rgb, texture):
+def _ecoat(m, rgb, texture, sheen):
     return coats.coat_matte(color=rgb or "#101010")
 
 
+_CHEM = fin.CHEMICAL_FINISHES
+_PLATE = fin.METAL_PLATING_FINISHES
+_COAT = fin.COATING_FINISHES
 _SURFACE = {
-    fin.ANODIZED: _anodized,
-    fin.PVD: _pvd,
-    fin.BLACK_OXIDE: _black_oxide,
-    fin.DYEING: _dyeing,
-    fin.CHROME_PLATING: _chrome,
-    fin.GOLD_PLATING: _gold,
-    fin.NICKEL_PLATING: _nickel,
-    fin.SILVER_PLATING: _silver,
-    fin.TIN_PLATING: _tin,
-    fin.ZINC_PLATING: _zinc,
-    fin.POWDER_COAT_GLOSS: _coat_gloss,
-    fin.POWDER_COAT_MATT: _coat_matte,
-    fin.ELECTROPHORESIS: _ecoat,
-    fin.SPRAY_PAINT_GLOSS: _coat_gloss,
-    fin.SPRAY_PAINT_MATT: _coat_matte,
-    fin.VACUUM_PLATING_GLOSS: _coat_gloss,
-    fin.VACUUM_PLATING_MATT: _coat_matte,
+    _CHEM[fin.Chemical.ANODIZED]: _anodized,
+    _CHEM[fin.Chemical.BLACK_OXIDE]: _black_oxide,
+    _CHEM[fin.Chemical.DYEING]: _dyeing,
+    _PLATE[fin.MetalPlating.PVD]: _pvd,
+    _PLATE[fin.MetalPlating.CHROME_PLATING]: _chrome,
+    _PLATE[fin.MetalPlating.GOLD_PLATING]: _gold,
+    _PLATE[fin.MetalPlating.NICKEL_PLATING]: _nickel,
+    _PLATE[fin.MetalPlating.SILVER_PLATING]: _silver,
+    _PLATE[fin.MetalPlating.TIN_PLATING]: _tin,
+    _PLATE[fin.MetalPlating.ZINC_PLATING]: _zinc,
+    _PLATE[fin.MetalPlating.VACUUM_PLATING]: _coat,
+    _COAT[fin.Coating.POWDER_COAT]: _coat,
+    _COAT[fin.Coating.SPRAY_PAINT]: _coat,
+    _COAT[fin.Coating.ELECTROPHORESIS]: _ecoat,
 }
 # everything else (smooth machining, electropolished, passivation, pickling,
 # chem film, conductive oxidation, laser, etch, silkscreen) leaves the look as-is.
 
 
 def _normalize(finish):
-    """finish -> list of (Finish, colour); unwraps AppliedFinish, tolerates raw Finish."""
+    """finish -> list of (Finish, colour, sheen); unwraps AppliedFinish, tolerates
+    a raw Finish."""
     if finish is None:
         return []
     seq = finish if isinstance(finish, (list, tuple)) else [finish]
     out = []
     for f in seq:
         if isinstance(f, AppliedFinish):
-            out.append((f.finish, f.color))
-        else:  # a raw Finish -> no colour
-            out.append((f, None))
+            out.append((f.finish, f.color, f.sheen))
+        else:  # a raw Finish -> no colour / sheen
+            out.append((f, None, None))
     return out
 
 
@@ -262,12 +263,14 @@ def get_pbr_properties(
     texture = None
     surface = None
     surface_color = None
-    for f, col in _normalize(finish):
+    surface_sheen = None
+    for f, col, sheen in _normalize(finish):
         if f in _TEXTURE:
             texture = _TEXTURE[f]
         elif f in _SURFACE:
             surface = f
             surface_color = col
+            surface_sheen = sheen
     if texture is None and process in _ROUGH_PROCESSES:
         texture = "matte"  # as-printed / as-built relief
 
@@ -276,7 +279,7 @@ def get_pbr_properties(
         # bare metals pass color=None and render their intrinsic look.
         return _plain_base(material, texture, _color_value(color), thickness_mm)
     rgb = _color_value(surface_color)
-    return _SURFACE[surface](material, rgb, texture)
+    return _SURFACE[surface](material, rgb, texture, surface_sheen)
 
 
 __all__ = ["get_pbr_properties"]

@@ -93,6 +93,17 @@ Category = Literal[
 ]
 ALLOWED_CATEGORIES = frozenset(get_args(Category))
 
+# Informal substrate groupings (not part of the formal Category taxonomy above),
+# used by the PBR bridge and finish applicability. FERROUS is a family grouping;
+# the rest are category groupings.
+FERROUS = frozenset({"mild_steel", "alloy_steel", "tool_steel", "spring_steel"})
+METAL = frozenset({"metal"})
+PAINTABLE = frozenset({"metal", "plastic", "resin", "wood"})
+COATABLE_POLY = frozenset({"metal", "plastic", "resin"})
+EVERYTHING = frozenset(
+    {"metal", "plastic", "resin", "wood", "glass", "paper", "textile"}
+)
+
 
 class RangeMaterial:
     """Mixin for range-table dataclasses: a ``mass()`` helper and a pretty

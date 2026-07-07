@@ -1,35 +1,29 @@
-"""Surface finishes, with *typical-use* hints and standard colour options.
+"""Surface finishes: the finish catalog + the ergonomic finish functions.
 
-Finishes are advisory, not gated: **any finish may be specified on any
-material** -- a given manufacturer may anodize titanium, powder-coat a polymer,
-etc. Each ``Finish`` only carries a *hint* of the substrates it is typically used
-on (by material ``category`` and/or ``family``). ``is_typical_for(material)``
-answers the hint; it never restricts. Hints are generic (chemistry/industry
-norms), not any one vendor's menu.
+Finishes are grouped by process into enums (:class:`Mechanical`, :class:`Chemical`,
+:class:`MetalPlating`, :class:`Coating`, :class:`Marking`), each backed by a
+``<GROUP>_FINISHES`` dict keyed by that enum -- the maintenance backbone. The
+**public API is the flat verb functions** (``anodize("blue")``, ``powder_coat(...)``),
+which bind a colour (and, for paints/coatings, a :class:`Sheen`) to a finish and
+return an :class:`AppliedFinish`.
+
+A ``Finish`` is now purely its intrinsic spec (name, standard colour palette,
+notes). Where a finish is *typically* used (its substrates) is a separate concern
+and lives in :mod:`.applicability` -- one central material<->finish table.
+
+Finishes are advisory, not gated: **any finish may be specified on any material**.
 
 ``colors`` is a standard palette per finish drawn from ``STANDARD_COLORS``:
 ``()`` = no colour choice (N/A / substrate colour), ``("black",)`` = single,
 ``("champagne", "rose gold", ...)`` = palette, and ``CUSTOM`` = any colour to
-spec (RAL/Pantone paint & powder).
+spec (RAL/Pantone paint & powder). Sheen (matte/gloss) is a per-application choice
+like colour -- it rides on the ``AppliedFinish``, not the ``Finish``.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-
-from collections.abc import Iterable
-
-from .core import RangeMaterial
-
-# --- substrate groups (for hints only) -------------------------------------
-FERROUS = frozenset({"mild_steel", "alloy_steel", "tool_steel", "spring_steel"})
-METAL = frozenset({"metal"})
-NON_FERROUS_METALS = frozenset({"aluminum", "stainless", "brass", "copper", "titanium"})
-PAINTABLE = frozenset({"metal", "plastic", "composite", "resin", "wood"})
-COATABLE_POLY = frozenset({"metal", "plastic", "composite", "resin"})
-EVERYTHING = frozenset(
-    {"metal", "plastic", "composite", "resin", "wood", "glass", "paper", "textile"}
-)
+from enum import Enum, auto
 
 # --- standard finish colours (controlled vocabulary) -----------------------
 CUSTOM = "custom"  # any colour to specification (RAL / Pantone)
@@ -59,88 +53,61 @@ STANDARD_COLORS = frozenset(
 )
 
 
+class Sheen(Enum):
+    """Surface sheen of a paint/coating -- a per-application choice like colour."""
+
+    GLOSS = auto()
+    MATTE = auto()
+
+
 @dataclass(frozen=True)
 class Finish:
+    """A surface finish's intrinsic spec. ``colors`` is its standard palette
+    (``()`` = no colour choice). Substrate applicability lives in
+    :mod:`.applicability`, not here."""
+
     name: str
-    kind: str  # mechanical | conversion | plating | coating | paint | color | marking
-    typical_categories: frozenset[str] = (
-        frozenset()
-    )  # hint: material.category in here ...
-    typical_families: frozenset[str] = frozenset()  # ... or material.family in here
     colors: tuple[str, ...] = ()  # standard palette; () = N/A / substrate colour
     notes: str | None = None
 
-    def is_typical_for(self, material: RangeMaterial) -> bool:
-        """Hint only -- is this finish *typically* used on this material?
 
-        Never a constraint: any finish may still be applied to any material.
-        """
-        return (
-            material.category in self.typical_categories
-            or material.family in self.typical_families
-        )
+# ===========================================================================
+# Finish catalog: one group enum + one <GROUP>_FINISHES dict per process family.
+# ===========================================================================
 
 
-FINISHES: dict[str, Finish] = {}
+class Mechanical(Enum):
+    BEAD_BLAST = auto()
+    BRUSHED = auto()
+    FINE_SANDING = auto()
+    SMOOTH_MACHINING = auto()
+    ELECTROPOLISHED = auto()
 
 
-def _slug(text: str) -> str:
-    """Lowercase, alnum-only slug (spaces/punctuation collapse to single '-')."""
-    out: list[str] = []
-    for ch in text.lower():
-        if ch.isalnum():
-            out.append(ch)
-        elif out and out[-1] != "-":
-            out.append("-")
-    return "".join(out).strip("-")
+MECHANICAL_FINISHES: dict[Mechanical, Finish] = {
+    Mechanical.BEAD_BLAST: Finish("Bead Blast"),
+    Mechanical.BRUSHED: Finish("Brushed"),
+    Mechanical.FINE_SANDING: Finish("Fine Sanding"),
+    Mechanical.SMOOTH_MACHINING: Finish(
+        "Smooth machining (Ra1.6µm)", notes="as-machined roughness spec"
+    ),
+    Mechanical.ELECTROPOLISHED: Finish("Electropolished"),
+}
 
 
-def _f(finish: Finish) -> Finish:
-    unknown = set(finish.colors) - STANDARD_COLORS
-    if unknown:
-        raise ValueError(f"{finish.name}: non-standard colours {sorted(unknown)}")
-    FINISHES[_slug(finish.name)] = finish
-    return finish
+class Chemical(Enum):
+    ANODIZED = auto()
+    CHEM_FILM = auto()
+    CONDUCTIVE_OXIDATION = auto()
+    BLACK_OXIDE = auto()
+    PASSIVATION = auto()
+    PICKLING = auto()
+    DYEING = auto()
 
 
-# --- mechanical (no added colour) ------------------------------------------
-BEAD_BLAST = _f(
-    Finish(
-        "Bead Blast",
-        "mechanical",
-        typical_categories=frozenset({"metal", "plastic", "composite"}),
-    )
-)
-BRUSHED = _f(Finish("Brushed", "mechanical", typical_categories=METAL))
-FINE_SANDING = _f(
-    Finish(
-        "Fine Sanding",
-        "mechanical",
-        typical_categories=frozenset({"metal", "plastic", "composite", "wood"}),
-    )
-)
-SMOOTH_MACHINING = _f(
-    Finish(
-        "Smooth machining (Ra1.6µm)",
-        "mechanical",
-        typical_categories=frozenset({"metal", "plastic", "composite", "wood"}),
-        notes="as-machined roughness spec",
-    )
-)
-ELECTROPOLISHED = _f(
-    Finish(
-        "Electropolished",
-        "mechanical",
-        typical_families=frozenset({"stainless", "titanium"}),
-    )
-)
-
-# --- conversion / oxide ----------------------------------------------------
-ANODIZED = _f(
-    Finish(
+CHEMICAL_FINISHES: dict[Chemical, Finish] = {
+    Chemical.ANODIZED: Finish(
         "Anodized",
-        "conversion",
-        typical_families=frozenset({"aluminum", "titanium"}),
         colors=(
             "natural",
             "black",
@@ -155,313 +122,247 @@ ANODIZED = _f(
             "green",
             "orange",
         ),
-    )
-)
-CHEM_FILM = _f(
-    Finish(
-        "Chemical conversion coat (Chem film)",
-        "conversion",
-        typical_families=frozenset({"aluminum"}),
-        colors=("clear", "gold"),
-    )
-)
-CONDUCTIVE_OXIDATION = _f(
-    Finish(
-        "Electrically conductive oxidation",
-        "conversion",
-        typical_families=frozenset({"aluminum"}),
-        colors=("clear",),
-    )
-)
-BLACK_OXIDE = _f(
-    Finish(
-        "Black oxide",
-        "conversion",
-        typical_families=FERROUS | frozenset({"stainless", "copper", "brass"}),
-        colors=("black",),
-    )
-)
-PASSIVATION = _f(
-    Finish(
-        "Passivation",
-        "conversion",
-        typical_families=frozenset({"stainless", "titanium"}),
-    )
-)
-PICKLING = _f(
-    Finish(
-        "Pickling", "conversion", typical_families=FERROUS | frozenset({"stainless"})
-    )
-)
-DYEING = _f(
-    Finish(
+    ),
+    Chemical.CHEM_FILM: Finish(
+        "Chemical conversion coat (Chem film)", colors=("clear", "gold")
+    ),
+    Chemical.CONDUCTIVE_OXIDATION: Finish(
+        "Electrically conductive oxidation", colors=("clear",)
+    ),
+    Chemical.BLACK_OXIDE: Finish("Black oxide", colors=("black",)),
+    Chemical.PASSIVATION: Finish("Passivation"),
+    Chemical.PICKLING: Finish("Pickling"),
+    Chemical.DYEING: Finish(
         "Dyeing",
-        "color",
-        typical_categories=frozenset({"plastic", "composite", "resin"}),
-        typical_families=frozenset({"aluminum"}),
         colors=(CUSTOM,),
         notes="anodized aluminum, or dyeable polymers (esp. nylon)",
-    )
-)
+    ),
+}
 
-# --- plating (metallic colour is inherent) ---------------------------------
-CHROME_PLATING = _f(
-    Finish("Chrome plating", "plating", typical_categories=METAL, colors=("chrome",))
-)
-GOLD_PLATING = _f(
-    Finish("Gold plating", "plating", typical_categories=METAL, colors=("gold",))
-)
-NICKEL_PLATING = _f(
-    Finish("Nickel plating", "plating", typical_categories=METAL, colors=("nickel",))
-)
-SILVER_PLATING = _f(
-    Finish("Silver plating", "plating", typical_categories=METAL, colors=("silver",))
-)
-TIN_PLATING = _f(
-    Finish("Tin plating", "plating", typical_categories=METAL, colors=("silver",))
-)
-PVD = _f(
-    Finish(
+
+class MetalPlating(Enum):
+    CHROME_PLATING = auto()
+    GOLD_PLATING = auto()
+    NICKEL_PLATING = auto()
+    SILVER_PLATING = auto()
+    TIN_PLATING = auto()
+    PVD = auto()
+    ZINC_PLATING = auto()
+    VACUUM_PLATING = auto()
+
+
+METAL_PLATING_FINISHES: dict[MetalPlating, Finish] = {
+    MetalPlating.CHROME_PLATING: Finish("Chrome plating", colors=("chrome",)),
+    MetalPlating.GOLD_PLATING: Finish("Gold plating", colors=("gold",)),
+    MetalPlating.NICKEL_PLATING: Finish("Nickel plating", colors=("nickel",)),
+    MetalPlating.SILVER_PLATING: Finish("Silver plating", colors=("silver",)),
+    MetalPlating.TIN_PLATING: Finish("Tin plating", colors=("silver",)),
+    MetalPlating.PVD: Finish(
         "PVD (Physical Vapor Deposition)",
-        "plating",
-        typical_categories=METAL,
         colors=("gold", "rose gold", "black", "gunmetal", "blue"),
-    )
-)
-ZINC_PLATING = _f(
-    Finish(
+    ),
+    MetalPlating.ZINC_PLATING: Finish(
         "Zinc plating",
-        "plating",
-        typical_families=FERROUS,
         colors=("clear", "blue", "yellow", "black"),
         notes="corrosion protection for ferrous steels",
-    )
-)
-
-# --- coating / paint -------------------------------------------------------
-POWDER_COAT_GLOSS = _f(
-    Finish(
-        "Powder coat - High gloss",
-        "coating",
-        typical_categories=METAL,
-        colors=(CUSTOM,),
-    )
-)
-POWDER_COAT_MATT = _f(
-    Finish("Powder coat - Matt", "coating", typical_categories=METAL, colors=(CUSTOM,))
-)
-ELECTROPHORESIS = _f(
-    Finish("Electrophoresis", "coating", typical_categories=METAL, colors=("black",))
-)
-SPRAY_PAINT_GLOSS = _f(
-    Finish(
-        "Spray painting - High gloss paint",
-        "paint",
-        typical_categories=PAINTABLE,
-        colors=(CUSTOM,),
-    )
-)
-SPRAY_PAINT_MATT = _f(
-    Finish(
-        "Spray painting - Matt paint",
-        "paint",
-        typical_categories=PAINTABLE,
-        colors=(CUSTOM,),
-    )
-)
-VACUUM_PLATING_GLOSS = _f(
-    Finish(
-        "Vacuum plating - High gloss paint",
-        "coating",
-        typical_categories=COATABLE_POLY,
-        colors=(CUSTOM,),
-    )
-)
-VACUUM_PLATING_MATT = _f(
-    Finish(
-        "Vacuum plating - Matt paint",
-        "coating",
-        typical_categories=COATABLE_POLY,
-        colors=(CUSTOM,),
-    )
-)
-
-# --- marking ---------------------------------------------------------------
-LASER_ENGRAVING = _f(
-    Finish("Laser engraving", "marking", typical_categories=EVERYTHING)
-)
-ETCHING = _f(
-    Finish("Etching", "marking", typical_categories=frozenset({"metal", "glass"}))
-)
-SILKSCREEN = _f(
-    Finish(
-        "Silkscreen",
-        "marking",
-        typical_categories=frozenset(
-            {"metal", "plastic", "composite", "resin", "glass"}
-        ),
-        colors=(CUSTOM,),
-    )
-)
+    ),
+    MetalPlating.VACUUM_PLATING: Finish("Vacuum plating", colors=(CUSTOM,)),
+}
 
 
-# --- queries (hints, not constraints) --------------------------------------
-def typical_finishes_for(material: RangeMaterial) -> list[Finish]:
-    """Finishes *typically* used on this material (a hint; not exhaustive)."""
-    return [f for f in FINISHES.values() if f.is_typical_for(material)]
+class Coating(Enum):
+    POWDER_COAT = auto()
+    ELECTROPHORESIS = auto()
+    SPRAY_PAINT = auto()
 
 
-def typical_materials_for(
-    finish: Finish, materials: Iterable[RangeMaterial]
-) -> list[RangeMaterial]:
-    """Which of ``materials`` this finish is *typically* used on (a hint).
-
-    Pass the candidate set explicitly (e.g. ``metals.ALL_METALS + plastics.ALL_PLASTICS``);
-    there is no central registry to enumerate.
-    """
-    return [m for m in materials if finish.is_typical_for(m)]
+COATING_FINISHES: dict[Coating, Finish] = {
+    Coating.POWDER_COAT: Finish("Powder coat", colors=(CUSTOM,)),
+    Coating.ELECTROPHORESIS: Finish("Electrophoresis", colors=("black",)),
+    Coating.SPRAY_PAINT: Finish("Spray painting", colors=(CUSTOM,)),
+}
 
 
-# --- applied finishes: functions bind a colour to a finish (public API) -----
+class Marking(Enum):
+    LASER_ENGRAVING = auto()
+    ETCHING = auto()
+    SILKSCREEN = auto()
+
+
+MARKING_FINISHES: dict[Marking, Finish] = {
+    Marking.LASER_ENGRAVING: Finish("Laser engraving"),
+    Marking.ETCHING: Finish("Etching"),
+    Marking.SILKSCREEN: Finish("Silkscreen", colors=(CUSTOM,)),
+}
+
+
+# All finishes flattened; used for palette validation and by :mod:`.applicability`.
+ALL_FINISHES = (
+    *MECHANICAL_FINISHES.values(),
+    *CHEMICAL_FINISHES.values(),
+    *METAL_PLATING_FINISHES.values(),
+    *COATING_FINISHES.values(),
+    *MARKING_FINISHES.values(),
+)
+
+for _finish in ALL_FINISHES:
+    _unknown = set(_finish.colors) - STANDARD_COLORS
+    if _unknown:
+        raise ValueError(f"{_finish.name}: non-standard colours {sorted(_unknown)}")
+
+
+# ===========================================================================
+# Applied finishes: the flat verb functions bind colour/sheen to a finish.
+# ===========================================================================
 
 
 @dataclass(frozen=True)
 class AppliedFinish:
-    """A finish plus its chosen colour -- produced by the finish functions below."""
+    """A finish plus its per-application appearance choices (colour, sheen) --
+    produced by the finish functions below."""
 
     finish: Finish
     color: str | None = None
+    sheen: Sheen | None = None  # None = finish has no sheen choice
 
 
-# mechanical (no colour)
+# --- mechanical (no colour) ------------------------------------------------
+def bead_blast() -> AppliedFinish:
+    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.BEAD_BLAST])
 
 
-def bead_blast():
-    return AppliedFinish(BEAD_BLAST)
+def brushed() -> AppliedFinish:
+    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.BRUSHED])
 
 
-def brushed():
-    return AppliedFinish(BRUSHED)
+def fine_sanding() -> AppliedFinish:
+    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.FINE_SANDING])
 
 
-def fine_sanding():
-    return AppliedFinish(FINE_SANDING)
+def smooth_machining() -> AppliedFinish:
+    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.SMOOTH_MACHINING])
 
 
-def smooth_machining():
-    return AppliedFinish(SMOOTH_MACHINING)
+def electropolish() -> AppliedFinish:
+    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.ELECTROPOLISHED])
 
 
-def electropolish():
-    return AppliedFinish(ELECTROPOLISHED)
+# --- chemical --------------------------------------------------------------
+def anodize(color) -> AppliedFinish:
+    # colour is mandatory: anodising is done to add colour (natural/clear anodise
+    # is still an explicit "natural" choice, not the absence of one).
+    return AppliedFinish(CHEMICAL_FINISHES[Chemical.ANODIZED], color)
 
 
-# conversion / oxide
+def chem_film() -> AppliedFinish:
+    return AppliedFinish(CHEMICAL_FINISHES[Chemical.CHEM_FILM])
 
 
-def anodize(color=None):
-    return AppliedFinish(ANODIZED, color)
+def conductive_oxidation() -> AppliedFinish:
+    return AppliedFinish(CHEMICAL_FINISHES[Chemical.CONDUCTIVE_OXIDATION])
 
 
-def chem_film():
-    return AppliedFinish(CHEM_FILM)
+def black_oxide() -> AppliedFinish:
+    return AppliedFinish(CHEMICAL_FINISHES[Chemical.BLACK_OXIDE])
 
 
-def conductive_oxidation():
-    return AppliedFinish(CONDUCTIVE_OXIDATION)
+def passivate() -> AppliedFinish:
+    return AppliedFinish(CHEMICAL_FINISHES[Chemical.PASSIVATION])
 
 
-def black_oxide():
-    return AppliedFinish(BLACK_OXIDE)
+def pickle() -> AppliedFinish:
+    return AppliedFinish(CHEMICAL_FINISHES[Chemical.PICKLING])
 
 
-def passivate():
-    return AppliedFinish(PASSIVATION)
+def dye(color) -> AppliedFinish:
+    return AppliedFinish(CHEMICAL_FINISHES[Chemical.DYEING], color)
 
 
-def pickle():
-    return AppliedFinish(PICKLING)
+# --- metal plating ---------------------------------------------------------
+def chrome() -> AppliedFinish:
+    return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.CHROME_PLATING])
 
 
-def dye(color):
-    return AppliedFinish(DYEING, color)
+def gold_plate() -> AppliedFinish:
+    return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.GOLD_PLATING])
 
 
-# plating
+def nickel_plate() -> AppliedFinish:
+    return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.NICKEL_PLATING])
 
 
-def chrome():
-    return AppliedFinish(CHROME_PLATING)
+def silver_plate() -> AppliedFinish:
+    return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.SILVER_PLATING])
 
 
-def gold_plate():
-    return AppliedFinish(GOLD_PLATING)
+def tin_plate() -> AppliedFinish:
+    return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.TIN_PLATING])
 
 
-def nickel_plate():
-    return AppliedFinish(NICKEL_PLATING)
+def pvd(color="clear") -> AppliedFinish:
+    # "clear" = bright natural PVD (substrate shows through); colours are opt-in.
+    return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.PVD], color)
 
 
-def silver_plate():
-    return AppliedFinish(SILVER_PLATING)
+def zinc_plate(color="clear") -> AppliedFinish:
+    # "clear" = clear/bright chromate -> the natural zinc look (the default).
+    return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.ZINC_PLATING], color)
 
 
-def tin_plate():
-    return AppliedFinish(TIN_PLATING)
+def vacuum_plating(color, sheen=Sheen.GLOSS) -> AppliedFinish:
+    return AppliedFinish(
+        METAL_PLATING_FINISHES[MetalPlating.VACUUM_PLATING], color, sheen
+    )
 
 
-def zinc_plate(color=None):
-    return AppliedFinish(ZINC_PLATING, color)
+# --- coating / paint (sheen: gloss default, matte optional) ----------------
+def powder_coat(color, sheen=Sheen.GLOSS) -> AppliedFinish:
+    return AppliedFinish(COATING_FINISHES[Coating.POWDER_COAT], color, sheen)
 
 
-def pvd(color=None):
-    return AppliedFinish(PVD, color)
+def spray_paint(color, sheen=Sheen.GLOSS) -> AppliedFinish:
+    return AppliedFinish(COATING_FINISHES[Coating.SPRAY_PAINT], color, sheen)
 
 
-# coating / paint (glossy by default; matt=True for the matt variant)
+def electrophoresis() -> AppliedFinish:
+    # e-coat is always black -- no colour choice.
+    return AppliedFinish(COATING_FINISHES[Coating.ELECTROPHORESIS])
 
 
-def powder_coat(color, matt=False):
-    return AppliedFinish(POWDER_COAT_MATT if matt else POWDER_COAT_GLOSS, color)
+# --- marking ---------------------------------------------------------------
+def laser_engrave() -> AppliedFinish:
+    return AppliedFinish(MARKING_FINISHES[Marking.LASER_ENGRAVING])
 
 
-def spray_paint(color, matt=False):
-    return AppliedFinish(SPRAY_PAINT_MATT if matt else SPRAY_PAINT_GLOSS, color)
+def etch() -> AppliedFinish:
+    return AppliedFinish(MARKING_FINISHES[Marking.ETCHING])
 
 
-def vacuum_plating(color, matt=False):
-    return AppliedFinish(VACUUM_PLATING_MATT if matt else VACUUM_PLATING_GLOSS, color)
-
-
-def electrophoresis(color=None):
-    return AppliedFinish(ELECTROPHORESIS, color)
-
-
-# marking
-
-
-def laser_engrave():
-    return AppliedFinish(LASER_ENGRAVING)
-
-
-def etch():
-    return AppliedFinish(ETCHING)
-
-
-def silkscreen(color=None):
-    return AppliedFinish(SILKSCREEN, color)
+def silkscreen(color="black") -> AppliedFinish:
+    # black is the common default; note PBR ignores markings, so colour is metadata.
+    return AppliedFinish(MARKING_FINISHES[Marking.SILKSCREEN], color)
 
 
 __all__ = [
+    # types + vocab
     "Finish",
     "AppliedFinish",
-    "FINISHES",
+    "Sheen",
     "CUSTOM",
     "STANDARD_COLORS",
-    "FERROUS",
-    "typical_finishes_for",
-    "typical_materials_for",
-    # finish functions (the public API; raw constants stay module-internal)
+    # catalog (maintenance backbone)
+    "Mechanical",
+    "Chemical",
+    "MetalPlating",
+    "Coating",
+    "Marking",
+    "MECHANICAL_FINISHES",
+    "CHEMICAL_FINISHES",
+    "METAL_PLATING_FINISHES",
+    "COATING_FINISHES",
+    "MARKING_FINISHES",
+    "ALL_FINISHES",
+    # finish functions (the public API)
     "bead_blast",
     "brushed",
     "fine_sanding",
@@ -479,11 +380,11 @@ __all__ = [
     "nickel_plate",
     "silver_plate",
     "tin_plate",
-    "zinc_plate",
     "pvd",
+    "zinc_plate",
+    "vacuum_plating",
     "powder_coat",
     "spray_paint",
-    "vacuum_plating",
     "electrophoresis",
     "laser_engrave",
     "etch",

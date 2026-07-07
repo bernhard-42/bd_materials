@@ -11,6 +11,18 @@ from __future__ import annotations
 
 from . import glass, metals, paper, plastics, resins, textile, wood
 
+# Flat registry of every catalog material -- lets top-level consumers (e.g.
+# applicability queries) enumerate the whole catalog without a passed-in list.
+ALL_MATERIALS = (
+    *metals.ALL_METALS,
+    *plastics.ALL_PLASTICS,
+    *resins.ALL_RESINS,
+    *glass.ALL_GLASSES,
+    *wood.ALL_WOODS,
+    *paper.ALL_PAPERS,
+    *textile.ALL_TEXTILES,
+)
+
 __all__ = [
     "glass",
     "metals",
@@ -19,4 +31,5 @@ __all__ = [
     "resins",
     "textile",
     "wood",
+    "ALL_MATERIALS",
 ]
