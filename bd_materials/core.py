@@ -63,8 +63,7 @@ PROPERTY_UNITS: dict[str, str] = {
     "shear_strength": "MPa",
     "compressive_strength_parallel": "MPa",  # wood, along grain
     "elongation_at_break": "%",
-    "shore_hardness": "Shore D",  # fixed-scale hardness (resins)
-    "hardness": "per hardness_scale",  # metals/plastics/glass; unit is per-material
+    "hardness": "per hardness_scale",  # metals/plastics/glass/resins; per-material unit
     "janka_hardness": "N",  # wood hardness (indentation force)
     "specific_heat_capacity": "J/(kg·K)",
     "melting_temperature": "°C",
@@ -111,8 +110,8 @@ class RangeMaterial:
 
     The subclass must be a dataclass with a ``name`` field and ``Range | None``
     value fields whose names are keys of ``PROPERTY_UNITS``. A ``hardness`` field
-    (metals/plastics) takes its unit from a companion ``hardness_scale`` string;
-    ``shore_hardness`` (resins) uses its fixed unit like any other property.
+    (metals, plastics, glass, resins) takes its unit from a companion
+    ``hardness_scale`` string.
 
     Intrinsic identity/appearance the viz layer reads (not properties, so
     ``__str__`` skips them): ``category`` (fixed per subclass), ``family``

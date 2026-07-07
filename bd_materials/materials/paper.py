@@ -12,8 +12,6 @@ Split into three single-grade families -- :class:`Paper`, :class:`Cardboard`,
 white, the predominant shade). Corrugated cardboard is effectively only sold as
 kraft, so it has no ``color`` -- the fixed look comes from its three.js
 ``corrugated_cardboard`` factory (case 1, like wood/metals).
-
-Standalone: does not touch the point-value library or the finishes/PBR stack.
 """
 
 from __future__ import annotations
@@ -61,6 +59,7 @@ class Cardboard(Enum):
 CARDBOARD_MATERIALS: dict[Cardboard, PaperMaterial] = {
     Cardboard.CORRUGATED: PaperMaterial(
         name="Cardboard_CORRUGATED",
+        # effective panel density (incl. flute voids); areal_density is the primary mass metric
         density=140,
         areal_density=Range(400, 700),
         thickness=Range(3, 5),
@@ -79,7 +78,7 @@ class Foamboard(Enum):
 FOAMBOARD_MATERIALS: dict[Foamboard, PaperMaterial] = {
     Foamboard.GENERIC: PaperMaterial(
         name="Foamboard_GENERIC",
-        density=100,
+        density=120,
         areal_density=Range(400, 550),
         thickness=Range(3, 6),
         tensile_strength=Range(2, 10),

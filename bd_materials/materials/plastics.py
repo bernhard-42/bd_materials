@@ -29,8 +29,6 @@ Other conventions where a metals field maps awkwardly onto polymers:
   for elastomers. Composites use Shore D as a rough proxy.
 
 Vendor-neutral: the Stratasys ABS-ESD7 grade from the old library is omitted.
-
-Standalone: does not touch the point-value library or the finishes/PBR stack.
 """
 
 from __future__ import annotations
@@ -82,7 +80,7 @@ PLA_MATERIALS: dict[PLA, PlasticMaterial] = {
         specific_heat_capacity=Range(1800, 1900),
         glass_transition_temperature=Range(55, 65),
         heat_deflection_temperature=Range(50, 60),
-        max_service_temp=Range(45, 55),
+        max_service_temp=Range(50, 60),
         thermal_expansion=Range(60e-6, 90e-6),
         thermal_conductivity=Range(0.11, 0.16),
         family="PLA",
@@ -102,7 +100,7 @@ PLA_MATERIALS: dict[PLA, PlasticMaterial] = {
         specific_heat_capacity=Range(1500, 1700),
         glass_transition_temperature=Range(55, 65),
         heat_deflection_temperature=Range(55, 70),
-        max_service_temp=Range(50, 60),
+        max_service_temp=Range(55, 65),
         thermal_expansion=Range(25e-6, 50e-6),
         thermal_conductivity=Range(0.15, 0.30),
         family="PLA",
@@ -190,31 +188,31 @@ NYLON_MATERIALS: dict[Nylon, PlasticMaterial] = {
         density=1140,
         tensile_strength=Range(50, 90),
         yield_strength=Range(45, 85),
-        modulus_of_elasticity=Range(2.0, 3.5),
+        modulus_of_elasticity=Range(1.9, 3.5),
         shear_modulus=Range(0.8, 1.3),
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(30, 60),
-        elongation_at_break=Range(20, 150),
+        elongation_at_break=Range(20, 300),
         hardness=Range(75, 85),
         hardness_scale="Shore D",
         specific_heat_capacity=Range(1600, 1700),
         glass_transition_temperature=Range(45, 60),
         heat_deflection_temperature=Range(60, 100),
-        max_service_temp=Range(80, 100),
+        max_service_temp=Range(80, 130),
         thermal_expansion=Range(70e-6, 100e-6),
-        thermal_conductivity=Range(0.24, 0.30),
+        thermal_conductivity=Range(0.24, 0.31),
         family="PA",
     ),
     Nylon.PA12: PlasticMaterial(
         name="Nylon_PA12",
         density=1010,
-        tensile_strength=Range(40, 55),
-        yield_strength=Range(40, 50),
+        tensile_strength=Range(30, 55),
+        yield_strength=Range(30, 50),
         modulus_of_elasticity=Range(1.2, 1.8),
         shear_modulus=Range(0.5, 0.8),
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(25, 40),
-        elongation_at_break=Range(50, 300),
+        elongation_at_break=Range(5, 300),
         hardness=Range(70, 80),
         hardness_scale="Shore D",
         specific_heat_capacity=Range(1700, 1800),
@@ -294,7 +292,7 @@ PEEK_MATERIALS: dict[Peek, PlasticMaterial] = {
         shear_modulus=Range(1.3, 1.6),
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(50, 75),
-        elongation_at_break=Range(20, 60),
+        elongation_at_break=Range(20, 100),
         hardness=Range(85, 90),
         hardness_scale="Shore D",
         specific_heat_capacity=Range(1300, 1400),
@@ -308,8 +306,8 @@ PEEK_MATERIALS: dict[Peek, PlasticMaterial] = {
     Peek.PRINTED: PlasticMaterial(
         name="Peek_PRINTED",
         density=1300,
-        tensile_strength=Range(80, 100),
-        yield_strength=Range(80, 95),
+        tensile_strength=Range(80, 120),
+        yield_strength=Range(80, 105),
         modulus_of_elasticity=Range(3.5, 4.2),
         shear_modulus=Range(1.3, 1.6),
         poisson_ratio=Range(0.38, 0.42),
@@ -320,7 +318,7 @@ PEEK_MATERIALS: dict[Peek, PlasticMaterial] = {
         specific_heat_capacity=Range(1300, 1400),
         glass_transition_temperature=Range(143, 150),
         heat_deflection_temperature=Range(140, 160),
-        max_service_temp=Range(200, 250),
+        max_service_temp=Range(160, 250),
         thermal_expansion=Range(45e-6, 60e-6),
         thermal_conductivity=Range(0.24, 0.29),
         family="PEEK",
@@ -348,8 +346,8 @@ TPU_MATERIALS: dict[TPU, PlasticMaterial] = {
         density=1200,
         tensile_strength=Range(25, 55),
         yield_strength=NOT_SUITABLE,
-        modulus_of_elasticity=Range(0.01, 0.05),
-        shear_modulus=Range(0.003, 0.02),
+        modulus_of_elasticity=Range(0.007, 0.10),
+        shear_modulus=Range(0.002, 0.035),
         poisson_ratio=Range(0.45, 0.49),
         shear_strength=Range(10, 30),
         elongation_at_break=Range(300, 700),
@@ -366,7 +364,7 @@ TPU_MATERIALS: dict[TPU, PlasticMaterial] = {
     TPU.SINTERED: PlasticMaterial(
         name="TPU_SINTERED",
         density=1200,
-        tensile_strength=Range(5, 25),
+        tensile_strength=Range(10, 25),
         yield_strength=NOT_SUITABLE,
         modulus_of_elasticity=Range(0.02, 0.1),
         shear_modulus=Range(0.007, 0.03),
@@ -415,7 +413,7 @@ PC_MATERIALS: dict[PC, PlasticMaterial] = {
         specific_heat_capacity=Range(1150, 1250),
         glass_transition_temperature=Range(145, 150),
         heat_deflection_temperature=Range(125, 140),
-        max_service_temp=Range(115, 130),
+        max_service_temp=Range(115, 145),
         thermal_expansion=Range(65e-6, 75e-6),
         thermal_conductivity=Range(0.19, 0.22),
         family="PC",
@@ -454,15 +452,15 @@ PP_MATERIALS: dict[PP, PlasticMaterial] = {
         shear_modulus=Range(0.4, 0.7),
         poisson_ratio=Range(0.40, 0.45),
         shear_strength=Range(15, 30),
-        elongation_at_break=Range(100, 600),
+        elongation_at_break=Range(10, 600),
         hardness=Range(70, 80),
         hardness_scale="Shore D",
         specific_heat_capacity=Range(1800, 2000),
         glass_transition_temperature=Range(-20, -10),
         heat_deflection_temperature=Range(50, 65),
-        max_service_temp=Range(80, 105),
+        max_service_temp=Range(80, 130),
         thermal_expansion=Range(100e-6, 180e-6),
-        thermal_conductivity=Range(0.11, 0.22),
+        thermal_conductivity=Range(0.11, 0.27),
         family="PP",
     ),
 }
@@ -485,9 +483,9 @@ POM_MATERIALS: dict[POM, PlasticMaterial] = {
     POM.GENERIC: PlasticMaterial(
         name="POM_GENERIC",
         density=1410,
-        tensile_strength=Range(60, 75),
-        yield_strength=Range(60, 70),
-        modulus_of_elasticity=Range(2.8, 3.6),
+        tensile_strength=Range(60, 90),
+        yield_strength=Range(60, 73),
+        modulus_of_elasticity=Range(2.8, 4.0),
         shear_modulus=Range(1.0, 1.4),
         poisson_ratio=Range(0.35, 0.40),
         shear_strength=Range(35, 55),
@@ -498,7 +496,7 @@ POM_MATERIALS: dict[POM, PlasticMaterial] = {
         glass_transition_temperature=Range(-60, -50),
         heat_deflection_temperature=Range(90, 110),
         max_service_temp=Range(90, 105),
-        thermal_expansion=Range(100e-6, 130e-6),
+        thermal_expansion=Range(80e-6, 140e-6),
         thermal_conductivity=Range(0.30, 0.40),
         family="POM",
     ),
@@ -535,7 +533,7 @@ PTFE_MATERIALS: dict[PTFE, PlasticMaterial] = {
         glass_transition_temperature=NOT_SUITABLE,
         heat_deflection_temperature=Range(50, 80),
         max_service_temp=Range(250, 270),
-        thermal_expansion=Range(100e-6, 160e-6),
+        thermal_expansion=Range(100e-6, 200e-6),
         thermal_conductivity=Range(0.23, 0.27),
         family="PTFE",
     ),
@@ -559,8 +557,8 @@ PMMA_MATERIALS: dict[PMMA, PlasticMaterial] = {
     PMMA.GENERIC: PlasticMaterial(
         name="PMMA_GENERIC",
         density=1180,
-        tensile_strength=Range(50, 77),
-        yield_strength=Range(50, 72),
+        tensile_strength=Range(50, 83),
+        yield_strength=Range(50, 80),
         modulus_of_elasticity=Range(2.4, 3.3),
         shear_modulus=Range(0.9, 1.2),
         poisson_ratio=Range(0.35, 0.40),
@@ -597,15 +595,15 @@ def pmma(
 
 
 class PE(Enum):
-    GENERIC = auto()
+    HDPE = auto()
 
 
 PE_MATERIALS: dict[PE, PlasticMaterial] = {
-    PE.GENERIC: PlasticMaterial(
-        name="PE_GENERIC",
+    PE.HDPE: PlasticMaterial(
+        name="PE_HDPE",
         density=960,
         tensile_strength=Range(20, 35),
-        yield_strength=Range(20, 30),
+        yield_strength=Range(20, 31),
         modulus_of_elasticity=Range(0.8, 1.3),
         shear_modulus=Range(0.3, 0.5),
         poisson_ratio=Range(0.40, 0.46),
@@ -616,16 +614,16 @@ PE_MATERIALS: dict[PE, PlasticMaterial] = {
         specific_heat_capacity=Range(1800, 2100),
         glass_transition_temperature=Range(-120, -100),
         heat_deflection_temperature=Range(40, 55),
-        max_service_temp=Range(60, 90),
+        max_service_temp=Range(60, 110),
         thermal_expansion=Range(100e-6, 200e-6),
-        thermal_conductivity=Range(0.35, 0.50),
+        thermal_conductivity=Range(0.35, 0.51),
         family="PE",
     ),
 }
 
 
 def pe(
-    grade: PE = PE.GENERIC,
+    grade: PE = PE.HDPE,
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
@@ -712,13 +710,34 @@ def rubber(
 
 
 class PETG(Enum):
+    GENERIC = auto()
     CF = auto()
 
 
 PETG_MATERIALS: dict[PETG, PlasticMaterial] = {
+    PETG.GENERIC: PlasticMaterial(
+        name="PETG_GENERIC",
+        density=1270,
+        tensile_strength=Range(45, 55),
+        yield_strength=Range(45, 53),
+        modulus_of_elasticity=Range(2.0, 2.2),
+        shear_modulus=Range(0.7, 0.85),
+        poisson_ratio=Range(0.38, 0.43),
+        shear_strength=Range(30, 40),
+        elongation_at_break=Range(50, 120),
+        hardness=Range(75, 82),
+        hardness_scale="Shore D",
+        specific_heat_capacity=Range(1200, 1400),
+        glass_transition_temperature=Range(75, 85),
+        heat_deflection_temperature=Range(65, 75),
+        max_service_temp=Range(60, 70),
+        thermal_expansion=Range(60e-6, 80e-6),
+        thermal_conductivity=Range(0.15, 0.25),
+        family="PETG",
+    ),
     PETG.CF: PlasticMaterial(
         name="PETG_CF",
-        density=1270,
+        density=1320,
         tensile_strength=Range(40, 60),
         yield_strength=Range(40, 55),
         modulus_of_elasticity=Range(3, 6),
@@ -740,12 +759,51 @@ PETG_MATERIALS: dict[PETG, PlasticMaterial] = {
 
 
 def petg(
-    grade: PETG = PETG.CF,
+    grade: PETG = PETG.GENERIC,
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
 ) -> FinishedMaterial:
     return FinishedMaterial(PETG_MATERIALS[grade], finish, color=color, process=process)
+
+
+class Asa(Enum):
+    GENERIC = auto()
+
+
+# Weathering-resistant amorphous thermoplastic (UV-stable ABS cousin). PCBWay lists
+# ASA with no property rows -- these are typical-ASA bands (close to ABS); REVIEW.
+ASA_MATERIALS: dict[Asa, PlasticMaterial] = {
+    Asa.GENERIC: PlasticMaterial(
+        name="Asa_GENERIC",
+        density=1070,
+        tensile_strength=Range(40, 55),
+        yield_strength=Range(40, 50),
+        modulus_of_elasticity=Range(1.9, 2.6),
+        shear_modulus=Range(0.7, 0.95),
+        poisson_ratio=Range(0.35, 0.40),
+        shear_strength=Range(25, 38),
+        elongation_at_break=Range(10, 40),
+        hardness=Range(70, 80),
+        hardness_scale="Shore D",
+        specific_heat_capacity=Range(1300, 1500),
+        glass_transition_temperature=Range(100, 110),
+        heat_deflection_temperature=Range(85, 100),
+        max_service_temp=Range(65, 85),
+        thermal_expansion=Range(80e-6, 100e-6),
+        thermal_conductivity=Range(0.15, 0.20),
+        family="ASA",
+    ),
+}
+
+
+def asa(
+    grade: Asa = Asa.GENERIC,
+    color=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial:
+    return FinishedMaterial(ASA_MATERIALS[grade], finish, color=color, process=process)
 
 
 class PPS(Enum):
@@ -766,7 +824,8 @@ PPS_MATERIALS: dict[PPS, PlasticMaterial] = {
         hardness=Range(85, 92),
         hardness_scale="Shore D",
         specific_heat_capacity=Range(1000, 1200),
-        glass_transition_temperature=Range(85, 95),
+        # Tg ~85-105 but HDT 200-270: reinforced semi-crystalline HDT tracks Tm (~280), not Tg
+        glass_transition_temperature=Range(85, 105),
         heat_deflection_temperature=Range(200, 270),
         max_service_temp=Range(200, 240),
         thermal_expansion=Range(20e-6, 50e-6),
@@ -793,10 +852,11 @@ FR4_MATERIALS: dict[FR4, PlasticMaterial] = {
     FR4.GENERIC: PlasticMaterial(
         name="FR4_GENERIC",
         density=1850,
-        tensile_strength=Range(280, 420),
+        tensile_strength=Range(260, 340),
         yield_strength=NOT_SUITABLE,
         modulus_of_elasticity=Range(18, 24),
-        shear_modulus=Range(5, 9),
+        shear_modulus=Range(3, 7),
+        # FR4's low Poisson ratio (~0.11-0.18) is real, not a typo
         poisson_ratio=Range(0.11, 0.18),
         shear_strength=Range(60, 120),
         elongation_at_break=Range(1, 3),
@@ -805,7 +865,7 @@ FR4_MATERIALS: dict[FR4, PlasticMaterial] = {
         specific_heat_capacity=Range(600, 900),
         glass_transition_temperature=Range(130, 180),
         heat_deflection_temperature=Range(130, 180),
-        max_service_temp=Range(120, 140),
+        max_service_temp=Range(120, 160),
         thermal_expansion=Range(12e-6, 18e-6),
         thermal_conductivity=Range(0.25, 0.35),
         family="FR4",
@@ -844,7 +904,7 @@ CFRP_MATERIALS: dict[CFRP, PlasticMaterial] = {
         heat_deflection_temperature=Range(100, 200),
         max_service_temp=Range(100, 180),
         thermal_expansion=Range(0, 10e-6),
-        thermal_conductivity=Range(1, 6),
+        thermal_conductivity=Range(0.5, 10),
         family="CFRP",
     ),
 }
@@ -874,6 +934,7 @@ ALL_PLASTICS = (
     *PHENOLIC_MATERIALS.values(),
     *RUBBER_MATERIALS.values(),
     *PETG_MATERIALS.values(),
+    *ASA_MATERIALS.values(),
     *PPS_MATERIALS.values(),
     *FR4_MATERIALS.values(),
     *CFRP_MATERIALS.values(),

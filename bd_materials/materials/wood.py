@@ -16,8 +16,6 @@ design-relevant **along-grain** values:
 
 ``thermal_expansion`` is intentionally omitted: wood's dimensional movement is
 driven by moisture, not temperature, so a CTE would mislead.
-
-Standalone: does not touch the point-value library or the finishes/PBR stack.
 """
 
 from __future__ import annotations
@@ -81,7 +79,7 @@ HARDWOOD_MATERIALS: dict[Hardwood, WoodMaterial] = {
         modulus_of_elasticity=Range(10, 13),
         modulus_of_rupture=Range(90, 115),
         compressive_strength_parallel=Range(45, 58),
-        janka_hardness=Range(5000, 6500),
+        janka_hardness=Range(5500, 7000),
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
         family="ash",
@@ -89,10 +87,10 @@ HARDWOOD_MATERIALS: dict[Hardwood, WoodMaterial] = {
     Hardwood.BEECH: WoodMaterial(
         name="Hardwood_BEECH",
         density=720,
-        modulus_of_elasticity=Range(10, 13),
+        modulus_of_elasticity=Range(11, 15),
         modulus_of_rupture=Range(90, 115),
         compressive_strength_parallel=Range(44, 56),
-        janka_hardness=Range(5000, 6500),
+        janka_hardness=Range(5500, 7000),
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
         family="beech",
@@ -125,18 +123,18 @@ HARDWOOD_MATERIALS: dict[Hardwood, WoodMaterial] = {
         modulus_of_elasticity=Range(10, 14),
         modulus_of_rupture=Range(90, 115),
         compressive_strength_parallel=Range(45, 58),
-        janka_hardness=Range(5200, 6800),
+        janka_hardness=Range(5000, 6500),
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.14, 0.20),
         family="oak",
     ),
     Hardwood.WALNUT: WoodMaterial(
         name="Hardwood_WALNUT",
-        density=610,
+        density=640,
         modulus_of_elasticity=Range(10, 13),
         modulus_of_rupture=Range(90, 110),
         compressive_strength_parallel=Range(46, 58),
-        janka_hardness=Range(4000, 5000),
+        janka_hardness=Range(4800, 5800),
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
         family="walnut",
@@ -157,7 +155,7 @@ SOFTWOOD_MATERIALS: dict[Softwood, WoodMaterial] = {
         modulus_of_elasticity=Range(8, 11),
         modulus_of_rupture=Range(60, 80),
         compressive_strength_parallel=Range(30, 40),
-        janka_hardness=Range(1500, 2700),
+        janka_hardness=Range(2000, 3000),
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.10, 0.15),
         family="spruce",
@@ -168,7 +166,7 @@ SOFTWOOD_MATERIALS: dict[Softwood, WoodMaterial] = {
         modulus_of_elasticity=Range(8, 12),
         modulus_of_rupture=Range(60, 80),
         compressive_strength_parallel=Range(33, 43),
-        janka_hardness=Range(1800, 2700),
+        janka_hardness=Range(2200, 2900),
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.10, 0.14),
         family="spruce",
@@ -179,7 +177,7 @@ SOFTWOOD_MATERIALS: dict[Softwood, WoodMaterial] = {
         modulus_of_elasticity=Range(8, 12),
         modulus_of_rupture=Range(65, 100),
         compressive_strength_parallel=Range(35, 55),
-        janka_hardness=Range(1700, 3100),
+        janka_hardness=Range(1700, 4500),
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.10, 0.15),
         family="spruce",  # three.js has no pine factory -- spruce is the closest look

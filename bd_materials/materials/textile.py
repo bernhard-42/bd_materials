@@ -8,8 +8,6 @@ highly grade-dependent -- treat as rough typicals.
 
 A single generic **woven** fabric is carried (the knit variant was dropped); felt
 and leather are grouped here as soft areal goods (leather isn't strictly a textile).
-
-Standalone: does not touch the point-value library or the finishes/PBR stack.
 """
 
 from __future__ import annotations
@@ -61,7 +59,7 @@ TEXTILE_MATERIALS: dict[Textile, TextileMaterial] = {
     ),
     Textile.LEATHER: TextileMaterial(
         name="Textile_LEATHER",
-        density=860,
+        density=950,
         areal_density=Range(800, 1600),
         thickness=Range(1, 3),
         tensile_strength=Range(10, 30),

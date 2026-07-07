@@ -4,16 +4,14 @@ Sibling of the metals/plastics modules using the same approach and the
 shared :mod:`..core` primitives (``Range``, ``PROPERTY_UNITS``, ``RangeMaterial``).
 
 Resins are grouped into **vendor-neutral functional families** (standard, tough,
-high-temp, ...) rather than individual products. The property set mirrors plastics
-(with ``glass_transition_temperature``, ``heat_deflection_temperature``,
-``elongation_at_break``), except hardness is a dedicated ``shore_hardness`` field
--- photopolymers are quoted on the Shore scale, so its unit is fixed (Shore D for
-all current families) via ``PROPERTY_UNITS`` rather than a per-material
-``hardness_scale``.
+high-temp, flexible, ...) rather than individual products. The property set mirrors
+plastics: ``glass_transition_temperature``, ``heat_deflection_temperature``,
+``elongation_at_break``, and ``hardness`` + ``hardness_scale`` -- rigid resins are
+quoted on **Shore D**, flexible/elastomeric ones on **Shore A**.
 
-``yield_strength`` ~equals tensile strength (cast photopolymers fail with little
-distinct yielding). Standalone: does not touch the point-value library or the
-finishes/PBR stack.
+``yield_strength`` ~equals tensile strength for the rigid families (cast
+photopolymers fail with little distinct yielding); it is ``NOT_SUITABLE`` for the
+flexible/elastomeric family.
 """
 
 from __future__ import annotations
@@ -24,18 +22,20 @@ from typing import ClassVar
 
 from ..finished import FinishedMaterial, Process
 from ..finishes import AppliedFinish
-from ..core import PolymerMaterial, Range
+from ..core import NOT_SUITABLE, PolymerMaterial, Range
 
 
 @dataclass(frozen=True)
 class ResinMaterial(PolymerMaterial):
-    """A photopolymer resin: the shared polymer ranges (from ``PolymerMaterial``)
-    plus a fixed-scale ``shore_hardness`` (Shore D). ``transparent`` is True for the
-    clear resin; a part's colour lives on the ``FinishedMaterial``.
+    """A photopolymer resin: the shared polymer ranges (from ``PolymerMaterial``) plus
+    a Shore hardness. ``hardness_scale`` is "Shore D" for rigid resins, "Shore A" for
+    flexible ones. ``transparent`` is True for the clear resin; a part's colour lives
+    on the ``FinishedMaterial``.
     """
 
     category: ClassVar[str] = "resin"
-    shore_hardness: Range | None  # Shore D
+    hardness: Range | None  # on the `hardness_scale` scale
+    hardness_scale: str  # "Shore D" (rigid) / "Shore A" (flexible)
     family: str | None = None
     transparent: bool = False
 
@@ -48,8 +48,11 @@ class Resin(Enum):
     CASTABLE = auto()
     ESD = auto()
     TRANSPARENT = auto()
+    FLEXIBLE = auto()
 
 
+# For rigid photopolymers Tg and HDT bands nearly coincide: these resins are
+# tested near Tg, so HDT (usually ~5-15C below Tg) overlaps it -- not a duplication.
 RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
     Resin.STANDARD: ResinMaterial(
         name="Resin_STANDARD",
@@ -61,7 +64,8 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(27, 36),
         elongation_at_break=Range(5, 12),
-        shore_hardness=Range(80, 86),
+        hardness=Range(80, 86),
+        hardness_scale="Shore D",
         specific_heat_capacity=Range(1400, 1600),
         glass_transition_temperature=Range(50, 65),
         heat_deflection_temperature=Range(50, 65),
@@ -80,7 +84,8 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(24, 33),
         elongation_at_break=Range(20, 60),
-        shore_hardness=Range(78, 84),
+        hardness=Range(78, 84),
+        hardness_scale="Shore D",
         specific_heat_capacity=Range(1400, 1600),
         glass_transition_temperature=Range(45, 60),
         heat_deflection_temperature=Range(45, 58),
@@ -98,12 +103,13 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         shear_modulus=Range(1.0, 1.3),
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(24, 33),
-        elongation_at_break=Range(3, 10),
-        shore_hardness=Range(80, 86),
+        elongation_at_break=Range(1, 10),
+        hardness=Range(80, 86),
+        hardness_scale="Shore D",
         specific_heat_capacity=Range(1400, 1600),
-        glass_transition_temperature=Range(110, 160),
-        heat_deflection_temperature=Range(100, 150),
-        max_service_temp=Range(90, 130),
+        glass_transition_temperature=Range(110, 245),
+        heat_deflection_temperature=Range(100, 230),
+        max_service_temp=Range(100, 200),
         thermal_expansion=Range(70e-6, 120e-6),
         thermal_conductivity=Range(0.18, 0.25),
         family="resin",
@@ -113,15 +119,17 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         density=1650,
         tensile_strength=Range(60, 80),
         yield_strength=Range(55, 72),
-        modulus_of_elasticity=Range(8, 12),
+        modulus_of_elasticity=Range(5, 9),
         shear_modulus=Range(3.0, 4.5),
         poisson_ratio=Range(0.30, 0.35),
         shear_strength=Range(36, 48),
         elongation_at_break=Range(1, 3),
-        shore_hardness=Range(88, 95),
+        hardness=Range(88, 95),
+        hardness_scale="Shore D",
         specific_heat_capacity=Range(1100, 1300),
         glass_transition_temperature=Range(150, 250),
-        heat_deflection_temperature=Range(200, 270),
+        # ceramic-filled: HDT is filler-controlled and can exceed the matrix Tg (not an inversion)
+        heat_deflection_temperature=Range(200, 280),
         max_service_temp=Range(150, 220),
         thermal_expansion=Range(30e-6, 70e-6),
         thermal_conductivity=Range(0.2, 0.5),
@@ -137,7 +145,8 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(21, 30),
         elongation_at_break=Range(3, 10),
-        shore_hardness=Range(76, 83),
+        hardness=Range(76, 83),
+        hardness_scale="Shore D",
         specific_heat_capacity=Range(1400, 1600),
         glass_transition_temperature=Range(48, 62),
         heat_deflection_temperature=Range(48, 62),
@@ -156,7 +165,9 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(23, 30),
         elongation_at_break=Range(5, 15),
-        shore_hardness=Range(85, 92),
+        # hardness is an ESTIMATE -- ESD datasheets (e.g. Formlabs) list no Shore value
+        hardness=Range(80, 88),
+        hardness_scale="Shore D",
         specific_heat_capacity=Range(1400, 1600),
         glass_transition_temperature=Range(55, 70),
         heat_deflection_temperature=Range(55, 70),
@@ -175,7 +186,8 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(23, 31),
         elongation_at_break=Range(5, 15),
-        shore_hardness=Range(80, 88),
+        hardness=Range(80, 88),
+        hardness_scale="Shore D",
         specific_heat_capacity=Range(1400, 1600),
         glass_transition_temperature=Range(45, 62),
         heat_deflection_temperature=Range(45, 60),
@@ -184,6 +196,26 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         thermal_conductivity=Range(0.18, 0.25),
         family="resin",
         transparent=True,
+    ),
+    Resin.FLEXIBLE: ResinMaterial(
+        name="Resin_FLEXIBLE",
+        density=1150,
+        tensile_strength=Range(5, 30),
+        yield_strength=NOT_SUITABLE,
+        modulus_of_elasticity=Range(0.001, 0.5),
+        shear_modulus=Range(0.0003, 0.17),
+        poisson_ratio=Range(0.40, 0.49),
+        shear_strength=Range(3, 18),
+        elongation_at_break=Range(25, 120),
+        hardness=Range(55, 85),
+        hardness_scale="Shore A",
+        specific_heat_capacity=Range(1400, 1600),
+        glass_transition_temperature=Range(-20, 25),
+        heat_deflection_temperature=NOT_SUITABLE,
+        max_service_temp=Range(40, 70),
+        thermal_expansion=Range(100e-6, 200e-6),
+        thermal_conductivity=Range(0.15, 0.25),
+        family="resin",
     ),
 }
 

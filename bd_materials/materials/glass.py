@@ -9,13 +9,11 @@ temperature are omitted entirely (a brittle glass has no yield/ductile
 elongation, and HDT is a polymer test) rather than carried as ``NOT_SUITABLE``.
 ``tensile_strength`` is the practical **flaw-limited** annealed strength (pristine
 fibre is far higher; surface flaws dominate). Hardness is on the **Vickers (HV)**
-scale. Both ``melting_temperature`` (the melt/working range -- glass has no sharp
-melt point) and ``glass_transition_temperature`` (Tg) are carried.
+scale. Both ``melting_temperature`` (the furnace-melt range -- glass has no sharp melt
+point; it is not a service limit: softening is far lower, ~730/820C -- see ``max_service_temp``) and ``glass_transition_temperature`` (Tg) are carried.
 
 Borosilicate's defining feature is its low thermal expansion (~3.3e-6/K vs
 ~9e-6/K for soda-lime), i.e. much better thermal-shock resistance.
-
-Standalone: does not touch the point-value library or the finishes/PBR stack.
 """
 
 from __future__ import annotations
@@ -33,7 +31,7 @@ from ..core import Range, SolidMaterial
 class GlassMaterial(SolidMaterial):
     """A glass: the shared solid ranges (from ``SolidMaterial``; ``tensile_strength``
     is flaw-limited, annealed) plus Vickers hardness, a glass-transition and a
-    melt/working range. Brittle, so no yield/shear-strength fields.
+    furnace-melt range (see below). Brittle, so no yield/shear-strength fields.
 
     Glass is ``transparent``; the optional colour + pane ``thickness_mm`` are
     per-part and live on the ``FinishedMaterial``.
@@ -43,7 +41,8 @@ class GlassMaterial(SolidMaterial):
     hardness: Range | None  # on the `hardness_scale` scale
     hardness_scale: str  # "HV" (Vickers)
     glass_transition_temperature: Range | None  # °C
-    melting_temperature: Range | None  # °C (melt / working range)
+    melting_temperature: Range | None  # °C -- furnace melt (glass has no sharp melt
+    # point); NOT a service limit -- softening is ~730/820C, use max_service_temp
     family: str | None = None
     transparent: bool = False
 
@@ -71,7 +70,7 @@ GLASS_MATERIALS: dict[Glass, GlassMaterial] = {
         specific_heat_capacity=Range(750, 880),
         glass_transition_temperature=Range(520, 570),
         melting_temperature=Range(1400, 1600),
-        max_service_temp=Range(400, 500),
+        max_service_temp=Range(150, 300),
         thermal_expansion=Range(8.5e-6, 9.5e-6),
         thermal_conductivity=Range(0.9, 1.1),
         family="soda_lime",
@@ -87,9 +86,9 @@ GLASS_MATERIALS: dict[Glass, GlassMaterial] = {
         hardness=Range(480, 600),
         hardness_scale="HV",
         specific_heat_capacity=Range(750, 830),
-        glass_transition_temperature=Range(525, 565),
+        glass_transition_temperature=Range(490, 565),
         melting_temperature=Range(1500, 1650),
-        max_service_temp=Range(450, 500),
+        max_service_temp=Range(230, 400),
         thermal_expansion=Range(3.0e-6, 3.5e-6),
         thermal_conductivity=Range(1.0, 1.2),
         family="borosilicate",
