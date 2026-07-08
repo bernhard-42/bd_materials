@@ -113,7 +113,7 @@ def pla(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(PLA_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -171,7 +171,7 @@ def abs_(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(ABS_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -271,7 +271,7 @@ def nylon(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(
         NYLON_MATERIALS[grade], finish, color=color, process=process
     )
@@ -331,7 +331,7 @@ def peek(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(PEEK_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -389,7 +389,7 @@ def tpu(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(TPU_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -428,7 +428,7 @@ def pc(
     thickness_mm=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(
         PC_MATERIALS[grade],
         finish,
@@ -471,7 +471,7 @@ def pp(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(PP_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -508,7 +508,7 @@ def pom(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(POM_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -545,7 +545,7 @@ def ptfe(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(PTFE_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -584,7 +584,7 @@ def pmma(
     thickness_mm=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(
         PMMA_MATERIALS[grade],
         finish,
@@ -627,7 +627,7 @@ def pe(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(PE_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -664,7 +664,7 @@ def phenolic(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(
         PHENOLIC_MATERIALS[grade], finish, color=color, process=process
     )
@@ -703,7 +703,7 @@ def rubber(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(
         RUBBER_MATERIALS[grade], finish, color=color, process=process
     )
@@ -763,7 +763,7 @@ def petg(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(PETG_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -802,7 +802,7 @@ def asa(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(ASA_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -840,7 +840,7 @@ def pps(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(PPS_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -878,7 +878,7 @@ def fr4(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(FR4_MATERIALS[grade], finish, color=color, process=process)
 
 
@@ -915,7 +915,7 @@ def cfrp(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PlasticMaterial]:
     return FinishedMaterial(CFRP_MATERIALS[grade], finish, color=color, process=process)
 
 

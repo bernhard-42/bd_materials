@@ -78,7 +78,7 @@ def textile(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[TextileMaterial]:
     return FinishedMaterial(
         TEXTILE_MATERIALS[grade], finish, color=color, process=process
     )

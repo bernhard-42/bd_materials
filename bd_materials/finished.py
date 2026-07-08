@@ -16,7 +16,7 @@ Threejs stays out of ``import bd_materials`` -- only ``.pbr`` pulls it in.
 from __future__ import annotations
 
 import enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from .finishes import AppliedFinish
 from .core import RangeMaterial
@@ -26,6 +26,10 @@ if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-fre
 
 # colour input accepted by ``color=`` (name / hex string, or an RGB tuple)
 Color = str | tuple[float, float, float]
+
+# the concrete material class a FinishedMaterial carries (MetalMaterial, ...), so
+# ``.material`` keeps its category-specific physics fields for type checkers
+MaterialT = TypeVar("MaterialT", bound=RangeMaterial)
 
 
 class Process(enum.Enum):
@@ -42,17 +46,21 @@ class Process(enum.Enum):
     WROUGHT = "wrought"
 
 
-class FinishedMaterial:
+class FinishedMaterial(Generic[MaterialT]):
     """A range ``Material`` + per-part colour / thickness / finish(es) / process.
 
     The material stays a pure typical-values table; everything chosen per part
     lives here. ``pbr=`` supplies a ready-made look and cannot be combined with
     ``finish`` / ``process`` / ``color`` / ``thickness_mm``.
+
+    Generic over the material class: a family function returns e.g.
+    ``FinishedMaterial[MetalMaterial]``, so ``.material`` keeps the category's
+    physics fields (``.material.tensile_strength``) for type checkers.
     """
 
     def __init__(
         self,
-        material: RangeMaterial,
+        material: MaterialT,
         finish: AppliedFinish | list[AppliedFinish] | None = None,
         *,
         color: Color | None = None,
@@ -81,7 +89,7 @@ class FinishedMaterial:
                 "surface, so a process (the raw as-made surface) is ignored -- pass "
                 "one or the other"
             )
-        self.material = material
+        self.material: MaterialT = material
         self.finish = finish
         self.color = color
         self.thickness_mm = thickness_mm

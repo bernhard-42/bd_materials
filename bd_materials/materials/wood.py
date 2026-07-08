@@ -227,7 +227,7 @@ def hardwood(
     grade: Hardwood = Hardwood.GENERIC,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[WoodMaterial]:
     return FinishedMaterial(HARDWOOD_MATERIALS[grade], finish, process=process)
 
 
@@ -235,7 +235,7 @@ def softwood(
     grade: Softwood = Softwood.GENERIC,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[WoodMaterial]:
     return FinishedMaterial(SOFTWOOD_MATERIALS[grade], finish, process=process)
 
 
@@ -243,7 +243,7 @@ def engineered_wood(
     grade: EngineeredWood = EngineeredWood.MDF,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[WoodMaterial]:
     return FinishedMaterial(ENGINEERED_WOOD_MATERIALS[grade], finish, process=process)
 
 

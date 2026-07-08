@@ -180,7 +180,7 @@ def aluminum(
     grade: Alu = Alu.G6061_T6,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(ALU_MATERIALS[grade], finish, process=process)
 
 
@@ -328,7 +328,7 @@ def stainless(
     grade: Stainless = Stainless.G304_ANNEALED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(STAINLESS_MATERIALS[grade], finish, process=process)
 
 
@@ -400,7 +400,7 @@ def mild_steel(
     grade: MildSteel = MildSteel.G1018_COLD_DRAWN,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(MILD_STEEL_MATERIALS[grade], finish, process=process)
 
 
@@ -472,7 +472,7 @@ def alloy_steel(
     grade: AlloySteel = AlloySteel.G4140_QUENCHED_TEMPERED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(ALLOY_STEEL_MATERIALS[grade], finish, process=process)
 
 
@@ -506,7 +506,7 @@ def spring_steel(
     grade: SpringSteel = SpringSteel.GENERIC_QUENCHED_TEMPERED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(SPRING_STEEL_MATERIALS[grade], finish, process=process)
 
 
@@ -654,7 +654,7 @@ def tool_steel(
     grade: ToolSteel = ToolSteel.D2_HARDENED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(TOOL_STEEL_MATERIALS[grade], finish, process=process)
 
 
@@ -707,7 +707,7 @@ def titanium(
     grade: Titanium = Titanium.GR5_ANNEALED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(TITANIUM_MATERIALS[grade], finish, process=process)
 
 
@@ -760,7 +760,7 @@ def brass(
     grade: Brass = Brass.C360_HALF_HARD,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(BRASS_MATERIALS[grade], finish, process=process)
 
 
@@ -794,7 +794,7 @@ def copper(
     grade: Copper = Copper.C110_ANNEALED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(COPPER_MATERIALS[grade], finish, process=process)
 
 
@@ -828,7 +828,7 @@ def magnesium(
     grade: Magnesium = Magnesium.GENERIC_STRUCTURAL,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[MetalMaterial]:
     return FinishedMaterial(MAGNESIUM_MATERIALS[grade], finish, process=process)
 
 

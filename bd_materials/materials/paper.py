@@ -101,7 +101,7 @@ def paper(
     color="white",
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PaperMaterial]:
     return FinishedMaterial(
         PAPER_MATERIALS[grade], finish, color=color, process=process
     )
@@ -111,7 +111,7 @@ def cardboard(
     grade: Cardboard = Cardboard.CORRUGATED,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PaperMaterial]:
     return FinishedMaterial(CARDBOARD_MATERIALS[grade], finish, process=process)
 
 
@@ -120,7 +120,7 @@ def foamboard(
     color="white",
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[PaperMaterial]:
     return FinishedMaterial(
         FOAMBOARD_MATERIALS[grade], finish, color=color, process=process
     )

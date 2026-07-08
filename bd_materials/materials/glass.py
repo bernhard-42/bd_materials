@@ -103,7 +103,7 @@ def glass(
     thickness_mm=None,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[GlassMaterial]:
     return FinishedMaterial(
         GLASS_MATERIALS[grade],
         finish,

@@ -229,7 +229,7 @@ def resin(
     thickness_mm=None,
     finish: _Finish = None,
     process: Process | None = None,
-) -> FinishedMaterial:
+) -> FinishedMaterial[ResinMaterial]:
     return FinishedMaterial(
         RESIN_MATERIALS[grade],
         finish,
