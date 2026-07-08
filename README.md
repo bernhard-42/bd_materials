@@ -1,6 +1,12 @@
 # bd_materials
 
-Typical-value engineering materials for [build123d](https://github.com/gumyr/build123d) — give a part a named material, get its **mass and mechanical/thermal properties**, and resolve how it **looks** (finish + colour → three.js PBR).
+---
+
+**!!! ALPHA - DO NOT USE YET !!!**
+
+---
+
+Typical-value engineering materials — give a part a named material, get its **mass and mechanical/thermal properties**, and resolve how it **looks** (finish + colour → three.js PBR).
 
 ```python
 from bd_materials import metals, finishes
@@ -15,7 +21,7 @@ part.pbr                              # three.js material for OCP VSCode
 
 ## 1. Purpose
 
-bd*materials is **not a materials database**. It is an \_opinionated, curated* list of the common materials you actually reach for in mechanical/CAD design with **typical-value ranges** for the properties and a single representative **density**.
+bd_materials is **not a materials database**. It is an \_opinionated, curated\* list of the common materials you actually reach for in mechanical/CAD design with **typical-value ranges** for the properties and a single representative **density**.
 
 > ### ⚠️ Disclaimer — read this
 >
