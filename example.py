@@ -1,20 +1,139 @@
 # %%
+
 from build123d import *
 from ocp_vscode import *
 from ocp_vscode.utils import create_shader_ball
-from bd_ext import *
-from bd_materials import metals, plastics, finishes, Process
+from bd_materials import (
+    metals,
+    plastics,
+    wood,
+    glass,
+    resins,
+    finishes,
+    Process,
+    typical_finishes,
+    typical_materials,
+)
 
 sb = create_shader_ball("sb")
 # %%
 
-m = metals.aluminum(finish=finishes.anodize("orange"))
+
+# %%
+
+
+## 1 — defaults only: the most common grade, bare surface
+
+m = metals.aluminum()  # 6061-T6
 show(sb, materials=[m.pbr])
 # %%
 
-m = metals.mild_steel()
+m = plastics.pla()  # generic PLA
 show(sb, materials=[m.pbr])
 # %%
 
-m = plastics.pla(color="gray", process=Process.FDM)
+m = wood.hardwood()  # generic hardwood
 show(sb, materials=[m.pbr])
+# %%
+
+
+## 2 — pick a grade (grade is first-positional)
+
+m = metals.aluminum(metals.Alu.G7075_T6)
+show(sb, materials=[m.pbr])
+# %%
+
+m = metals.stainless(metals.Stainless.G316L_AS_BUILT)  # SLM as-built
+show(sb, materials=[m.pbr])
+# %%
+
+m = wood.hardwood(wood.Hardwood.ASH)
+show(sb, materials=[m.pbr])
+# %%
+
+m = wood.softwood(wood.Softwood.PINE)
+show(sb, materials=[m.pbr])
+# %%
+
+m = resins.resin(resins.Resin.TOUGH)
+show(sb, materials=[m.pbr])
+# %%
+
+
+## 3 — selectable colour (plastics/resins/paper/textile) and transparent panes
+
+m = plastics.pla(color="red")
+show(sb, materials=[m.pbr])
+# %%
+
+m = plastics.pmma(color="clear", thickness_mm=3)  # transparent -> pane thickness
+show(sb, materials=[m.pbr])
+# %%
+
+m = glass.glass(glass.Glass.BOROSILICATE, color="green", thickness_mm=5)
+show(sb, materials=[m.pbr])
+# %%
+
+
+## 4 — a finish (colour and, for paints/coats, a sheen ride on the finish)
+
+m = metals.aluminum(finish=finishes.anodize("champagne"))  # finish on default grade
+show(sb, materials=[m.pbr])
+# %%
+
+m = metals.aluminum(metals.Alu.G7075_T6, finishes.anodize("blue"))  # grade + finish
+show(sb, materials=[m.pbr])
+# %%
+
+m = metals.mild_steel(finish=finishes.powder_coat("green", finishes.Sheen.MATTE))
+show(sb, materials=[m.pbr])
+# %%
+
+m = metals.brass()
+show(sb, materials=[m.pbr])
+# %%
+
+m = metals.brass(finish=finishes.pvd("gold"))
+show(sb, materials=[m.pbr])
+# %%
+
+
+## 5 — process nudges the *bare* as-made surface (a print reads rough)
+
+m = plastics.pla(color="black", process=Process.FDM)
+show(sb, materials=[m.pbr])
+
+# %% compared to
+
+m = plastics.pla(color="black")
+show(sb, materials=[m.pbr])
+# %%
+
+
+## 6 — inspect the physics, compute mass, resolve the look
+
+al = metals.aluminum(metals.Alu.G7075_T6)
+print(al.material)  # aligned "property  min to max  unit" table
+
+print(f"{al.material.mass(volume_mm3=8000)=}")  # grams  (density x volume)
+
+assert al.material.tensile_strength is not None
+
+print(f"{al.material.tensile_strength=}")  # Range(mi)n=540, max=600  MPa
+print(f"{al.material.tensile_strength.value_at(0)=}")  # 540 Pa (min)
+print(f"{al.material.tensile_strength.value_at(1)=}")  # 600 Pa (max)
+print(f"{al.material.tensile_strength.value_at(0.2)=}")  # 552 Pa (max)
+
+al.pbr  # three.js PbrProperties
+
+# %%
+
+# 7 — advisory applicability queries (never a constraint)
+
+print("Typical finishes for a aluminum:\n")
+for tf in typical_finishes(metals.aluminum().material):
+    print(f"- {tf.name}")
+
+print("\nTypical materials for a anodizing:\n")
+for m in typical_materials(finishes.Chemical.ANODIZED):
+    print(f"- {m.name}")
