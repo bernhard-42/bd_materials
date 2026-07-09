@@ -45,33 +45,40 @@ class Range:
 NOT_SUITABLE = Range(math.nan, math.nan)
 
 
-# One unit per property, across every material class, in canonical display order
-# (describe() iterates these keys, so this is also the sole source of layout order --
-# independent of each material's dataclass field/MRO order). density is single-valued;
-# every other property is a Range. `hardness`'s unit is per-material, so describe()
-# shows its `hardness_scale` rather than the placeholder listed here.
-PROPERTY_UNITS: dict[str, str] = {
-    "density": "kg/m³",
+# Property units, split into the two display groups. __str__ prints them in this
+# order -- "# mechanical properties" then "# thermal properties" -- alpha-sorted
+# within each (mirroring the definition blocks). density is single-valued; every
+# other property is a Range. `hardness`'s unit is per-material, so __str__ shows its
+# `hardness_scale` rather than the placeholder here.
+MECHANICAL_PROPERTY_UNITS: dict[str, str] = {
     "areal_density": "g/m²",  # areal goods (paper, textile) -- grammage
-    "thickness": "mm",  # areal goods
-    "tensile_strength": "MPa",
-    "yield_strength": "MPa",
+    "compressive_strength_parallel": "MPa",  # wood, along grain
+    "density": "kg/m³",
+    "elongation_at_break": "%",
+    "hardness": "per hardness_scale",  # per-material unit (its hardness_scale)
+    "janka_hardness": "N",  # wood hardness (indentation force)
     "modulus_of_elasticity": "GPa",
     "modulus_of_rupture": "MPa",  # wood bending strength
-    "shear_modulus": "GPa",
     "poisson_ratio": "",  # dimensionless
+    "shear_modulus": "GPa",
     "shear_strength": "MPa",
-    "compressive_strength_parallel": "MPa",  # wood, along grain
-    "elongation_at_break": "%",
-    "hardness": "per hardness_scale",  # metals/plastics/glass/resins; per-material unit
-    "janka_hardness": "N",  # wood hardness (indentation force)
-    "specific_heat_capacity": "J/(kg·K)",
-    "melting_temperature": "°C",
+    "tensile_strength": "MPa",
+    "thickness": "mm",  # areal goods
+    "yield_strength": "MPa",
+}
+THERMAL_PROPERTY_UNITS: dict[str, str] = {
     "glass_transition_temperature": "°C",
     "heat_deflection_temperature": "°C",
     "max_service_temp": "°C",
-    "thermal_expansion": "1/K",
+    "melting_temperature": "°C",
+    "specific_heat_capacity": "J/(kg·K)",
     "thermal_conductivity": "W/(m·K)",
+    "thermal_expansion": "1/K",
+}
+# Flat lookup over both groups -- the single per-property unit table used elsewhere.
+PROPERTY_UNITS: dict[str, str] = {
+    **MECHANICAL_PROPERTY_UNITS,
+    **THERMAL_PROPERTY_UNITS,
 }
 
 
@@ -142,28 +149,34 @@ class RangeMaterial:
         return self.density * volume_mm3 * 1e-6
 
     def __str__(self) -> str:
-        """Aligned 'property  value unit' lines in canonical order; 'missing' /
-        'n/a' for the None / NOT_SUITABLE sentinels."""
+        """Aligned 'property  value unit' lines under a '# mechanical properties'
+        then '# thermal properties' header (one per non-empty group, taken from the
+        two unit dicts in order; mirroring the definition blocks); the ``name`` is
+        the title line. 'missing' / 'n/a' for the None / NOT_SUITABLE sentinels."""
         scale = getattr(self, "hardness_scale", "")
         have = {f.name for f in fields(cast(Any, self))}
-        rows: list[tuple[str, str, str]] = []
-        for name in PROPERTY_UNITS:  # canonical order == PROPERTY_UNITS order
-            if name not in have:
-                continue
-            val = getattr(self, name)
-            unit = scale if name == "hardness" else PROPERTY_UNITS[name]
-            if val is None:
-                body, unit = "missing", ""
-            elif isinstance(val, Range) and math.isnan(val.min):
-                body, unit = "n/a", ""
-            elif isinstance(val, Range):
-                body = f"{val.min:g} to {val.max:g}"
-            else:
-                body = f"{val:g}"
-            rows.append((name, body, unit))
-        width = max(len(n) for n, _, _ in rows)
+        width = max(len(n) for n in PROPERTY_UNITS if n in have)
         lines = [getattr(self, "name")]
-        lines += [f"  {n:{width}s}  {b} {u}".rstrip() for n, b, u in rows]
+        for group, units in (
+            ("mechanical", MECHANICAL_PROPERTY_UNITS),
+            ("thermal", THERMAL_PROPERTY_UNITS),
+        ):
+            names = [n for n in units if n in have]
+            if not names:
+                continue
+            lines.append(f"  # {group} properties")
+            for name in names:
+                val = getattr(self, name)
+                unit = scale if name == "hardness" else units[name]
+                if val is None:
+                    body, unit = "missing", ""
+                elif isinstance(val, Range) and math.isnan(val.min):
+                    body, unit = "n/a", ""
+                elif isinstance(val, Range):
+                    body = f"{val.min:g} to {val.max:g}"
+                else:
+                    body = f"{val:g}"
+                lines.append(f"  {name:{width}s}  {body} {unit}".rstrip())
         return "\n".join(lines)
 
 

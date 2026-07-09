@@ -65,49 +65,55 @@ The `applicability` module answers "which finish typically suits which material"
 - Aluminum, grade 6061, temper T6:
 
   ```text
+  # mechanical properties
   density                 2700 kg/m³
+  hardness                85 to 100 HB
+  modulus_of_elasticity   66 to 70 GPa
+  poisson_ratio           0.32 to 0.35
+  shear_modulus           25 to 28 GPa
+  shear_strength          200 to 210 MPa
   tensile_strength        290 to 320 MPa
   yield_strength          240 to 280 MPa
-  modulus_of_elasticity   66 to 70 GPa
-  shear_modulus           25 to 28 GPa
-  poisson_ratio           0.32 to 0.35
-  shear_strength          200 to 210 MPa
-  hardness                85 to 100 HB
-  specific_heat_capacity  875 to 950 J/(kg·K)
-  melting_temperature     570 to 660 °C
+  # thermal properties
   max_service_temp        80 to 120 °C
-  thermal_expansion       2.2e-05 to 2.4e-05 1/K
+  melting_temperature     570 to 660 °C
+  specific_heat_capacity  875 to 950 J/(kg·K)
   thermal_conductivity    130 to 180 W/(m·K)
+  thermal_expansion       2.2e-05 to 2.4e-05 1/K
   ```
 
 - PLA, carbon filled:
 
   ```text
+  # mechanical properties
   density                       1250 kg/m³
-  tensile_strength              40 to 65 MPa
-  yield_strength                40 to 55 MPa
-  modulus_of_elasticity         4 to 7 GPa
-  shear_modulus                 2 to 3.5 GPa
-  poisson_ratio                 0.35 to 0.4
-  shear_strength                30 to 50 MPa
   elongation_at_break           1 to 3 %
   hardness                      80 to 88 Shore D
-  specific_heat_capacity        1500 to 1700 J/(kg·K)
+  modulus_of_elasticity         4 to 7 GPa
+  poisson_ratio                 0.35 to 0.4
+  shear_modulus                 2 to 3.5 GPa
+  shear_strength                30 to 50 MPa
+  tensile_strength              40 to 65 MPa
+  yield_strength                40 to 55 MPa
+  # thermal properties
   glass_transition_temperature  55 to 65 °C
   heat_deflection_temperature   55 to 70 °C
   max_service_temp              55 to 65 °C
-  thermal_expansion             2.5e-05 to 5e-05 1/K
+  specific_heat_capacity        1500 to 1700 J/(kg·K)
   thermal_conductivity          0.15 to 0.3 W/(m·K)
+  thermal_expansion             2.5e-05 to 5e-05 1/K
   ```
 
 - Hardwood, maple:
 
   ```text
+  # mechanical properties
+  compressive_strength_parallel  48 to 60 MPa
   density                        705 kg/m³
+  janka_hardness                 5500 to 7000 N
   modulus_of_elasticity          11 to 14 GPa
   modulus_of_rupture             95 to 120 MPa
-  compressive_strength_parallel  48 to 60 MPa
-  janka_hardness                 5500 to 7000 N
+  # thermal properties
   specific_heat_capacity         1200 to 1700 J/(kg·K)
   thermal_conductivity           0.12 to 0.18 W/(m·K)
   ```
