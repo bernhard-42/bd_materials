@@ -1,13 +1,10 @@
-"""Range-based typical values for textiles (woven fabric, felt, leather).
+"""Typical-value property ranges for textiles (woven fabric, felt, leather).
 
-Sibling of the other range modules using the shared :mod:`..core` primitives.
-Textiles are **areal goods**: the primary mass metric is grammage
-(``areal_density``, g/m²), not volumetric density. ``tensile_strength`` is the
-in-plane value and is approximate for these flexible materials. Properties are
-highly grade-dependent -- treat as rough typicals.
-
-A single generic **woven** fabric is carried (the knit variant was dropped); felt
-and leather are grouped here as soft areal goods (leather isn't strictly a textile).
+Textiles are **areal goods**: the primary mass metric is grammage (``areal_density``,
+g/m2), not volumetric density; the ``density`` field is only the effective bulk value.
+``tensile_strength`` is the in-plane value and is approximate for these flexible
+materials, so treat all values as rough typicals. (Leather isn't strictly a textile but
+is grouped here as a soft areal good.)
 """
 
 from __future__ import annotations

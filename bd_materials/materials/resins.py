@@ -1,17 +1,11 @@
-"""Range-based typical values for photopolymer resins (SLA / DLP).
+"""Typical-value property ranges for photopolymer resins (SLA / DLP).
 
-Sibling of the metals/plastics modules using the same approach and the
-shared :mod:`..core` primitives (``Range``, ``PROPERTY_UNITS``, ``RangeMaterial``).
-
-Resins are grouped into **vendor-neutral functional families** (standard, tough,
-high-temp, flexible, ...) rather than individual products. The property set mirrors
-plastics: ``glass_transition_temperature``, ``heat_deflection_temperature``,
-``elongation_at_break``, and ``hardness`` + ``hardness_scale`` -- rigid resins are
-quoted on **Shore D**, flexible/elastomeric ones on **Shore A**.
-
-``yield_strength`` ~equals tensile strength for the rigid families (cast
-photopolymers fail with little distinct yielding); it is ``NOT_SUITABLE`` for the
-flexible/elastomeric family.
+Resins are modelled as functional families (standard, tough, high-temp, flexible, ...).
+Each carries the polymer property set -- ``glass_transition_temperature``,
+``heat_deflection_temperature``, ``elongation_at_break`` and a Shore ``hardness`` on its
+``hardness_scale`` ("Shore D" for rigid resins, "Shore A" for flexible/elastomeric
+ones). ``yield_strength`` ~equals ``tensile_strength`` for the rigid families and is
+``NOT_SUITABLE`` for the flexible family.
 """
 
 from __future__ import annotations
@@ -165,7 +159,7 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         poisson_ratio=Range(0.38, 0.42),
         shear_strength=Range(23, 30),
         elongation_at_break=Range(5, 15),
-        # hardness is an ESTIMATE -- ESD datasheets (e.g. Formlabs) list no Shore value
+        # hardness is approximate: ESD-resin datasheets rarely quote a Shore value
         hardness=Range(80, 88),
         hardness_scale="Shore D",
         specific_heat_capacity=Range(1400, 1600),

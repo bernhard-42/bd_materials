@@ -1,21 +1,17 @@
-"""Range-based typical values for wood (solid species + engineered boards).
+"""Typical-value property ranges for wood (solid species + engineered boards).
 
-Sibling of the other range modules using the shared :mod:`..core` primitives.
-Values are for ~12% moisture content and shift substantially when wet. Species are
-grouped into three families -- :class:`Hardwood`, :class:`Softwood`,
-:class:`EngineeredWood` -- each with a ``GENERIC`` early-phase grade where useful.
-
-Wood is **orthotropic**; to fit a scalar range table the fields carry the
-design-relevant **along-grain** values:
+Values are for ~12% moisture content and shift substantially when wet. Wood is
+**orthotropic**; to fit a scalar range table the fields carry the design-relevant
+**along-grain** values:
 
 * ``modulus_of_elasticity`` -- along grain (parallel to fibres), GPa.
 * ``modulus_of_rupture`` -- bending strength, MPa (wood has no true yield).
 * ``compressive_strength_parallel`` -- along grain, MPa.
-* ``janka_hardness`` -- side hardness (indentation force), N. ``None`` for
-  engineered boards (MDF/OSB), where it is not commonly quoted (value missing).
+* ``janka_hardness`` -- side hardness (indentation force), N; ``None`` for engineered
+  boards, where it is not commonly quoted.
 
-``thermal_expansion`` is intentionally omitted: wood's dimensional movement is
-driven by moisture, not temperature, so a CTE would mislead.
+``thermal_expansion`` is intentionally omitted: wood moves with moisture, not
+temperature, so a CTE would mislead.
 """
 
 from __future__ import annotations
@@ -51,6 +47,10 @@ class WoodMaterial(RangeMaterial):
     transparent: bool = False
 
 
+_Finish = AppliedFinish | list[AppliedFinish] | None
+
+
+# --- Hardwood ----------------------------------------------------------------
 class Hardwood(Enum):
     GENERIC = auto()  # early-phase, before a species is chosen
     ASH = auto()
@@ -142,6 +142,15 @@ HARDWOOD_MATERIALS: dict[Hardwood, WoodMaterial] = {
 }
 
 
+def hardwood(
+    grade: Hardwood = Hardwood.GENERIC,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[WoodMaterial]:
+    return FinishedMaterial(HARDWOOD_MATERIALS[grade], finish, process=process)
+
+
+# --- Softwood ----------------------------------------------------------------
 class Softwood(Enum):
     GENERIC = auto()  # early-phase, before a species is chosen
     SPRUCE = auto()
@@ -185,6 +194,15 @@ SOFTWOOD_MATERIALS: dict[Softwood, WoodMaterial] = {
 }
 
 
+def softwood(
+    grade: Softwood = Softwood.GENERIC,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[WoodMaterial]:
+    return FinishedMaterial(SOFTWOOD_MATERIALS[grade], finish, process=process)
+
+
+# --- Engineered wood ---------------------------------------------------------
 class EngineeredWood(Enum):
     MDF = auto()
     OSB = auto()
@@ -214,29 +232,6 @@ ENGINEERED_WOOD_MATERIALS: dict[EngineeredWood, WoodMaterial] = {
         family="osb",
     ),
 }
-
-
-# ===========================================================================
-# Family functions (return FinishedMaterial; wood is opaque -- no colour).
-# ===========================================================================
-
-_Finish = AppliedFinish | list[AppliedFinish] | None
-
-
-def hardwood(
-    grade: Hardwood = Hardwood.GENERIC,
-    finish: _Finish = None,
-    process: Process | None = None,
-) -> FinishedMaterial[WoodMaterial]:
-    return FinishedMaterial(HARDWOOD_MATERIALS[grade], finish, process=process)
-
-
-def softwood(
-    grade: Softwood = Softwood.GENERIC,
-    finish: _Finish = None,
-    process: Process | None = None,
-) -> FinishedMaterial[WoodMaterial]:
-    return FinishedMaterial(SOFTWOOD_MATERIALS[grade], finish, process=process)
 
 
 def engineered_wood(

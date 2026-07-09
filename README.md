@@ -21,12 +21,12 @@ part.pbr                              # three.js material for OCP VSCode
 
 ## 1. Purpose
 
-bd_materials is **not a materials database**. It is an \_opinionated, curated\* list of the common materials you actually reach for in mechanical/CAD design with **typical-value ranges** for the properties and a single representative **density**.
+bd_materials is **not a materials database**. It is an _opinionated, curated_ list of the common materials you actually reach for in mechanical/CAD design, with **typical-value ranges** for the properties and a single representative **density**.
 
 > ### ⚠️ Disclaimer — read this
 >
 > - **Typical values only.** Every mechanical/thermal property is a **min–max `Range`**, not a guaranteed spec. Even `density` is a _single representative value_, not exact.
-> - **Real products can fall outside the range.** Temper, heat treatment, product form, process (esp. additive), fillers and supplier variation all shift the numbers. The bands are _common-knowledge_ figures, chosen deliberately (a published band is textbook knowledge; a single copied datasheet figure carries provenance/licensing risk) and cross-checked, but they are approximate.
+> - **Real products can fall outside the range.** Temper, heat treatment, product form, process (esp. additive), fillers and supplier variation all shift the numbers. The bands are _common-knowledge_ typical figures — cross-checked, but approximate.
 > - **For the early design phase.** Use it for sizing, material selection, mass estimates and visualisation. **In detailed design, use the actual product's data sheet.**
 > - A property may be **`None`** (value not filled in) or **`NOT_SUITABLE`** (`Range(nan, nan)` — the property does not apply, e.g. an elastomer's yield strength).
 > - The `family` tag drives the _look_ (PBR), not the physics. Where three.js lacks a dedicated factory it falls back to the nearest look (e.g. pine → spruce).
@@ -160,7 +160,7 @@ In **`bd_materials.finishes`**:
 - **`AppliedFinish`** — a `Finish` plus the per-part `color` and `sheen`. This is what the verb functions return and what `FinishedMaterial(finish=…)` accepts.
 - Group enums (`Mechanical`, `Chemical`, `MetalPlating`, `Coating`, `Marking`) + their `<GROUP>_FINISHES` dicts are the maintenance backbone; the **verb functions are the API**.
 
-Colour semantics are honest per finish:
+Colour is handled per finish:
 
 - **Mandatory** where the finish is defined by colour — `anodize(color)`, `dye(color)`, `powder_coat(color, sheen=…)`, `spray_paint(...)`, `vacuum_plating(...)`.
 - **Sensible default** where a natural look exists — `pvd("clear")`, `zinc_plate("clear")`, `silkscreen("black")`. `"clear"`/`"natural"` render the bare substrate (no tint).

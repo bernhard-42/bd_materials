@@ -1,21 +1,21 @@
 """Range-based engineering-materials catalog for build123d.
 
-Typical-value **ranges** (min-max), not single points -- honest about real
-variation and free of the vendor/datasheet-licensing trap (a published band is
-common knowledge). Materials are reached through category namespaces; a family
-function returns a :class:`FinishedMaterial` (the part touch point): ``.material``
-is the physics (a shared, immutable range table), ``.pbr`` is the three.js look.
+Typical-value **ranges** (min-max) for the properties, not single points -- they
+reflect the real spread across temper, product form and process. Materials are
+reached through category namespaces; a family function returns a
+:class:`FinishedMaterial`: ``.material`` is the physics (a shared, immutable range
+table), ``.pbr`` is the three.js look.
 
     from bd_materials import metals, plastics, finishes
-    from bd_materials.metals import Alu
+    from bd_materials.materials.metals import Alu
 
     metals.aluminum()                                  # FinishedMaterial (6061 default)
     metals.aluminum(Alu.G7075_T6, finishes.anodize("champagne"))
-    plastics.pla(color="red")                          # selectable colour (case 2)
+    plastics.pla(color="red")                          # selectable colour
     plastics.pmma(color="clear", thickness_mm=3)       # transparent -> pane thickness
 
     print(metals.aluminum().material)                  # typical-value dump (__str__)
-    metals.aluminum().pbr                              # resolved look (needs threejs_materials)
+    metals.aluminum().pbr                              # resolved three.js look
 
 Intrinsic identity (``family``, ``category``, ``transparent``) lives on the
 ``Material``; per-part choices (``color``, ``thickness_mm``, ``finish``,
@@ -56,7 +56,7 @@ __all__ = [
     "applicability",
     "typical_finishes",
     "typical_materials",
-    # user touch points
+    # user-facing types
     "FinishedMaterial",
     "Process",
 ]

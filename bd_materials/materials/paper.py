@@ -1,17 +1,10 @@
-"""Range-based typical values for paper goods (paper, cardboard, foamboard).
+"""Typical-value property ranges for paper goods (paper, cardboard, foamboard).
 
-Sibling of the other range modules using the shared :mod:`..core` primitives.
 These are **areal goods**: the primary mass metric is grammage (``areal_density``,
-g/m²), not volumetric density, and a cut sheet's mass is grammage x area.
-``tensile_strength`` is the in-plane (machine-direction) value and is approximate
-for these structured/layered materials. Grade and supplier variation is large --
-treat as rough typicals.
-
-Split into three single-grade families -- :class:`Paper`, :class:`Cardboard`,
-:class:`Foamboard`. Paper and foamboard take a selectable ``color`` (default
-white, the predominant shade). Corrugated cardboard is effectively only sold as
-kraft, so it has no ``color`` -- the fixed look comes from its three.js
-``corrugated_cardboard`` factory (case 1, like wood/metals).
+g/m2), not volumetric density -- a cut sheet's mass is grammage x area, and the
+``density`` field is only the effective bulk value. ``tensile_strength`` is the in-plane
+(machine-direction) value and is approximate for these layered materials; grade and
+supplier variation is large, so treat all values as rough typicals.
 """
 
 from __future__ import annotations
@@ -34,6 +27,10 @@ class PaperMaterial(ArealMaterial):
     category: ClassVar[str] = "paper"
 
 
+_Finish = AppliedFinish | list[AppliedFinish] | None
+
+
+# --- Paper -------------------------------------------------------------------
 class Paper(Enum):
     OFFICE = auto()
 
@@ -52,6 +49,18 @@ PAPER_MATERIALS: dict[Paper, PaperMaterial] = {
 }
 
 
+def paper(
+    grade: Paper = Paper.OFFICE,
+    color="white",
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[PaperMaterial]:
+    return FinishedMaterial(
+        PAPER_MATERIALS[grade], finish, color=color, process=process
+    )
+
+
+# --- Cardboard ---------------------------------------------------------------
 class Cardboard(Enum):
     CORRUGATED = auto()
 
@@ -71,6 +80,15 @@ CARDBOARD_MATERIALS: dict[Cardboard, PaperMaterial] = {
 }
 
 
+def cardboard(
+    grade: Cardboard = Cardboard.CORRUGATED,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[PaperMaterial]:
+    return FinishedMaterial(CARDBOARD_MATERIALS[grade], finish, process=process)
+
+
+# --- Foamboard ---------------------------------------------------------------
 class Foamboard(Enum):
     GENERIC = auto()
 
@@ -87,32 +105,6 @@ FOAMBOARD_MATERIALS: dict[Foamboard, PaperMaterial] = {
         family="foamboard",
     ),
 }
-
-
-# ===========================================================================
-# Family functions -- each defaults to its predominant intrinsic colour.
-# ===========================================================================
-
-_Finish = AppliedFinish | list[AppliedFinish] | None
-
-
-def paper(
-    grade: Paper = Paper.OFFICE,
-    color="white",
-    finish: _Finish = None,
-    process: Process | None = None,
-) -> FinishedMaterial[PaperMaterial]:
-    return FinishedMaterial(
-        PAPER_MATERIALS[grade], finish, color=color, process=process
-    )
-
-
-def cardboard(
-    grade: Cardboard = Cardboard.CORRUGATED,
-    finish: _Finish = None,
-    process: Process | None = None,
-) -> FinishedMaterial[PaperMaterial]:
-    return FinishedMaterial(CARDBOARD_MATERIALS[grade], finish, process=process)
 
 
 def foamboard(

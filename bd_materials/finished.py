@@ -1,11 +1,10 @@
-"""The user-facing finished material (the build123d part touch point).
+"""The user-facing finished material -- the material as applied to a build123d part.
 
 A ``FinishedMaterial`` bundles a range-based ``Material`` (the shared, immutable
 typical-values table -- physics) with the **per-part choices**: ``color`` (a
-selectable base colour, case 2), ``thickness_mm`` (pane thickness, only
-meaningful when the material is ``transparent``), ``finish`` (an ``AppliedFinish``
-or list of them), and ``process``. ``.material`` gives the physics; ``.pbr``
-resolves the three.js look.
+selectable base colour), ``thickness_mm`` (pane thickness, only meaningful when the
+material is ``transparent``), ``finish`` (an ``AppliedFinish`` or list of them), and
+``process``. ``.material`` gives the physics; ``.pbr`` resolves the three.js look.
 
 Colour precedence (resolved in ``pbr``): a covering finish colour > the selected
 ``color`` > the material's intrinsic look (derived from ``family``).

@@ -1,34 +1,16 @@
-"""Range-based typical values for plastics.
+"""Typical-value property ranges for plastics.
 
-Sibling of the other category modules using the same approach: every property is a
-**min–max range** (see that module for the rationale -- common-knowledge bands
-avoid the vendor/licensing trap and are honest about variation). ``density`` is a
-single representative value; everything else is a ``Range``. Units are fixed per
-property (``PROPERTY_UNITS``).
+A ``PlasticMaterial`` holds a single representative ``density`` plus min-max ``Range``
+bands for the mechanical/thermal properties. The set adds
+``glass_transition_temperature`` (the transition that governs polymer service, in place
+of a melting point), ``heat_deflection_temperature``, ``elongation_at_break`` and a
+Shore ``hardness`` on its ``hardness_scale`` ("Shore D" for rigid grades, "Shore A" for
+elastomers).
 
-Same property set as metals, except ``melting_temperature`` is replaced by
-``glass_transition_temperature`` (Tg is the transition that governs polymer
-service), plus two plastics-specific ones: ``heat_deflection_temperature`` (°C)
-and ``elongation_at_break`` (%).
-
-Missing vs not-applicable. A ``Range`` field can also be:
-
-* ``None`` -- the value is **missing** (not yet filled in).
-* ``NOT_SUITABLE`` (``Range(nan, nan)``) -- the property **does not apply**. Used
-  for: elastomers' ``yield_strength`` and ``heat_deflection_temperature`` (TPU,
-  rubber); ``yield_strength`` of the thermoset-laminate / continuous-fibre grades
-  (phenolic, FR4, CFRP), which have no isotropic yield; and PTFE's
-  ``glass_transition_temperature`` (not usefully single-valued for PTFE).
-
-Other conventions where a metals field maps awkwardly onto polymers:
-
-* ``yield_strength`` -- for brittle *thermoplastics* and short-fibre-filled
-  grades (PMMA, PLA-CF, PETG-CF, PPS-CF) that fracture with little yielding, this
-  ~equals tensile strength.
-* ``hardness`` -- ``hardness_scale`` is "Shore D" for rigid plastics, "Shore A"
-  for elastomers. Composites use Shore D as a rough proxy.
-
-Vendor-neutral: the Stratasys ABS-ESD7 grade from the old library is omitted.
+For a brittle thermoplastic or short-fibre grade that fractures with little yielding,
+``yield_strength`` ~equals ``tensile_strength``. A field is ``NOT_SUITABLE`` where the
+property does not apply (an elastomer's yield or heat-deflection, a laminate's isotropic
+yield) and ``None`` where a value is simply not filled in.
 """
 
 from __future__ import annotations
@@ -59,6 +41,7 @@ class PlasticMaterial(PolymerMaterial):
 _Finish = AppliedFinish | list[AppliedFinish] | None
 
 
+# --- PLA ---------------------------------------------------------------------
 class PLA(Enum):
     GENERIC = auto()
     CARBON_FILLED = auto()
@@ -117,6 +100,7 @@ def pla(
     return FinishedMaterial(PLA_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- ABS ---------------------------------------------------------------------
 class ABS(Enum):
     GENERIC = auto()
     FLAME_RETARDANT = auto()
@@ -175,6 +159,7 @@ def abs_(
     return FinishedMaterial(ABS_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- Nylon (PA) --------------------------------------------------------------
 class Nylon(Enum):
     PA6 = auto()
     PA12 = auto()
@@ -277,6 +262,7 @@ def nylon(
     )
 
 
+# --- PEEK --------------------------------------------------------------------
 class Peek(Enum):
     MOLDED = auto()
     PRINTED = auto()
@@ -335,6 +321,7 @@ def peek(
     return FinishedMaterial(PEEK_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- TPU ---------------------------------------------------------------------
 class TPU(Enum):
     SHORE_95A = auto()
     SINTERED = auto()
@@ -393,6 +380,7 @@ def tpu(
     return FinishedMaterial(TPU_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- PC (polycarbonate) ------------------------------------------------------
 class PC(Enum):
     GENERIC = auto()
 
@@ -438,6 +426,7 @@ def pc(
     )
 
 
+# --- PP (polypropylene) ------------------------------------------------------
 class PP(Enum):
     GENERIC = auto()
 
@@ -475,6 +464,7 @@ def pp(
     return FinishedMaterial(PP_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- POM (acetal) ------------------------------------------------------------
 class POM(Enum):
     GENERIC = auto()
 
@@ -512,6 +502,7 @@ def pom(
     return FinishedMaterial(POM_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- PTFE --------------------------------------------------------------------
 class PTFE(Enum):
     GENERIC = auto()
 
@@ -549,6 +540,7 @@ def ptfe(
     return FinishedMaterial(PTFE_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- PMMA (acrylic) ----------------------------------------------------------
 class PMMA(Enum):
     GENERIC = auto()
 
@@ -594,6 +586,7 @@ def pmma(
     )
 
 
+# --- PE (polyethylene) -------------------------------------------------------
 class PE(Enum):
     HDPE = auto()
 
@@ -631,6 +624,7 @@ def pe(
     return FinishedMaterial(PE_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- Phenolic ----------------------------------------------------------------
 class Phenolic(Enum):
     BAKELITE = auto()
 
@@ -670,6 +664,7 @@ def phenolic(
     )
 
 
+# --- Rubber ------------------------------------------------------------------
 class Rubber(Enum):
     GENERIC = auto()
 
@@ -709,6 +704,7 @@ def rubber(
     )
 
 
+# --- PETG --------------------------------------------------------------------
 class PETG(Enum):
     GENERIC = auto()
     CF = auto()
@@ -767,12 +763,13 @@ def petg(
     return FinishedMaterial(PETG_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- ASA ---------------------------------------------------------------------
 class Asa(Enum):
     GENERIC = auto()
 
 
-# Weathering-resistant amorphous thermoplastic (UV-stable ABS cousin). PCBWay lists
-# ASA with no property rows -- these are typical-ASA bands (close to ABS); REVIEW.
+# Weathering-resistant amorphous thermoplastic, a UV-stable relative of ABS; the
+# property bands are typical for the class.
 ASA_MATERIALS: dict[Asa, PlasticMaterial] = {
     Asa.GENERIC: PlasticMaterial(
         name="Asa_GENERIC",
@@ -806,6 +803,7 @@ def asa(
     return FinishedMaterial(ASA_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- PPS ---------------------------------------------------------------------
 class PPS(Enum):
     CF = auto()
 
@@ -844,6 +842,7 @@ def pps(
     return FinishedMaterial(PPS_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- FR4 ---------------------------------------------------------------------
 class FR4(Enum):
     GENERIC = auto()
 
@@ -856,7 +855,7 @@ FR4_MATERIALS: dict[FR4, PlasticMaterial] = {
         yield_strength=NOT_SUITABLE,
         modulus_of_elasticity=Range(18, 24),
         shear_modulus=Range(3, 7),
-        # FR4's low Poisson ratio (~0.11-0.18) is real, not a typo
+        # FR4's Poisson ratio is genuinely this low for the anisotropic laminate
         poisson_ratio=Range(0.11, 0.18),
         shear_strength=Range(60, 120),
         elongation_at_break=Range(1, 3),
@@ -882,6 +881,7 @@ def fr4(
     return FinishedMaterial(FR4_MATERIALS[grade], finish, color=color, process=process)
 
 
+# --- CFRP --------------------------------------------------------------------
 class CFRP(Enum):
     PLATE = auto()
 

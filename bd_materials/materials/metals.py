@@ -1,28 +1,10 @@
-"""Range-based typical values for metals.
+"""Typical-value property ranges for metals.
 
-Sibling modules cover other material classes with the same approach (e.g.
-``plastics`` for plastics). Every mechanical/thermal property is a
-**min–max range**, not a single point.
-Two reasons:
-
-* **No licensing / vendor trap.** A published band ("6061-T6 tensile ~290-320 MPa")
-  is textbook common knowledge; a single precise figure copied from a datasheet is
-  the thing that carries provenance/licensing risk.
-* **Honesty about variation.** Real values scatter with temper, heat-treatment,
-  product form, and (for AM) process. A range states that spread instead of
-  pretending a single number is authoritative.
-
-Units are **fixed per property** (see ``PROPERTY_UNITS``) -- they are an intrinsic
-property of the quantity, defined once, not repeated on every material. ``density``
-is a single representative value (its spread is small); everything else is a
-``Range``.
-
-Values seeded from common-knowledge typical-value bands. Where a source gave only
-a rule (e.g. shear strength ~0.55-0.65 x tensile) or a family band rather than a
-per-grade number, the range was estimated from that rule/band.
-
-Reached via a grade enum + family function (e.g. ``aluminum(Alu.G7075_T6)``), each
-returning a ``FinishedMaterial``.
+A ``MetalMaterial`` holds a single representative ``density`` plus min-max ``Range``
+bands for each mechanical/thermal property, capturing the typical spread across temper,
+product form and process. On top of the shared solid-material fields, metals add
+``yield_strength``, ``shear_strength``, ``hardness`` (read on its ``hardness_scale`` --
+HB / HRC / HV) and a ``melting_temperature``.
 """
 
 from __future__ import annotations
@@ -55,6 +37,7 @@ class MetalMaterial(SolidMaterial):
     transparent: bool = False
 
 
+# --- Aluminium ---------------------------------------------------------------
 class Alu(Enum):
     G6061_T6 = auto()
     G7075_T6 = auto()
@@ -184,6 +167,7 @@ def aluminum(
     return FinishedMaterial(ALU_MATERIALS[grade], finish, process=process)
 
 
+# --- Stainless steel ---------------------------------------------------------
 class Stainless(Enum):
     G304_ANNEALED = auto()
     G316L_ANNEALED = auto()
@@ -332,6 +316,7 @@ def stainless(
     return FinishedMaterial(STAINLESS_MATERIALS[grade], finish, process=process)
 
 
+# --- Mild steel --------------------------------------------------------------
 class MildSteel(Enum):
     G1018_COLD_DRAWN = auto()
     G1045_COLD_DRAWN = auto()
@@ -404,6 +389,7 @@ def mild_steel(
     return FinishedMaterial(MILD_STEEL_MATERIALS[grade], finish, process=process)
 
 
+# --- Alloy steel -------------------------------------------------------------
 class AlloySteel(Enum):
     G4140_QUENCHED_TEMPERED = auto()
     G4340_QUENCHED_TEMPERED = auto()
@@ -476,6 +462,7 @@ def alloy_steel(
     return FinishedMaterial(ALLOY_STEEL_MATERIALS[grade], finish, process=process)
 
 
+# --- Spring steel ------------------------------------------------------------
 class SpringSteel(Enum):
     GENERIC_QUENCHED_TEMPERED = auto()
 
@@ -510,6 +497,7 @@ def spring_steel(
     return FinishedMaterial(SPRING_STEEL_MATERIALS[grade], finish, process=process)
 
 
+# --- Tool steel --------------------------------------------------------------
 class ToolSteel(Enum):
     D2_HARDENED = auto()
     A2_HARDENED = auto()
@@ -658,6 +646,7 @@ def tool_steel(
     return FinishedMaterial(TOOL_STEEL_MATERIALS[grade], finish, process=process)
 
 
+# --- Titanium ----------------------------------------------------------------
 class Titanium(Enum):
     GR5_ANNEALED = auto()
     TC4_AS_BUILT = auto()
@@ -711,6 +700,7 @@ def titanium(
     return FinishedMaterial(TITANIUM_MATERIALS[grade], finish, process=process)
 
 
+# --- Brass -------------------------------------------------------------------
 class Brass(Enum):
     C360_HALF_HARD = auto()
     C360_SOFT_ANNEALED = auto()
@@ -764,6 +754,7 @@ def brass(
     return FinishedMaterial(BRASS_MATERIALS[grade], finish, process=process)
 
 
+# --- Copper ------------------------------------------------------------------
 class Copper(Enum):
     C110_ANNEALED = auto()
 
@@ -798,6 +789,7 @@ def copper(
     return FinishedMaterial(COPPER_MATERIALS[grade], finish, process=process)
 
 
+# --- Magnesium ---------------------------------------------------------------
 class Magnesium(Enum):
     GENERIC_STRUCTURAL = auto()
 

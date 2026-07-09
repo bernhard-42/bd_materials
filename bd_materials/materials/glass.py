@@ -1,19 +1,13 @@
-"""Range-based typical values for glass.
+"""Typical-value property ranges for glass.
 
-Sibling of the other category modules using the shared :mod:`..core`
-primitives (``Range``, ``PROPERTY_UNITS``, ``RangeMaterial``).
-
-Glass is an amorphous, brittle inorganic solid, so the field set is tailored:
-yield strength, shear strength, elongation at break, and heat-deflection
-temperature are omitted entirely (a brittle glass has no yield/ductile
-elongation, and HDT is a polymer test) rather than carried as ``NOT_SUITABLE``.
-``tensile_strength`` is the practical **flaw-limited** annealed strength (pristine
-fibre is far higher; surface flaws dominate). Hardness is on the **Vickers (HV)**
-scale. Both ``melting_temperature`` (the furnace-melt range -- glass has no sharp melt
-point; it is not a service limit: softening is far lower, ~730/820C -- see ``max_service_temp``) and ``glass_transition_temperature`` (Tg) are carried.
-
-Borosilicate's defining feature is its low thermal expansion (~3.3e-6/K vs
-~9e-6/K for soda-lime), i.e. much better thermal-shock resistance.
+Glass is an amorphous, brittle inorganic solid, so the field set is tailored: it omits
+``yield_strength``, ``shear_strength``, ``elongation_at_break`` and
+``heat_deflection_temperature`` (a brittle solid has no ductile yield or elongation, and
+HDT is a polymer test). ``tensile_strength`` is the practical **flaw-limited** annealed
+strength -- surface flaws dominate, so pristine fibre is far higher. ``hardness`` is on
+the Vickers (HV) scale. A ``glass_transition_temperature`` and a ``melting_temperature``
+are both carried; the latter is the furnace-melt range (glass has no sharp melt point),
+not a service limit -- use ``max_service_temp`` for that.
 """
 
 from __future__ import annotations
@@ -41,15 +35,10 @@ class GlassMaterial(SolidMaterial):
     hardness: Range | None  # on the `hardness_scale` scale
     hardness_scale: str  # "HV" (Vickers)
     glass_transition_temperature: Range | None  # °C
-    melting_temperature: Range | None  # °C -- furnace melt (glass has no sharp melt
-    # point); NOT a service limit -- softening is ~730/820C, use max_service_temp
+    melting_temperature: Range | None  # °C -- furnace-melt range, not a service
+    # limit (glass softens far lower, ~730/820C -- see max_service_temp)
     family: str | None = None
     transparent: bool = False
-
-
-# ===========================================================================
-# Grade enum, catalog dict (inline), and family function.
-# ===========================================================================
 
 
 class Glass(Enum):
