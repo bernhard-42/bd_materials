@@ -107,9 +107,9 @@ def _plain_base(material: RangeMaterial, texture, rgb, thickness):
     """Look with no colour finish -- substrate + optional texture.
 
     Wood/paper/textile pick a bundled factory by ``family`` (the factory key),
-    falling back to a generic factory for grades three.js doesn't bundle
-    (e.g. pine, the wood generics). ``thickness`` (per part) feeds transmissive
-    materials -- glass and any material flagged ``transparent``.
+    falling back to a generic factory for a family three.js doesn't bundle.
+    ``thickness`` (per part) feeds transmissive materials -- glass and any
+    material flagged ``transparent``.
     """
     cat = material.category
     fam = material.family or ""

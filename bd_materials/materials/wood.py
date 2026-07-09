@@ -210,7 +210,7 @@ SOFTWOOD_MATERIALS: dict[Softwood, WoodMaterial] = {
     Softwood.PINE: WoodMaterial(
         # identity
         name="Softwood_PINE",
-        family="spruce",  # three.js has no pine factory -- spruce is the closest look
+        family="pine",
         # mechanical properties
         compressive_strength_parallel=Range(35, 55),
         density=500,

@@ -23,7 +23,7 @@ part.pbr                              # three.js material for OCP VSCode
 > - **Real products can fall outside the range.** Temper, heat treatment, product form, process (esp. additive), fillers and supplier variation all shift the numbers. The bands are _common-knowledge_ typical figures — cross-checked, but approximate.
 > - **For the early design phase.** Use it for sizing, material selection, mass estimates and visualisation. **In detailed design, use the actual product's data sheet.**
 > - A property may be **`None`** (value not filled in) or **`NOT_SUITABLE`** (`Range(nan, nan)` — the property does not apply, e.g. an elastomer's yield strength).
-> - The `family` tag drives the _look_ (PBR), not the physics. Where three.js lacks a dedicated factory it falls back to the nearest look (e.g. pine → spruce).
+> - The `family` tag drives the _look_ (PBR), not the physics. Where three.js lacks a dedicated factory it falls back to the nearest bundled look.
 
 ---
 
