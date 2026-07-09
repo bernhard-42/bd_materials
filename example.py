@@ -1,5 +1,7 @@
 # %%
 
+from bd_materials.materials.metals import ToolSteel
+from bd_materials.finishes import Finish
 from build123d import *
 from ocp_vscode import *
 from ocp_vscode.utils import create_shader_ball
@@ -16,6 +18,7 @@ from bd_materials import (
 )
 
 sb = create_shader_ball("sb")
+set_defaults(studio_env_intensity=0.75, studio_env_rotation=48)
 # %%
 
 
@@ -137,3 +140,70 @@ for tf in typical_finishes(metals.aluminum().material):
 print("\nTypical materials for a anodizing:\n")
 for m in typical_materials(finishes.Chemical.ANODIZED):
     print(f"- {m.name}")
+
+
+# %%
+
+m = metals.aluminum()
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.aluminum(finish=finishes.brushed())
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.aluminum(finish=finishes.fine_sanding())
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.aluminum(finish=finishes.anodize("#e8723b"))
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.aluminum(finish=[finishes.bead_blast(), finishes.anodize("#e8723b")])
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.tool_steel(metals.ToolSteel.D2_HARDENED)
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.tool_steel(metals.ToolSteel.D2_HARDENED, finish=finishes.brushed())
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.tool_steel(
+    metals.ToolSteel.D2_HARDENED, finish=[finishes.brushed(), finishes.pvd("red")]
+)
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.tool_steel(metals.ToolSteel.D2_HARDENED, finish=finishes.black_oxide())
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.tool_steel(metals.ToolSteel.D2_HARDENED, finish=finishes.zinc_plate())
+show(sb, materials=[m.pbr])
+
+# %%
+
+m = metals.tool_steel(metals.ToolSteel.D2_HARDENED, finish=finishes.anodize("green"))
+show(sb, materials=[m.pbr])
+
+# %%
+m = metals.tool_steel(
+    metals.ToolSteel.D2_HARDENED,
+    finish=[finishes.bead_blast(), finishes.anodize("green")],
+)
+show(sb, materials=[m.pbr])
+
+# %%
