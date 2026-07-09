@@ -1,11 +1,14 @@
 """Typical-value property ranges for photopolymer resins (SLA / DLP).
 
-Resins are modelled as functional families (standard, tough, high-temp, flexible, ...).
-Each carries the polymer property set -- ``glass_transition_temperature``,
-``heat_deflection_temperature``, ``elongation_at_break`` and a Shore ``hardness`` on its
-``hardness_scale`` ("Shore D" for rigid resins, "Shore A" for flexible/elastomeric
-ones). ``yield_strength`` ~equals ``tensile_strength`` for the rigid families and is
-``NOT_SUITABLE`` for the flexible family.
+Resins are modelled as functional families (standard, tough, high-temp, flexible, ...),
+one family per resin type. Each carries the polymer property set --
+``glass_transition_temperature``, ``heat_deflection_temperature``,
+``elongation_at_break`` and a Shore ``hardness`` on its ``hardness_scale`` ("Shore D"
+for rigid resins, "Shore A" for flexible/elastomeric ones). ``yield_strength`` ~equals
+``tensile_strength`` for the rigid families and is ``NOT_SUITABLE`` for the flexible one.
+
+For rigid photopolymers Tg and HDT bands nearly coincide: these resins are tested near
+Tg, so HDT (usually ~5-15C below Tg) overlaps it -- not a duplication.
 """
 
 from __future__ import annotations
@@ -34,22 +37,17 @@ class ResinMaterial(PolymerMaterial):
     transparent: bool = False
 
 
-class Resin(Enum):
-    STANDARD = auto()
-    TOUGH = auto()
-    HIGH_TEMP = auto()
-    CERAMIC = auto()
-    CASTABLE = auto()
-    ESD = auto()
-    TRANSPARENT = auto()
-    FLEXIBLE = auto()
+_Finish = AppliedFinish | list[AppliedFinish] | None
 
 
-# For rigid photopolymers Tg and HDT bands nearly coincide: these resins are
-# tested near Tg, so HDT (usually ~5-15C below Tg) overlaps it -- not a duplication.
-RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
-    Resin.STANDARD: ResinMaterial(
-        name="Resin_STANDARD",
+# --- Standard ----------------------------------------------------------------
+class Standard(Enum):
+    GENERIC = auto()
+
+
+STANDARD_MATERIALS: dict[Standard, ResinMaterial] = {
+    Standard.GENERIC: ResinMaterial(
+        name="Standard_GENERIC",
         density=1150,
         tensile_strength=Range(45, 60),
         yield_strength=Range(42, 55),
@@ -68,8 +66,28 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         thermal_conductivity=Range(0.18, 0.25),
         family="resin",
     ),
-    Resin.TOUGH: ResinMaterial(
-        name="Resin_TOUGH",
+}
+
+
+def standard(
+    grade: Standard = Standard.GENERIC,
+    color=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[ResinMaterial]:
+    return FinishedMaterial(
+        STANDARD_MATERIALS[grade], finish, color=color, process=process
+    )
+
+
+# --- Tough -------------------------------------------------------------------
+class Tough(Enum):
+    GENERIC = auto()
+
+
+TOUGH_MATERIALS: dict[Tough, ResinMaterial] = {
+    Tough.GENERIC: ResinMaterial(
+        name="Tough_GENERIC",
         density=1150,
         tensile_strength=Range(40, 55),
         yield_strength=Range(35, 48),
@@ -88,8 +106,28 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         thermal_conductivity=Range(0.18, 0.25),
         family="resin",
     ),
-    Resin.HIGH_TEMP: ResinMaterial(
-        name="Resin_HIGH_TEMP",
+}
+
+
+def tough(
+    grade: Tough = Tough.GENERIC,
+    color=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[ResinMaterial]:
+    return FinishedMaterial(
+        TOUGH_MATERIALS[grade], finish, color=color, process=process
+    )
+
+
+# --- High-temp ---------------------------------------------------------------
+class HighTemp(Enum):
+    GENERIC = auto()
+
+
+HIGH_TEMP_MATERIALS: dict[HighTemp, ResinMaterial] = {
+    HighTemp.GENERIC: ResinMaterial(
+        name="HighTemp_GENERIC",
         density=1300,
         tensile_strength=Range(40, 55),
         yield_strength=Range(38, 50),
@@ -108,8 +146,28 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         thermal_conductivity=Range(0.18, 0.25),
         family="resin",
     ),
-    Resin.CERAMIC: ResinMaterial(
-        name="Resin_CERAMIC",
+}
+
+
+def high_temp(
+    grade: HighTemp = HighTemp.GENERIC,
+    color=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[ResinMaterial]:
+    return FinishedMaterial(
+        HIGH_TEMP_MATERIALS[grade], finish, color=color, process=process
+    )
+
+
+# --- Ceramic -----------------------------------------------------------------
+class Ceramic(Enum):
+    GENERIC = auto()
+
+
+CERAMIC_MATERIALS: dict[Ceramic, ResinMaterial] = {
+    Ceramic.GENERIC: ResinMaterial(
+        name="Ceramic_GENERIC",
         density=1650,
         tensile_strength=Range(60, 80),
         yield_strength=Range(55, 72),
@@ -129,8 +187,28 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         thermal_conductivity=Range(0.2, 0.5),
         family="resin",
     ),
-    Resin.CASTABLE: ResinMaterial(
-        name="Resin_CASTABLE",
+}
+
+
+def ceramic(
+    grade: Ceramic = Ceramic.GENERIC,
+    color=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[ResinMaterial]:
+    return FinishedMaterial(
+        CERAMIC_MATERIALS[grade], finish, color=color, process=process
+    )
+
+
+# --- Castable ----------------------------------------------------------------
+class Castable(Enum):
+    GENERIC = auto()
+
+
+CASTABLE_MATERIALS: dict[Castable, ResinMaterial] = {
+    Castable.GENERIC: ResinMaterial(
+        name="Castable_GENERIC",
         density=1150,
         tensile_strength=Range(35, 50),
         yield_strength=Range(32, 45),
@@ -149,8 +227,28 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         thermal_conductivity=Range(0.18, 0.25),
         family="resin",
     ),
-    Resin.ESD: ResinMaterial(
-        name="Resin_ESD",
+}
+
+
+def castable(
+    grade: Castable = Castable.GENERIC,
+    color=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[ResinMaterial]:
+    return FinishedMaterial(
+        CASTABLE_MATERIALS[grade], finish, color=color, process=process
+    )
+
+
+# --- ESD ---------------------------------------------------------------------
+class Esd(Enum):
+    GENERIC = auto()
+
+
+ESD_MATERIALS: dict[Esd, ResinMaterial] = {
+    Esd.GENERIC: ResinMaterial(
+        name="Esd_GENERIC",
         density=1300,
         tensile_strength=Range(38, 50),
         yield_strength=Range(35, 46),
@@ -170,8 +268,26 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         thermal_conductivity=Range(0.18, 0.25),
         family="resin",
     ),
-    Resin.TRANSPARENT: ResinMaterial(
-        name="Resin_TRANSPARENT",
+}
+
+
+def esd(
+    grade: Esd = Esd.GENERIC,
+    color=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[ResinMaterial]:
+    return FinishedMaterial(ESD_MATERIALS[grade], finish, color=color, process=process)
+
+
+# --- Transparent -------------------------------------------------------------
+class Transparent(Enum):
+    GENERIC = auto()
+
+
+TRANSPARENT_MATERIALS: dict[Transparent, ResinMaterial] = {
+    Transparent.GENERIC: ResinMaterial(
+        name="Transparent_GENERIC",
         density=1300,
         tensile_strength=Range(38, 52),
         yield_strength=Range(35, 48),
@@ -191,8 +307,33 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
         family="resin",
         transparent=True,
     ),
-    Resin.FLEXIBLE: ResinMaterial(
-        name="Resin_FLEXIBLE",
+}
+
+
+def transparent(
+    grade: Transparent = Transparent.GENERIC,
+    color=None,
+    thickness_mm=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[ResinMaterial]:
+    return FinishedMaterial(
+        TRANSPARENT_MATERIALS[grade],
+        finish,
+        color=color,
+        thickness_mm=thickness_mm,
+        process=process,
+    )
+
+
+# --- Flexible ----------------------------------------------------------------
+class Flexible(Enum):
+    GENERIC = auto()
+
+
+FLEXIBLE_MATERIALS: dict[Flexible, ResinMaterial] = {
+    Flexible.GENERIC: ResinMaterial(
+        name="Flexible_GENERIC",
         density=1150,
         tensile_strength=Range(5, 30),
         yield_strength=NOT_SUITABLE,
@@ -214,30 +355,31 @@ RESIN_MATERIALS: dict[Resin, ResinMaterial] = {
 }
 
 
-_Finish = AppliedFinish | list[AppliedFinish] | None
-
-
-def resin(
-    grade: Resin = Resin.STANDARD,
+def flexible(
+    grade: Flexible = Flexible.GENERIC,
     color=None,
-    thickness_mm=None,
     finish: _Finish = None,
     process: Process | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     return FinishedMaterial(
-        RESIN_MATERIALS[grade],
-        finish,
-        color=color,
-        thickness_mm=thickness_mm,
-        process=process,
+        FLEXIBLE_MATERIALS[grade], finish, color=color, process=process
     )
 
 
-ALL_RESINS = tuple(RESIN_MATERIALS.values())
+ALL_RESINS = (
+    *STANDARD_MATERIALS.values(),
+    *TOUGH_MATERIALS.values(),
+    *HIGH_TEMP_MATERIALS.values(),
+    *CERAMIC_MATERIALS.values(),
+    *CASTABLE_MATERIALS.values(),
+    *ESD_MATERIALS.values(),
+    *TRANSPARENT_MATERIALS.values(),
+    *FLEXIBLE_MATERIALS.values(),
+)
 
 
 if __name__ == "__main__":
     print(f"resins: {len(ALL_RESINS)}")
     print()
-    print(RESIN_MATERIALS[Resin.STANDARD])
-    print(RESIN_MATERIALS[Resin.CERAMIC])
+    print(STANDARD_MATERIALS[Standard.GENERIC])
+    print(CERAMIC_MATERIALS[Ceramic.GENERIC])

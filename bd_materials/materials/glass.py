@@ -41,14 +41,17 @@ class GlassMaterial(SolidMaterial):
     transparent: bool = False
 
 
-class Glass(Enum):
-    SODA_LIME = auto()
-    BOROSILICATE = auto()
+_Finish = AppliedFinish | list[AppliedFinish] | None
 
 
-GLASS_MATERIALS: dict[Glass, GlassMaterial] = {
-    Glass.SODA_LIME: GlassMaterial(
-        name="GLASS_SODA_LIME",
+# --- Soda-lime ---------------------------------------------------------------
+class SodaLime(Enum):
+    GENERIC = auto()
+
+
+SODA_LIME_MATERIALS: dict[SodaLime, GlassMaterial] = {
+    SodaLime.GENERIC: GlassMaterial(
+        name="SodaLime_GENERIC",
         density=2500,
         tensile_strength=Range(30, 90),
         modulus_of_elasticity=Range(68, 74),
@@ -65,8 +68,33 @@ GLASS_MATERIALS: dict[Glass, GlassMaterial] = {
         family="soda_lime",
         transparent=True,
     ),
-    Glass.BOROSILICATE: GlassMaterial(
-        name="GLASS_BOROSILICATE",
+}
+
+
+def soda_lime(
+    grade: SodaLime = SodaLime.GENERIC,
+    color=None,
+    thickness_mm=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[GlassMaterial]:
+    return FinishedMaterial(
+        SODA_LIME_MATERIALS[grade],
+        finish,
+        color=color,
+        thickness_mm=thickness_mm,
+        process=process,
+    )
+
+
+# --- Borosilicate ------------------------------------------------------------
+class Borosilicate(Enum):
+    GENERIC = auto()
+
+
+BOROSILICATE_MATERIALS: dict[Borosilicate, GlassMaterial] = {
+    Borosilicate.GENERIC: GlassMaterial(
+        name="Borosilicate_GENERIC",
         density=2230,
         tensile_strength=Range(30, 90),
         modulus_of_elasticity=Range(60, 66),
@@ -86,15 +114,15 @@ GLASS_MATERIALS: dict[Glass, GlassMaterial] = {
 }
 
 
-def glass(
-    grade: Glass = Glass.SODA_LIME,
+def borosilicate(
+    grade: Borosilicate = Borosilicate.GENERIC,
     color=None,
     thickness_mm=None,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: _Finish = None,
     process: Process | None = None,
 ) -> FinishedMaterial[GlassMaterial]:
     return FinishedMaterial(
-        GLASS_MATERIALS[grade],
+        BOROSILICATE_MATERIALS[grade],
         finish,
         color=color,
         thickness_mm=thickness_mm,
@@ -102,7 +130,10 @@ def glass(
     )
 
 
-ALL_GLASSES = tuple(GLASS_MATERIALS.values())
+ALL_GLASSES = (
+    *SODA_LIME_MATERIALS.values(),
+    *BOROSILICATE_MATERIALS.values(),
+)
 
 
 if __name__ == "__main__":

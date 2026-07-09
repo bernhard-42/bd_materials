@@ -49,7 +49,7 @@ _looks = [
     ),
     ("PLA, red (FDM)", plastics.pla(color="red", process=Process.FDM)),
     ("PMMA, clear 3mm", plastics.pmma(color="clear", thickness_mm=3)),
-    ("borosilicate, 5mm", glass.glass(glass.Glass.BOROSILICATE, thickness_mm=5)),
+    ("borosilicate, 5mm", glass.borosilicate(thickness_mm=5)),
     ("oak", wood.hardwood(wood.Hardwood.OAK)),
 ]
 try:

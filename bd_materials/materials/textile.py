@@ -27,15 +27,17 @@ class TextileMaterial(ArealMaterial):
     category: ClassVar[str] = "textile"
 
 
-class Textile(Enum):
-    WOVEN = auto()
-    FELT = auto()
-    LEATHER = auto()
+_Finish = AppliedFinish | list[AppliedFinish] | None
 
 
-TEXTILE_MATERIALS: dict[Textile, TextileMaterial] = {
-    Textile.WOVEN: TextileMaterial(
-        name="Textile_WOVEN",
+# --- Woven -------------------------------------------------------------------
+class Woven(Enum):
+    GENERIC = auto()
+
+
+WOVEN_MATERIALS: dict[Woven, TextileMaterial] = {
+    Woven.GENERIC: TextileMaterial(
+        name="Woven_GENERIC",
         density=500,
         areal_density=Range(150, 300),
         thickness=Range(0.3, 0.6),
@@ -44,8 +46,28 @@ TEXTILE_MATERIALS: dict[Textile, TextileMaterial] = {
         specific_heat_capacity=Range(1300, 1700),
         family="fabric_weave",
     ),
-    Textile.FELT: TextileMaterial(
-        name="Textile_FELT",
+}
+
+
+def woven(
+    grade: Woven = Woven.GENERIC,
+    color=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[TextileMaterial]:
+    return FinishedMaterial(
+        WOVEN_MATERIALS[grade], finish, color=color, process=process
+    )
+
+
+# --- Felt --------------------------------------------------------------------
+class Felt(Enum):
+    GENERIC = auto()
+
+
+FELT_MATERIALS: dict[Felt, TextileMaterial] = {
+    Felt.GENERIC: TextileMaterial(
+        name="Felt_GENERIC",
         density=120,
         areal_density=Range(200, 400),
         thickness=Range(2, 4),
@@ -54,8 +76,26 @@ TEXTILE_MATERIALS: dict[Textile, TextileMaterial] = {
         specific_heat_capacity=Range(1300, 1700),
         family="felt",
     ),
-    Textile.LEATHER: TextileMaterial(
-        name="Textile_LEATHER",
+}
+
+
+def felt(
+    grade: Felt = Felt.GENERIC,
+    color=None,
+    finish: _Finish = None,
+    process: Process | None = None,
+) -> FinishedMaterial[TextileMaterial]:
+    return FinishedMaterial(FELT_MATERIALS[grade], finish, color=color, process=process)
+
+
+# --- Leather -----------------------------------------------------------------
+class Leather(Enum):
+    GENERIC = auto()
+
+
+LEATHER_MATERIALS: dict[Leather, TextileMaterial] = {
+    Leather.GENERIC: TextileMaterial(
+        name="Leather_GENERIC",
         density=950,
         areal_density=Range(800, 1600),
         thickness=Range(1, 3),
@@ -67,21 +107,22 @@ TEXTILE_MATERIALS: dict[Textile, TextileMaterial] = {
 }
 
 
-_Finish = AppliedFinish | list[AppliedFinish] | None
-
-
-def textile(
-    grade: Textile = Textile.WOVEN,
+def leather(
+    grade: Leather = Leather.GENERIC,
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
 ) -> FinishedMaterial[TextileMaterial]:
     return FinishedMaterial(
-        TEXTILE_MATERIALS[grade], finish, color=color, process=process
+        LEATHER_MATERIALS[grade], finish, color=color, process=process
     )
 
 
-ALL_TEXTILES = tuple(TEXTILE_MATERIALS.values())
+ALL_TEXTILES = (
+    *WOVEN_MATERIALS.values(),
+    *FELT_MATERIALS.values(),
+    *LEATHER_MATERIALS.values(),
+)
 
 
 if __name__ == "__main__":

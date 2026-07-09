@@ -37,11 +37,11 @@ The taxonomy follows how parts are actually **made** and **finished**, not an ab
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | `metals`   | `Alu`, `Stainless`, `MildSteel`, `AlloySteel`, `ToolSteel`, `SpringSteel`, `Titanium`, `Brass`, `Copper`, `Magnesium`                    | 33     |
 | `plastics` | `PLA`, `ABS`, `Nylon`, `Peek`, `TPU`, `PC`, `PP`, `POM`, `PTFE`, `PMMA`, `PE`, `Phenolic`, `Rubber`, `PETG`, `PPS`, `FR4`, `CFRP`, `Asa` | 26     |
-| `resins`   | `Resin` (standard / tough / high-temp / ceramic / castable / esd / transparent / flexible)                                               | 8      |
-| `glass`    | `Glass` (soda-lime, borosilicate)                                                                                                        | 2      |
+| `resins`   | `Standard`, `Tough`, `HighTemp`, `Ceramic`, `Castable`, `Esd`, `Transparent`, `Flexible`                                                 | 8      |
+| `glass`    | `SodaLime`, `Borosilicate`                                                                                                               | 2      |
 | `wood`     | `Hardwood`, `Softwood`, `EngineeredWood`                                                                                                 | 12     |
 | `paper`    | `Paper`, `Cardboard`, `Foamboard`                                                                                                        | 3      |
-| `textile`  | `Textile` (woven, felt, leather)                                                                                                         | 3      |
+| `textile`  | `Woven`, `Felt`, `Leather`                                                                                                               | 3      |
 
 Grades encode the **condition** that governs properties — e.g. `Alu.G7075_T6` (temper), `Stainless.G316L_AS_BUILT` (SLM as-built) vs `G316L_ANNEALED` (wrought), `Nylon.PA12_SINTERED` (SLS/MJF powder). Same alloy, different process → different grade.
 
@@ -132,12 +132,12 @@ wood.hardwood()                         # generic hardwood
 metals.aluminum(metals.Alu.G7075_T6)
 metals.stainless(metals.Stainless.G316L_AS_BUILT)   # SLM as-built
 wood.hardwood(wood.Hardwood.OAK)
-resins.resin(resins.Resin.TOUGH)
+resins.tough()                                      # each resin type is its own family fn
 
 # 3 — selectable colour (plastics/resins/paper/textile) and transparent panes
 plastics.pla(color="red")
 plastics.pmma(color="clear", thickness_mm=3)        # transparent -> pane thickness
-glass.glass(glass.Glass.BOROSILICATE, color="green", thickness_mm=5)
+glass.borosilicate(color="green", thickness_mm=5)
 
 # 4 — a finish (colour and, for paints/coats, a sheen ride on the finish)
 metals.aluminum(finish=finishes.anodize("champagne"))          # finish on default grade
@@ -162,7 +162,7 @@ typical_finishes(metals.aluminum().material)         # [Anodized, Bead Blast, ..
 typical_materials(finishes.Chemical.ANODIZED)        # [Alu_G6061_T6, ..., Titanium_...]
 ```
 
-Grade enums live on their module (`metals.Alu`, `glass.Glass`, …) or import directly: `from bd_materials.materials.metals import Alu`.
+Grade enums live on their module (`metals.Alu`, `glass.Borosilicate`, …) or import directly: `from bd_materials.materials.metals import Alu`. Families with a single grade (e.g. `glass.borosilicate()`, `resins.tough()`) default to it, so you never need the enum until a family has more than one grade.
 
 ---
 

@@ -1,7 +1,5 @@
 # %%
 
-from bd_materials.materials.metals import ToolSteel
-from bd_materials.finishes import Finish
 from build123d import *
 from ocp_vscode import *
 from ocp_vscode.utils import create_shader_ball
@@ -58,7 +56,7 @@ m = wood.softwood(wood.Softwood.PINE)
 show(sb, materials=[m.pbr])
 # %%
 
-m = resins.resin(resins.Resin.TOUGH)
+m = resins.tough()
 show(sb, materials=[m.pbr])
 # %%
 
@@ -73,7 +71,7 @@ m = plastics.pmma(color="clear", thickness_mm=3)  # transparent -> pane thicknes
 show(sb, materials=[m.pbr])
 # %%
 
-m = glass.glass(glass.Glass.BOROSILICATE, color="green", thickness_mm=5)
+m = glass.borosilicate(color="green", thickness_mm=5)
 show(sb, materials=[m.pbr])
 # %%
 
