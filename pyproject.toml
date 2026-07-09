@@ -24,6 +24,3 @@ Issues = "https://github.com/bernhard-42/bd_materials/issues"
 
 [tool.setuptools]
 packages = ["bd_materials"]
-
-[tool.ruff]
-target-version = "py310"
