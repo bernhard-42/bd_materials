@@ -183,12 +183,17 @@ def _nickel(m, rgb, texture, sheen):
 
 
 def _tin(m, rgb, texture, sheen):
-    return metal.tin()
+    # tin plating is matte/satin (matte tin is standard, esp. for solderability) ->
+    # the matte variant; interim: nudge the glossy tin factory until tin_matte lands
+    fn = getattr(metal, "tin_matte", None)
+    return fn() if fn else metal.tin().override(roughness=0.4)
 
 
 def _zinc(m, rgb, texture, sheen):
-    fn = getattr(metal, "zinc", None)  # prefer a real zinc factory if present
-    base = fn() if fn else metal.silver_matte()
+    # zinc plating is satin -> the matte zinc variant. Until zinc_matte is bundled in
+    # threejs-materials, take the (too-glossy) plain zinc factory down to satin.
+    fn = getattr(metal, "zinc_matte", None)
+    base = fn() if fn else metal.zinc().override(roughness=0.4)
     return base.override(color=rgb) if rgb else base
 
 
