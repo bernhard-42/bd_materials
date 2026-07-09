@@ -37,14 +37,17 @@ class Paper(Enum):
 
 PAPER_MATERIALS: dict[Paper, PaperMaterial] = {
     Paper.OFFICE: PaperMaterial(
+        # identity
         name="Paper_OFFICE",
-        density=800,
-        areal_density=Range(70, 90),
-        thickness=Range(0.09, 0.12),
-        tensile_strength=Range(20, 60),
-        thermal_conductivity=Range(0.05, 0.10),
-        specific_heat_capacity=Range(1300, 1400),
         family="paper",
+        # mechanical properties
+        areal_density=Range(70, 90),
+        density=800,
+        tensile_strength=Range(20, 60),
+        thickness=Range(0.09, 0.12),
+        # thermal properties
+        specific_heat_capacity=Range(1300, 1400),
+        thermal_conductivity=Range(0.05, 0.10),
     ),
 }
 
@@ -67,15 +70,18 @@ class Cardboard(Enum):
 
 CARDBOARD_MATERIALS: dict[Cardboard, PaperMaterial] = {
     Cardboard.CORRUGATED: PaperMaterial(
+        # identity
         name="Cardboard_CORRUGATED",
+        family="corrugated_cardboard",
+        # mechanical properties
+        areal_density=Range(400, 700),
         # effective panel density (incl. flute voids); areal_density is the primary mass metric
         density=140,
-        areal_density=Range(400, 700),
-        thickness=Range(3, 5),
         tensile_strength=Range(5, 25),
-        thermal_conductivity=Range(0.05, 0.10),
+        thickness=Range(3, 5),
+        # thermal properties
         specific_heat_capacity=Range(1300, 1400),
-        family="corrugated_cardboard",
+        thermal_conductivity=Range(0.05, 0.10),
     ),
 }
 
@@ -95,14 +101,17 @@ class Foamboard(Enum):
 
 FOAMBOARD_MATERIALS: dict[Foamboard, PaperMaterial] = {
     Foamboard.GENERIC: PaperMaterial(
+        # identity
         name="Foamboard_GENERIC",
-        density=120,
-        areal_density=Range(400, 550),
-        thickness=Range(3, 6),
-        tensile_strength=Range(2, 10),
-        thermal_conductivity=Range(0.03, 0.06),
-        specific_heat_capacity=Range(1300, 1500),
         family="foamboard",
+        # mechanical properties
+        areal_density=Range(400, 550),
+        density=120,
+        tensile_strength=Range(2, 10),
+        thickness=Range(3, 6),
+        # thermal properties
+        specific_heat_capacity=Range(1300, 1500),
+        thermal_conductivity=Range(0.03, 0.06),
     ),
 }
 

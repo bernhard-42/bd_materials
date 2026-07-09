@@ -37,14 +37,17 @@ class Woven(Enum):
 
 WOVEN_MATERIALS: dict[Woven, TextileMaterial] = {
     Woven.GENERIC: TextileMaterial(
+        # identity
         name="Woven_GENERIC",
-        density=500,
-        areal_density=Range(150, 300),
-        thickness=Range(0.3, 0.6),
-        tensile_strength=Range(10, 50),
-        thermal_conductivity=Range(0.03, 0.07),
-        specific_heat_capacity=Range(1300, 1700),
         family="fabric_weave",
+        # mechanical properties
+        areal_density=Range(150, 300),
+        density=500,
+        tensile_strength=Range(10, 50),
+        thickness=Range(0.3, 0.6),
+        # thermal properties
+        specific_heat_capacity=Range(1300, 1700),
+        thermal_conductivity=Range(0.03, 0.07),
     ),
 }
 
@@ -67,14 +70,17 @@ class Felt(Enum):
 
 FELT_MATERIALS: dict[Felt, TextileMaterial] = {
     Felt.GENERIC: TextileMaterial(
+        # identity
         name="Felt_GENERIC",
-        density=120,
-        areal_density=Range(200, 400),
-        thickness=Range(2, 4),
-        tensile_strength=Range(2, 10),
-        thermal_conductivity=Range(0.04, 0.08),
-        specific_heat_capacity=Range(1300, 1700),
         family="felt",
+        # mechanical properties
+        areal_density=Range(200, 400),
+        density=120,
+        tensile_strength=Range(2, 10),
+        thickness=Range(2, 4),
+        # thermal properties
+        specific_heat_capacity=Range(1300, 1700),
+        thermal_conductivity=Range(0.04, 0.08),
     ),
 }
 
@@ -95,14 +101,17 @@ class Leather(Enum):
 
 LEATHER_MATERIALS: dict[Leather, TextileMaterial] = {
     Leather.GENERIC: TextileMaterial(
+        # identity
         name="Leather_GENERIC",
-        density=950,
-        areal_density=Range(800, 1600),
-        thickness=Range(1, 3),
-        tensile_strength=Range(10, 30),
-        thermal_conductivity=Range(0.14, 0.20),
-        specific_heat_capacity=Range(1500, 2000),
         family="leather",
+        # mechanical properties
+        areal_density=Range(800, 1600),
+        density=950,
+        tensile_strength=Range(10, 30),
+        thickness=Range(1, 3),
+        # thermal properties
+        specific_heat_capacity=Range(1500, 2000),
+        thermal_conductivity=Range(0.14, 0.20),
     ),
 }
 

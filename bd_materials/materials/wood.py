@@ -63,81 +63,102 @@ class Hardwood(Enum):
 
 HARDWOOD_MATERIALS: dict[Hardwood, WoodMaterial] = {
     Hardwood.GENERIC: WoodMaterial(
+        # identity
         name="Hardwood_GENERIC",
+        family="oak",
+        # mechanical properties
+        compressive_strength_parallel=Range(45, 60),
         density=675,
+        janka_hardness=Range(4000, 7000),
         modulus_of_elasticity=Range(10, 13),
         modulus_of_rupture=Range(90, 110),
-        compressive_strength_parallel=Range(45, 60),
-        janka_hardness=Range(4000, 7000),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
-        family="oak",
     ),
     Hardwood.ASH: WoodMaterial(
+        # identity
         name="Hardwood_ASH",
+        family="ash",
+        # mechanical properties
+        compressive_strength_parallel=Range(45, 58),
         density=670,
+        janka_hardness=Range(5500, 7000),
         modulus_of_elasticity=Range(10, 13),
         modulus_of_rupture=Range(90, 115),
-        compressive_strength_parallel=Range(45, 58),
-        janka_hardness=Range(5500, 7000),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
-        family="ash",
     ),
     Hardwood.BEECH: WoodMaterial(
+        # identity
         name="Hardwood_BEECH",
+        family="beech",
+        # mechanical properties
+        compressive_strength_parallel=Range(44, 56),
         density=720,
+        janka_hardness=Range(5500, 7000),
         modulus_of_elasticity=Range(11, 15),
         modulus_of_rupture=Range(90, 115),
-        compressive_strength_parallel=Range(44, 56),
-        janka_hardness=Range(5500, 7000),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
-        family="beech",
     ),
     Hardwood.BIRCH: WoodMaterial(
+        # identity
         name="Hardwood_BIRCH",
+        family="birch",
+        # mechanical properties
+        compressive_strength_parallel=Range(50, 62),
         density=660,
+        janka_hardness=Range(4800, 6200),
         modulus_of_elasticity=Range(11, 15),
         modulus_of_rupture=Range(100, 125),
-        compressive_strength_parallel=Range(50, 62),
-        janka_hardness=Range(4800, 6200),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
-        family="birch",
     ),
     Hardwood.MAPLE: WoodMaterial(
+        # identity
         name="Hardwood_MAPLE",
+        family="maple",
+        # mechanical properties
+        compressive_strength_parallel=Range(48, 60),
         density=705,
+        janka_hardness=Range(5500, 7000),
         modulus_of_elasticity=Range(11, 14),
         modulus_of_rupture=Range(95, 120),
-        compressive_strength_parallel=Range(48, 60),
-        janka_hardness=Range(5500, 7000),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
-        family="maple",
     ),
     Hardwood.OAK: WoodMaterial(
+        # identity
         name="Hardwood_OAK",
+        family="oak",
+        # mechanical properties
+        compressive_strength_parallel=Range(45, 58),
         density=755,
+        janka_hardness=Range(5000, 6500),
         modulus_of_elasticity=Range(10, 14),
         modulus_of_rupture=Range(90, 115),
-        compressive_strength_parallel=Range(45, 58),
-        janka_hardness=Range(5000, 6500),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.14, 0.20),
-        family="oak",
     ),
     Hardwood.WALNUT: WoodMaterial(
+        # identity
         name="Hardwood_WALNUT",
+        family="walnut",
+        # mechanical properties
+        compressive_strength_parallel=Range(46, 58),
         density=640,
+        janka_hardness=Range(4800, 5800),
         modulus_of_elasticity=Range(10, 13),
         modulus_of_rupture=Range(90, 110),
-        compressive_strength_parallel=Range(46, 58),
-        janka_hardness=Range(4800, 5800),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
-        family="walnut",
     ),
 }
 
@@ -159,37 +180,46 @@ class Softwood(Enum):
 
 SOFTWOOD_MATERIALS: dict[Softwood, WoodMaterial] = {
     Softwood.GENERIC: WoodMaterial(
+        # identity
         name="Softwood_GENERIC",
+        family="spruce",
+        # mechanical properties
+        compressive_strength_parallel=Range(30, 40),
         density=470,
+        janka_hardness=Range(2000, 3000),
         modulus_of_elasticity=Range(8, 11),
         modulus_of_rupture=Range(60, 80),
-        compressive_strength_parallel=Range(30, 40),
-        janka_hardness=Range(2000, 3000),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.10, 0.15),
-        family="spruce",
     ),
     Softwood.SPRUCE: WoodMaterial(
+        # identity
         name="Softwood_SPRUCE",
+        family="spruce",
+        # mechanical properties
+        compressive_strength_parallel=Range(33, 43),
         density=430,
+        janka_hardness=Range(2200, 2900),
         modulus_of_elasticity=Range(8, 12),
         modulus_of_rupture=Range(60, 80),
-        compressive_strength_parallel=Range(33, 43),
-        janka_hardness=Range(2200, 2900),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.10, 0.14),
-        family="spruce",
     ),
     Softwood.PINE: WoodMaterial(
+        # identity
         name="Softwood_PINE",
+        family="spruce",  # three.js has no pine factory -- spruce is the closest look
+        # mechanical properties
+        compressive_strength_parallel=Range(35, 55),
         density=500,
+        janka_hardness=Range(1700, 4500),
         modulus_of_elasticity=Range(8, 12),
         modulus_of_rupture=Range(65, 100),
-        compressive_strength_parallel=Range(35, 55),
-        janka_hardness=Range(1700, 4500),
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.10, 0.15),
-        family="spruce",  # three.js has no pine factory -- spruce is the closest look
     ),
 }
 
@@ -210,26 +240,32 @@ class EngineeredWood(Enum):
 
 ENGINEERED_WOOD_MATERIALS: dict[EngineeredWood, WoodMaterial] = {
     EngineeredWood.MDF: WoodMaterial(
+        # identity
         name="EngineeredWood_MDF",
+        family="mdf",
+        # mechanical properties
+        compressive_strength_parallel=Range(10, 18),
         density=750,
+        janka_hardness=None,
         modulus_of_elasticity=Range(3.0, 4.5),
         modulus_of_rupture=Range(28, 42),
-        compressive_strength_parallel=Range(10, 18),
-        janka_hardness=None,
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.10, 0.15),
-        family="mdf",
     ),
     EngineeredWood.OSB: WoodMaterial(
+        # identity
         name="EngineeredWood_OSB",
+        family="osb",
+        # mechanical properties
+        compressive_strength_parallel=Range(10, 18),
         density=640,
+        janka_hardness=None,
         modulus_of_elasticity=Range(4.5, 7.0),
         modulus_of_rupture=Range(22, 35),
-        compressive_strength_parallel=Range(10, 18),
-        janka_hardness=None,
+        # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.10, 0.15),
-        family="osb",
     ),
 }
 
