@@ -33,8 +33,6 @@ class PlasticMaterial(PolymerMaterial):
     category: ClassVar[str] = "plastic"
     hardness: Range | None  # on the `hardness_scale` scale
     hardness_scale: str  # "Shore D", "Shore A", ...
-    family: str | None = None
-    transparent: bool = False
 
 
 # --- PLA ---------------------------------------------------------------------

@@ -32,8 +32,6 @@ class ResinMaterial(PolymerMaterial):
     category: ClassVar[str] = "resin"
     hardness: Range | None  # on the `hardness_scale` scale
     hardness_scale: str  # "Shore D" (rigid) / "Shore A" (flexible)
-    family: str | None = None
-    transparent: bool = False
 
 
 # --- Standard ----------------------------------------------------------------

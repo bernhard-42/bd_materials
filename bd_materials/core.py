@@ -237,8 +237,6 @@ class SolidMaterial(RangeMaterial):
     """Base for bulk isotropic solids (metals, glass, polymers): the property
     fields common to all of them."""
 
-    name: str
-    density: float  # kg/m³ (single representative value)
     tensile_strength: Range | None  # MPa
     modulus_of_elasticity: Range | None  # GPa
     shear_modulus: Range | None  # GPa
@@ -266,12 +264,8 @@ class ArealMaterial(RangeMaterial):
     """Base for areal goods (paper, textile): grammage-sized planar materials
     (mass from area, not volume). Leaf classes only set ``category``."""
 
-    name: str
-    density: float  # kg/m³ (apparent, single representative value)
     areal_density: Range | None  # g/m² (grammage -- primary mass metric)
     thickness: Range | None  # mm
     tensile_strength: Range | None  # MPa (in-plane; approx)
     thermal_conductivity: Range | None  # W/(m·K)
     specific_heat_capacity: Range | None  # J/(kg·K)
-    family: str | None = None
-    transparent: bool = False

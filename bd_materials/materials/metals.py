@@ -32,8 +32,6 @@ class MetalMaterial(SolidMaterial):
     hardness: Range | None  # on the `hardness_scale` scale
     hardness_scale: str  # "HB", "HRC", "HV", ...
     melting_temperature: Range | None  # °C
-    family: str | None = None
-    transparent: bool = False
 
 
 # --- Aluminium ---------------------------------------------------------------

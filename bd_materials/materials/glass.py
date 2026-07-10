@@ -36,8 +36,6 @@ class GlassMaterial(SolidMaterial):
     glass_transition_temperature: Range | None  # °C
     melting_temperature: Range | None  # °C -- furnace-melt range, not a service
     # limit (glass softens far lower, ~730/820C -- see max_service_temp)
-    family: str | None = None
-    transparent: bool = False
 
 
 # --- Soda-lime ---------------------------------------------------------------

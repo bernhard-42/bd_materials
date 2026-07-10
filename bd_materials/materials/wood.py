@@ -34,16 +34,12 @@ class WoodMaterial(RangeMaterial):
     """
 
     category: ClassVar[str] = "wood"
-    name: str
-    density: float  # kg/m³ (single representative value, ~12% MC)
     modulus_of_elasticity: Range | None  # GPa (along grain)
     modulus_of_rupture: Range | None  # MPa (bending strength)
     compressive_strength_parallel: Range | None  # MPa (along grain)
     janka_hardness: Range | None  # N (side hardness; None for MDF/OSB)
     specific_heat_capacity: Range | None  # J/(kg·K)
     thermal_conductivity: Range | None  # W/(m·K)
-    family: str | None = None
-    transparent: bool = False
 
 
 # --- Hardwood ----------------------------------------------------------------
