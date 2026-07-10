@@ -6,3 +6,5 @@ __pycache__/
 CLAUDE.md
 inputs/
 *.pptx
+build/
+dist/
