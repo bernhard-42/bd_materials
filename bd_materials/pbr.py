@@ -5,9 +5,9 @@ the right ``threejs_materials`` factory for how a part looks -- the function beh
 the ``FinishedMaterial.pbr`` property (the user-facing entry, in ``finished``).
 
 ``finish`` is an ``AppliedFinish`` (from a finish function like
-``spray_paint("blue")``) or a list of them; each carries its colour. Finishes
+``spray_paint("blue")``) or a list of them; each carries its color. Finishes
 split on two axes: **texture** (brushed / bead-blast -> metal relief variants)
-and **surface/colour** (anodize/PVD override; paint covers; plating replaces).
+and **surface/color** (anodize/PVD override; paint covers; plating replaces).
 ``process`` (a ``Process``) nudges the default surface: printed/as-built routes
 render rough, everything else smooth. ``pbr`` (if given) is returned unchanged.
 
@@ -32,7 +32,7 @@ if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-fre
 # as-printed / as-built routes default to a rough surface; the rest stay smooth
 _ROUGH_PROCESSES = frozenset({Process.FDM, Process.SLS, Process.MJF, Process.SLM})
 
-# --- colour names -> sRGB hex (None = leave factory default / not colourable) --
+# --- color names -> sRGB hex (None = leave factory default / not colorable) --
 _COLOR_HEX: dict[str, str | None] = {
     "natural": None,
     "clear": None,
@@ -70,7 +70,7 @@ _TEXTURE = {
 
 
 def _color_value(color: Color | None) -> Color | None:
-    """A standard colour name -> hex; hex / CSS name / RGB tuple pass through."""
+    """A standard color name -> hex; hex / CSS name / RGB tuple pass through."""
     if color is None:
         return None
     if isinstance(color, str):
@@ -92,7 +92,7 @@ def _metal_name(material: RangeMaterial) -> str:
 
 
 def _is_carbon(material: RangeMaterial) -> bool:
-    """Whether the material is the carbon-fibre (CFRP) family."""
+    """Whether the material is the carbon-fiber (CFRP) family."""
     return material.family == "CFRP"
 
 
@@ -110,7 +110,7 @@ def _plain_base(
     rgb: Color | None,
     thickness: float | None,
 ) -> PbrProperties:
-    """Look for a material with no covering colour finish -- substrate + texture.
+    """Look for a material with no covering color finish -- substrate + texture.
 
     Wood/paper/textile pick a bundled factory by ``family`` (the factory key),
     falling back to a generic factory for a family three.js doesn't bundle.
@@ -118,7 +118,7 @@ def _plain_base(
     Args:
         material: The material whose bare look to build.
         texture: A relief variant ("brushed" / "matte"), or ``None`` for smooth.
-        rgb: The base colour as hex / RGB, or ``None`` for the factory default.
+        rgb: The base color as hex / RGB, or ``None`` for the factory default.
         thickness: Pane thickness (mm) for transmissive materials (glass and anything
             flagged ``transparent``); ignored otherwise.
 
@@ -152,16 +152,16 @@ def _plain_base(
     return plastic.plastic_clean(color=rgb)
 
 
-# --- surface (colour) finishes: (material, rgb, texture, sheen) -> PbrProperties ---
+# --- surface (color) finishes: (material, rgb, texture, sheen) -> PbrProperties ---
 # All handlers share this signature; sheen (gloss/matte) is only used by the
 # paint/coat handler, ignored by the rest.
 def _anodized(
     m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
-    """Anodized look: recolour, keeping any brushed/blasted relief."""
+    """Anodized look: recolor, keeping any brushed/blasted relief."""
     if m.family == "aluminum" and texture is None:
         return metal.aluminum_anodized(color=rgb)  # tuned preset for the common case
-    base = _metal_tex_base(m, texture)  # keep relief; scalar recolour
+    base = _metal_tex_base(m, texture)  # keep relief; scalar recolor
     if rgb is not None:
         return base.override(color=rgb, roughness=0.3)
     return base
@@ -170,7 +170,7 @@ def _anodized(
 def _pvd(
     m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
-    """PVD look: "clear" shows the substrate metal; a colour becomes a metallic coat."""
+    """PVD look: "clear" shows the substrate metal; a color becomes a metallic coat."""
     if rgb is None:
         return _metal_tex_base(m, texture)  # clear PVD: bright substrate metal
     if texture is not None:  # keep the brushed/blasted relief
@@ -190,10 +190,10 @@ def _black_oxide(
 def _dyeing(
     m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
-    """Dyed look: aluminium behaves like anodize; polymers tint the base."""
+    """Dyed look: aluminum behaves like anodize; polymers tint the base."""
     if m.family == "aluminum":
         return _anodized(m, rgb, texture, sheen)
-    return _plain_base(m, texture, rgb, None)  # dyed polymer: base tinted by colour
+    return _plain_base(m, texture, rgb, None)  # dyed polymer: base tinted by color
 
 
 def _chrome(
@@ -293,13 +293,13 @@ _SURFACE = {
 def _normalize(
     finish: FinishSpec,
 ) -> list[tuple[fin.Finish, str | None, fin.Sheen | None]]:
-    """Normalize the ``finish`` argument to a list of (Finish, colour, sheen).
+    """Normalize the ``finish`` argument to a list of (Finish, color, sheen).
 
     Args:
         finish: ``None``, a single ``AppliedFinish`` / ``Finish``, or a list of them.
 
     Returns:
-        A list of ``(Finish, colour, sheen)`` tuples; a raw ``Finish`` yields
+        A list of ``(Finish, color, sheen)`` tuples; a raw ``Finish`` yields
         ``(finish, None, None)``.
     """
     if finish is None:
@@ -309,7 +309,7 @@ def _normalize(
     for f in seq:
         if isinstance(f, AppliedFinish):
             out.append((f.finish, f.color, f.sheen))
-        else:  # a raw Finish -> no colour / sheen
+        else:  # a raw Finish -> no color / sheen
             out.append((f, None, None))
     return out
 
@@ -327,11 +327,11 @@ def get_pbr_properties(
     Args:
         material: The material being rendered (dispatched on its ``category``).
         finish: An ``AppliedFinish`` (e.g. from ``spray_paint("blue")``) or a list of
-            them -- each carries its own colour.
+            them -- each carries its own color.
         process: A ``Process`` that nudges the default surface (printed -> rough).
-        color: The material's own base colour, applied only when no surface finish
-            covers it (e.g. a coloured filament or tinted resin); ignored for bare
-            metals, whose colour is intrinsic.
+        color: The material's own base color, applied only when no surface finish
+            covers it (e.g. a colored filament or tinted resin); ignored for bare
+            metals, whose color is intrinsic.
         thickness_mm: Pane thickness (mm) for transmissive materials.
         pbr: A ready-made look, returned unchanged if given.
 
@@ -356,7 +356,7 @@ def get_pbr_properties(
         texture = "matte"  # as-printed / as-built relief
 
     if surface is None:
-        # No covering/colouring finish -> the per-part colour (case-2 selection);
+        # No covering/coloring finish -> the per-part color (case-2 selection);
         # bare metals pass color=None and render their intrinsic look.
         return _plain_base(material, texture, _color_value(color), thickness_mm)
     rgb = _color_value(surface_color)

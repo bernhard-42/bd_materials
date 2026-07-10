@@ -2,11 +2,11 @@
 
 A ``FinishedMaterial`` bundles a range-based ``Material`` (the shared, immutable
 typical-values table -- physics) with the **per-part choices**: ``color`` (a
-selectable base colour), ``thickness_mm`` (pane thickness, only meaningful when the
+selectable base color), ``thickness_mm`` (pane thickness, only meaningful when the
 material is ``transparent``), ``finish`` (an ``AppliedFinish`` or list of them), and
 ``process``. ``.material`` gives the physics; ``.pbr`` resolves the three.js look.
 
-Colour precedence (resolved in ``pbr``): a covering finish colour > the selected
+Color precedence (resolved in ``pbr``): a covering finish color > the selected
 ``color`` > the material's intrinsic look (derived from ``family``).
 
 Threejs stays out of ``import bd_materials`` -- only ``.pbr`` pulls it in.
@@ -23,7 +23,7 @@ from .core import RangeMaterial
 if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-free)
     from threejs_materials import PbrProperties
 
-# colour input accepted by ``color=`` (name / hex string, or an RGB tuple)
+# color input accepted by ``color=`` (name / hex string, or an RGB tuple)
 Color = str | tuple[float, float, float]
 
 # finish input accepted by ``finish=`` (a single applied finish, a list, or none)
@@ -49,7 +49,7 @@ class Process(enum.Enum):
 
 
 class FinishedMaterial(Generic[MaterialT]):
-    """A range ``Material`` + per-part colour / thickness / finish(es) / process.
+    """A range ``Material`` + per-part color / thickness / finish(es) / process.
 
     The material stays a pure typical-values table; everything chosen per part
     lives here. ``pbr=`` supplies a ready-made look and cannot be combined with
@@ -76,7 +76,7 @@ class FinishedMaterial(Generic[MaterialT]):
             material: The range ``Material`` (physics) this part is made of.
             finish: An ``AppliedFinish`` or list of them; mutually exclusive with
                 ``process``.
-            color: A selectable base colour (name, hex string, or RGB tuple).
+            color: A selectable base color (name, hex string, or RGB tuple).
             thickness_mm: Pane thickness in mm, meaningful only for a ``transparent``
                 material.
             process: An as-made surface hint; mutually exclusive with ``finish``.
@@ -121,7 +121,7 @@ class FinishedMaterial(Generic[MaterialT]):
         """The resolved three.js look (needs ``threejs_materials``).
 
         The explicit override if supplied, else derived from the material's identity,
-        the selected colour/thickness, the finish(es), and the process. The viz stack
+        the selected color/thickness, the finish(es), and the process. The viz stack
         is imported here and nowhere else.
 
         Returns:

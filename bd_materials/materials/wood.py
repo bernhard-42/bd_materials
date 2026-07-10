@@ -4,7 +4,7 @@ Values are for ~12% moisture content and shift substantially when wet. Wood is
 **orthotropic**; to fit a scalar range table the fields carry the design-relevant
 **along-grain** values:
 
-* ``modulus_of_elasticity`` -- along grain (parallel to fibres), GPa.
+* ``modulus_of_elasticity`` -- along grain (parallel to fibers), GPa.
 * ``modulus_of_rupture`` -- bending strength, MPa (wood has no true yield).
 * ``compressive_strength_parallel`` -- along grain, MPa.
 * ``janka_hardness`` -- side hardness (indentation force), N; ``None`` for engineered
@@ -30,7 +30,7 @@ class WoodMaterial(RangeMaterial):
 
     ``density`` is a single value; the rest are ``Range`` bands (or ``None`` if
     the value is missing). ``family`` is the three.js wood factory key; wood is
-    opaque (no colour -- stain/paint is a finish), so ``transparent`` is False.
+    opaque (no color -- stain/paint is a finish), so ``transparent`` is False.
     """
 
     category: ClassVar[str] = "wood"

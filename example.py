@@ -61,7 +61,7 @@ show(sb, materials=[m.pbr])
 # %%
 
 
-## 3 — selectable colour (plastics/resins/paper/textile) and transparent panes
+## 3 — selectable color (plastics/resins/paper/textile) and transparent panes
 
 m = plastics.pla(color="red")
 show(sb, materials=[m.pbr])
@@ -76,7 +76,7 @@ show(sb, materials=[m.pbr])
 # %%
 
 
-## 4 — a finish (colour and, for paints/coats, a sheen ride on the finish)
+## 4 — a finish (color and, for paints/coats, a sheen ride on the finish)
 
 m = metals.aluminum(finish=finishes.anodize("champagne"))  # finish on default grade
 show(sb, materials=[m.pbr])

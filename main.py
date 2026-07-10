@@ -42,7 +42,7 @@ print(metals.aluminum(Alu.G7075_T6).material)
 # --- visualization: FinishedMaterial -> three.js PBR ---------------------------
 # Building a FinishedMaterial needs no threejs; only .pbr imports threejs_materials.
 _looks = [
-    ("aluminium, anodized", metals.aluminum(finish=finishes.anodize("champagne"))),
+    ("aluminum, anodized", metals.aluminum(finish=finishes.anodize("champagne"))),
     (
         "steel, powder-coat",
         metals.mild_steel(finish=finishes.powder_coat("green", finishes.Sheen.MATTE)),

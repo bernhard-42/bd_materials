@@ -20,7 +20,7 @@ from ..core import ArealMaterial, Range, with_density
 @dataclass(frozen=True, kw_only=True)
 class TextileMaterial(ArealMaterial):
     """A textile: the shared areal ranges (from ``ArealMaterial``). ``family`` is the
-    three.js textile factory key; a part's colour lives on the ``FinishedMaterial``.
+    three.js textile factory key; a part's color lives on the ``FinishedMaterial``.
     """
 
     category: ClassVar[str] = "textile"
@@ -59,7 +59,7 @@ def woven(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -112,7 +112,7 @@ def felt(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -165,7 +165,7 @@ def leather(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.

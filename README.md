@@ -1,6 +1,6 @@
 # bd_materials
 
-Typical-value engineering materials — give a part a named material, get its **mass and mechanical/thermal properties**, and resolve how it **looks** (finish + colour → three.js PBR).
+Typical-value engineering materials — give a part a named material, get its **mass and mechanical/thermal properties**, and resolve how it **looks** (finish + color → three.js PBR).
 
 ```python
 from bd_materials import metals, finishes
@@ -140,12 +140,12 @@ metals.stainless(metals.Stainless.G316L_AS_BUILT)   # SLM as-built
 wood.hardwood(wood.Hardwood.OAK)
 resins.tough()                                      # each resin type is its own family fn
 
-# 3 — selectable colour (plastics/resins/paper/textile) and transparent panes
+# 3 — selectable color (plastics/resins/paper/textile) and transparent panes
 plastics.pla(color="red")
 plastics.pmma(color="clear", thickness_mm=3)        # transparent -> pane thickness
 glass.borosilicate(color="green", thickness_mm=5)
 
-# 4 — a finish (colour and, for paints/coats, a sheen ride on the finish)
+# 4 — a finish (color and, for paints/coats, a sheen ride on the finish)
 metals.aluminum(finish=finishes.anodize("champagne"))          # finish on default grade
 metals.aluminum(metals.Alu.G7075_T6, finishes.anodize("blue")) # grade + finish
 metals.mild_steel(finish=finishes.powder_coat("green", finishes.Sheen.MATTE))
@@ -217,9 +217,9 @@ In **`bd_materials.finishes`**:
 - **`AppliedFinish`** — a `Finish` plus the per-part `color` and `sheen`. This is what the verb functions return and what `FinishedMaterial(finish=…)` accepts.
 - Group enums (`Mechanical`, `Chemical`, `MetalPlating`, `Coating`, `Marking`) + their `<GROUP>_FINISHES` dicts are the maintenance backbone; the **verb functions are the API**.
 
-Colour is handled per finish:
+Color is handled per finish:
 
-- **Mandatory** where the finish is defined by colour — `anodize(color)`, `dye(color)`, `powder_coat(color, sheen=…)`, `spray_paint(...)`, `vacuum_plating(...)`.
+- **Mandatory** where the finish is defined by color — `anodize(color)`, `dye(color)`, `powder_coat(color, sheen=…)`, `spray_paint(...)`, `vacuum_plating(...)`.
 - **Sensible default** where a natural look exists — `pvd("clear")`, `zinc_plate("clear")`, `silkscreen("black")`. `"clear"`/`"natural"` render the bare substrate (no tint).
 - **None** where fixed/inherent — `chrome()`, `gold_plate()`, `electrophoresis()` (black), and the mechanical finishes (`bead_blast()`, `brushed()`, …).
 

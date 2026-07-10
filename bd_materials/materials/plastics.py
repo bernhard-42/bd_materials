@@ -7,7 +7,7 @@ of a melting point), ``heat_deflection_temperature``, ``elongation_at_break`` an
 Shore ``hardness`` on its ``hardness_scale`` ("Shore D" for rigid grades, "Shore A" for
 elastomers).
 
-For a brittle thermoplastic or short-fibre grade that fractures with little yielding,
+For a brittle thermoplastic or short-fiber grade that fractures with little yielding,
 ``yield_strength`` ~equals ``tensile_strength``. A field is ``NOT_SUITABLE`` where the
 property does not apply (an elastomer's yield or heat-deflection, a laminate's isotropic
 yield) and ``None`` where a value is simply not filled in.
@@ -27,7 +27,7 @@ from ..core import NOT_SUITABLE, PolymerMaterial, Range, with_density
 class PlasticMaterial(PolymerMaterial):
     """A plastic: the shared polymer ranges (from ``PolymerMaterial``) plus a Shore
     hardness. ``family`` is the PBR/identity key; ``transparent`` is True for clear
-    grades (PMMA, PC). A part's colour lives on ``FinishedMaterial``, not here.
+    grades (PMMA, PC). A part's color lives on ``FinishedMaterial``, not here.
     """
 
     category: ClassVar[str] = "plastic"
@@ -102,7 +102,7 @@ def pla(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -189,7 +189,7 @@ def abs_(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -324,7 +324,7 @@ def nylon(
 
     Args:
         grade: Grade to select; defaults to PA12.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -411,7 +411,7 @@ def peek(
 
     Args:
         grade: Grade to select; defaults to moulded.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -498,7 +498,7 @@ def tpu(
 
     Args:
         grade: Grade to select; defaults to Shore 95A.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -563,7 +563,7 @@ def pc(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
@@ -629,7 +629,7 @@ def pp(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -692,7 +692,7 @@ def pom(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -755,7 +755,7 @@ def ptfe(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -820,7 +820,7 @@ def pmma(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
@@ -886,7 +886,7 @@ def pe(
 
     Args:
         grade: Grade to select; defaults to HDPE.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -949,7 +949,7 @@ def phenolic(
 
     Args:
         grade: Grade to select; defaults to Bakelite.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -1012,7 +1012,7 @@ def rubber(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -1099,7 +1099,7 @@ def petg(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -1164,7 +1164,7 @@ def asa(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -1228,7 +1228,7 @@ def pps(
 
     Args:
         grade: Grade to select; defaults to carbon-filled.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -1292,7 +1292,7 @@ def fr4(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -1355,7 +1355,7 @@ def cfrp(
 
     Args:
         grade: Grade to select; defaults to plate.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.

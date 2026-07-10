@@ -11,7 +11,7 @@ table), ``.pbr`` is the three.js look.
 
     metals.aluminum()                                  # FinishedMaterial (6061 default)
     metals.aluminum(Alu.G7075_T6, finishes.anodize("champagne"))
-    plastics.pla(color="red")                          # selectable colour
+    plastics.pla(color="red")                          # selectable color
     plastics.pmma(color="clear", thickness_mm=3)       # transparent -> pane thickness
 
     print(metals.aluminum().material)                  # typical-value dump (__str__)

@@ -23,7 +23,7 @@ class MetalMaterial(SolidMaterial):
     shear strength, hardness (HB/HRC/HV), and a melting range.
 
     ``family`` is the PBR/identity key; metals are opaque (``transparent`` False)
-    and have no ``color`` -- a metal's colour comes from a finish.
+    and have no ``color`` -- a metal's color comes from a finish.
     """
 
     category: ClassVar[str] = "metal"
@@ -34,7 +34,7 @@ class MetalMaterial(SolidMaterial):
     melting_temperature: Range | None  # °C
 
 
-# --- Aluminium ---------------------------------------------------------------
+# --- Aluminum ---------------------------------------------------------------
 class Alu(Enum):
     G6061_T6 = auto()
     G7075_T6 = auto()
@@ -180,7 +180,7 @@ def aluminum(
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    """Aluminium as a ``FinishedMaterial``.
+    """Aluminum as a ``FinishedMaterial``.
 
     Args:
         grade: Grade to select; defaults to 6061-T6.

@@ -4,7 +4,7 @@ Finishes are grouped by process into enums (:class:`Mechanical`, :class:`Chemica
 :class:`MetalPlating`, :class:`Coating`, :class:`Marking`), each backed by a
 ``<GROUP>_FINISHES`` dict keyed by that enum -- the maintenance backbone. The
 **public API is the flat verb functions** (``anodize("blue")``, ``powder_coat(...)``),
-which bind a colour (and, for paints/coatings, a :class:`Sheen`) to a finish and
+which bind a color (and, for paints/coatings, a :class:`Sheen`) to a finish and
 return an :class:`AppliedFinish`.
 
 A ``Finish`` is purely its intrinsic spec (name + optional notes). Where a finish is
@@ -13,10 +13,10 @@ A ``Finish`` is purely its intrinsic spec (name + optional notes). Where a finis
 
 Finishes are advisory, not gated: **any finish may be specified on any material**.
 
-Which colours a finish is typically offered in is advisory and deliberately not
-modelled on the ``Finish`` -- any colour may be applied per part (a name in
+Which colors a finish is typically offered in is advisory and deliberately not
+modelled on the ``Finish`` -- any color may be applied per part (a name in
 ``pbr._COLOR_HEX`` renders as that swatch; anything else passes through). Sheen
-(matte/gloss) is a per-application choice like colour -- it rides on the
+(matte/gloss) is a per-application choice like color -- it rides on the
 ``AppliedFinish``, not the ``Finish``.
 """
 
@@ -27,7 +27,7 @@ from enum import Enum, auto
 
 
 class Sheen(Enum):
-    """Surface sheen of a paint/coating -- a per-application choice like colour."""
+    """Surface sheen of a paint/coating -- a per-application choice like color."""
 
     GLOSS = auto()
     MATTE = auto()
@@ -35,7 +35,7 @@ class Sheen(Enum):
 
 @dataclass(frozen=True)
 class Finish:
-    """A surface finish's intrinsic spec (name + optional notes). Which colours a
+    """A surface finish's intrinsic spec (name + optional notes). Which colors a
     finish is typically offered in is advisory and not modelled here; substrate
     applicability lives in :mod:`.applicability`, not here."""
 
@@ -169,13 +169,13 @@ ALL_FINISHES = (
 
 
 # ===========================================================================
-# Applied finishes: the flat verb functions bind colour/sheen to a finish.
+# Applied finishes: the flat verb functions bind color/sheen to a finish.
 # ===========================================================================
 
 
 @dataclass(frozen=True)
 class AppliedFinish:
-    """A finish plus its per-application appearance choices (colour, sheen) --
+    """A finish plus its per-application appearance choices (color, sheen) --
     produced by the finish functions below."""
 
     finish: Finish
@@ -183,7 +183,7 @@ class AppliedFinish:
     sheen: Sheen | None = None  # None = finish has no sheen choice
 
 
-# --- mechanical (no colour) ------------------------------------------------
+# --- mechanical (no color) ------------------------------------------------
 def bead_blast() -> AppliedFinish:
     """Bead-blasted matte finish."""
     return AppliedFinish(MECHANICAL_FINISHES[Mechanical.BEAD_BLAST])
@@ -214,7 +214,7 @@ def anodize(color: str) -> AppliedFinish:
     """Anodized finish in ``color``.
 
     Args:
-        color: The anodize colour. Mandatory -- anodising is done to add colour
+        color: The anodize color. Mandatory -- anodizing is done to add color
             ("natural" is still an explicit choice, not the absence of one).
 
     Returns:
@@ -249,10 +249,10 @@ def pickle() -> AppliedFinish:
 
 
 def dye(color: str) -> AppliedFinish:
-    """Dyed finish in ``color`` (anodized aluminium or dyeable polymers).
+    """Dyed finish in ``color`` (anodized aluminum or dyeable polymers).
 
     Args:
-        color: The dye colour.
+        color: The dye color.
 
     Returns:
         The applied finish.
@@ -291,7 +291,7 @@ def pvd(color: str = "clear") -> AppliedFinish:
 
     Args:
         color: "clear" (default) is bright natural PVD, with the substrate showing
-            through; colours are opt-in.
+            through; colors are opt-in.
 
     Returns:
         The applied finish.
@@ -316,7 +316,7 @@ def vacuum_plating(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Vacuum-metallised plating in ``color``.
 
     Args:
-        color: The plating colour.
+        color: The plating color.
         sheen: Gloss (default) or matte.
 
     Returns:
@@ -332,7 +332,7 @@ def powder_coat(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Powder coat in ``color``.
 
     Args:
-        color: The coat colour (any, to spec).
+        color: The coat color (any, to spec).
         sheen: Gloss (default) or matte.
 
     Returns:
@@ -345,7 +345,7 @@ def spray_paint(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Spray paint in ``color``.
 
     Args:
-        color: The paint colour (any, to spec).
+        color: The paint color (any, to spec).
         sheen: Gloss (default) or matte.
 
     Returns:
@@ -382,7 +382,7 @@ def silkscreen(color: str = "black") -> AppliedFinish:
     """Silkscreen marking in ``color`` (default black).
 
     Args:
-        color: The ink colour. Note PBR ignores markings, so this is metadata.
+        color: The ink color. Note PBR ignores markings, so this is metadata.
 
     Returns:
         The applied finish.

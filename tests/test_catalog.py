@@ -8,7 +8,7 @@ categories. These tests target what those do *not* cover:
 - ``mass()`` scales linearly with volume,
 - the ``FinishedMaterial`` guard rails raise, and
 - (the main event) every material resolves a three.js PBR look across the
-  colour / finish / process paths -- the branch-per-category logic in ``pbr.py``,
+  color / finish / process paths -- the branch-per-category logic in ``pbr.py``,
   which nothing else exercises. These are skipped when ``threejs_materials`` is absent.
 """
 
@@ -90,11 +90,11 @@ def test_pbr_override_excludes_other_look_inputs():
         FinishedMaterial(metals.aluminum().material, color="red", pbr=look)
 
 
-# --- PBR resolution: every material + a spread of finish/colour/process paths ---
+# --- PBR resolution: every material + a spread of finish/color/process paths ---
 
 # One case per branch in pbr.py's dispatch and per surface handler in _SURFACE.
 _PBR_CASES = {
-    # bare substrates (case-1 / case-2 colour, transmissive, composite)
+    # bare substrates (case-1 / case-2 color, transmissive, composite)
     "alu_bare": lambda: metals.aluminum(),
     "pla_color_fdm": lambda: plastics.pla(color="red", process=Process.FDM),
     "pmma_clear_pane": lambda: plastics.pmma(color="clear", thickness_mm=3),
@@ -109,7 +109,7 @@ _PBR_CASES = {
     "alu_brushed": lambda: metals.aluminum(finish=finishes.brushed()),
     "alu_bead_blast": lambda: metals.aluminum(finish=finishes.bead_blast()),
     "steel_slm_rough": lambda: metals.mild_steel(process=Process.SLM),
-    # surface (colour) finishes -- one per _SURFACE handler
+    # surface (color) finishes -- one per _SURFACE handler
     "alu_anodize": lambda: metals.aluminum(finish=finishes.anodize("blue")),
     "steel_black_oxide": lambda: metals.mild_steel(finish=finishes.black_oxide()),
     "alu_dye": lambda: metals.aluminum(finish=finishes.dye("red")),
@@ -131,7 +131,7 @@ _PBR_CASES = {
     "steel_ecoat_white": lambda: metals.mild_steel(
         finish=finishes.electrophoresis("white")
     ),
-    # anodize on a brushed substrate (recolour-keeping-relief branch)
+    # anodize on a brushed substrate (recolor-keeping-relief branch)
     "alu_brushed_anodize": lambda: metals.aluminum(
         finish=[finishes.brushed(), finishes.anodize("black")]
     ),
@@ -148,6 +148,6 @@ def test_every_material_resolves_a_pbr_look(material):
 
 @requires_threejs
 @pytest.mark.parametrize("build", _PBR_CASES.values(), ids=list(_PBR_CASES))
-def test_finish_colour_process_paths_resolve(build):
-    """Every finish / colour / process path in pbr.py resolves without error."""
+def test_finish_color_process_paths_resolve(build):
+    """Every finish / color / process path in pbr.py resolves without error."""
     assert build().pbr is not None

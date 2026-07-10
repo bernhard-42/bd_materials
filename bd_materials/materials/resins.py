@@ -25,7 +25,7 @@ from ..core import NOT_SUITABLE, PolymerMaterial, Range, with_density
 class ResinMaterial(PolymerMaterial):
     """A photopolymer resin: the shared polymer ranges (from ``PolymerMaterial``) plus
     a Shore hardness. ``hardness_scale`` is "Shore D" for rigid resins, "Shore A" for
-    flexible ones. ``transparent`` is True for the clear resin; a part's colour lives
+    flexible ones. ``transparent`` is True for the clear resin; a part's color lives
     on the ``FinishedMaterial``.
     """
 
@@ -77,7 +77,7 @@ def standard(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -140,7 +140,7 @@ def tough(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -203,7 +203,7 @@ def high_temp(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -267,7 +267,7 @@ def ceramic(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -330,7 +330,7 @@ def castable(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -394,7 +394,7 @@ def esd(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -459,7 +459,7 @@ def transparent(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
@@ -525,7 +525,7 @@ def flexible(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.

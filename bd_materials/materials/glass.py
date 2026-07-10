@@ -4,7 +4,7 @@ Glass is an amorphous, brittle inorganic solid, so the field set is tailored: it
 ``yield_strength``, ``shear_strength``, ``elongation_at_break`` and
 ``heat_deflection_temperature`` (a brittle solid has no ductile yield or elongation, and
 HDT is a polymer test). ``tensile_strength`` is the practical **flaw-limited** annealed
-strength -- surface flaws dominate, so pristine fibre is far higher. ``hardness`` is on
+strength -- surface flaws dominate, so pristine fiber is far higher. ``hardness`` is on
 the Vickers (HV) scale. A ``glass_transition_temperature`` and a ``melting_temperature``
 are both carried; the latter is the furnace-melt range (glass has no sharp melt point),
 not a service limit -- use ``max_service_temp`` for that.
@@ -26,7 +26,7 @@ class GlassMaterial(SolidMaterial):
     is flaw-limited, annealed) plus Vickers hardness, a glass-transition and a
     furnace-melt range (see below). Brittle, so no yield/shear-strength fields.
 
-    Glass is ``transparent``; the optional colour + pane ``thickness_mm`` are
+    Glass is ``transparent``; the optional color + pane ``thickness_mm`` are
     per-part and live on the ``FinishedMaterial``.
     """
 
@@ -80,7 +80,7 @@ def soda_lime(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
@@ -145,7 +145,7 @@ def borosilicate(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).

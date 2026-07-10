@@ -20,7 +20,7 @@ from ..core import ArealMaterial, Range, with_density
 @dataclass(frozen=True, kw_only=True)
 class PaperMaterial(ArealMaterial):
     """A paper good: the shared areal ranges (from ``ArealMaterial``). ``family`` is
-    the three.js paper factory key; a part's colour lives on the ``FinishedMaterial``.
+    the three.js paper factory key; a part's color lives on the ``FinishedMaterial``.
     """
 
     category: ClassVar[str] = "paper"
@@ -59,7 +59,7 @@ def paper(
 
     Args:
         grade: Grade to select; defaults to office.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
@@ -162,7 +162,7 @@ def foamboard(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base colour for the part -- a standard-palette name, a hex string, or an
+        color: Base color for the part -- a standard-palette name, a hex string, or an
             RGB tuple.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
