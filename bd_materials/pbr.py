@@ -273,14 +273,22 @@ def _coat(
 def _ecoat(
     m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
-    """Electrophoretic e-coat look: a thin semi-transparent film over the substrate
-    metal, so it reads as a tinted semi-gloss metallic with the metal grain showing
-    through -- deep charcoal for "black" (its default/common color), never pitch black;
-    other colors pass through."""
+    """Electrophoretic e-coat look, split by substrate. Deep charcoal for "black"
+    (its default/common color), never pitch black; other colors pass through.
+
+    On aluminum it is a thin semi-transparent electrophoretic lacquer over anodizing,
+    so it reads as a tinted semi-gloss metallic with the metal grain showing through.
+    On other metals (steel, ...) it is an opaque epoxy e-coat -- a covering satin film
+    that hides the substrate texture.
+    """
     if rgb is None or rgb == _COLOR_HEX["black"]:
         rgb = _ECOAT_CHARCOAL  # black (the default/common e-coat) -> deep charcoal
-    # tint the substrate metal (keeps metalness + any grain) at a semi-gloss roughness
-    return _metal_tex_base(m, texture).override(color=rgb, roughness=0.3)
+    if m.family == "aluminum":
+        # semi-transparent: tint the metal base, keeping metalness + any relief
+        return _metal_tex_base(m, texture).override(color=rgb, roughness=0.3)
+    # opaque epoxy e-coat: a covering satin film (semi-gloss, not dead matte),
+    # substrate texture hidden; roughness 0.4 is nominal
+    return coats.coat_gloss(color=rgb).override(roughness=0.4)
 
 
 _CHEM = fin.CHEMICAL_FINISHES

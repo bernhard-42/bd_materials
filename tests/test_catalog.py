@@ -131,6 +131,9 @@ _PBR_CASES = {
     "steel_ecoat_white": lambda: metals.mild_steel(
         finish=finishes.electrophoresis("white")
     ),
+    "alu_brushed_ecoat": lambda: metals.aluminum(
+        finish=[finishes.brushed(), finishes.electrophoresis()]
+    ),
     # anodize on a brushed substrate (recolor-keeping-relief branch)
     "alu_brushed_anodize": lambda: metals.aluminum(
         finish=[finishes.brushed(), finishes.anodize("black")]

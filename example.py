@@ -19,10 +19,6 @@ sb = create_shader_ball("sb")
 set_defaults(studio_env_intensity=0.75, studio_env_rotation=48)
 # %%
 
-
-# %%
-
-
 ## 1 — defaults only: the most common grade, bare surface
 
 m = metals.aluminum()  # 6061-T6
@@ -208,6 +204,18 @@ show(sb, materials=[m.pbr])
 m = metals.tool_steel(
     metals.ToolSteel.D2_HARDENED,
     finish=[finishes.bead_blast(), finishes.anodize("green")],
+)
+show(sb, materials=[m.pbr])
+
+# %%
+m = metals.aluminum(
+    finish=[finishes.brushed(), finishes.electrophoresis()],
+)
+show(sb, materials=[m.pbr])
+
+# %%
+m = metals.tool_steel(
+    finish=[finishes.brushed(), finishes.electrophoresis()],
 )
 show(sb, materials=[m.pbr])
 
