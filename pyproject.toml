@@ -17,6 +17,9 @@ classifiers = [
 ]
 dependencies = ["threejs-materials"]
 
+[project.optional-dependencies]
+test = ["pytest==9.0.3"]
+
 [project.urls]
 Homepage = "https://github.com/bernhard-42/bd_materials"
 Repository = "https://github.com/bernhard-42/bd_materials"
@@ -24,3 +27,6 @@ Issues = "https://github.com/bernhard-42/bd_materials/issues"
 
 [tool.setuptools]
 packages = ["bd_materials"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
