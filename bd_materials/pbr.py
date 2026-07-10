@@ -152,6 +152,14 @@ def _plain_base(
     return plastic.plastic_clean(color=rgb)
 
 
+# Dark conversion / e-coat finishes render as a very dark neutral grey, not an
+# optical-void black, so surface geometry stays legible in the viewer: black oxide
+# reads as matte "tool black" (gun-blue), e-coat black as a deep charcoal. Both are
+# nominal look values, tune to taste.
+_BLACK_OXIDE_GREY = "#2a2a2a"
+_ECOAT_CHARCOAL = "#2e2e2e"
+
+
 # --- surface (color) finishes: (material, rgb, texture, sheen) -> PbrProperties ---
 # All handlers share this signature; sheen (gloss/matte) is only used by the
 # paint/coat handler, ignored by the rest.
@@ -181,10 +189,12 @@ def _pvd(
 def _black_oxide(
     m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
-    """Black-oxide look: near-black, keeping relief or as a matte coat."""
+    """Black-oxide look: matte very-dark-grey (tool black), keeping relief or as a coat."""
     if texture is not None:  # keep the blasted/brushed relief
-        return _metal_tex_base(m, texture).override(color="#141414", roughness=0.5)
-    return coats.metallic_coat_matte(color="#141414")
+        return _metal_tex_base(m, texture).override(
+            color=_BLACK_OXIDE_GREY, roughness=0.5
+        )
+    return coats.metallic_coat_matte(color=_BLACK_OXIDE_GREY)
 
 
 def _dyeing(
@@ -263,8 +273,11 @@ def _coat(
 def _ecoat(
     m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
-    """Electrophoretic e-coat look (black by default)."""
-    return coats.coat_matte(color=rgb if rgb is not None else "#101010")
+    """Electrophoretic e-coat look; the thin semi-transparent film reads as a deep
+    charcoal even for "black", never optical-void black; other colors pass through."""
+    if rgb is None or rgb == _COLOR_HEX["black"]:
+        rgb = _ECOAT_CHARCOAL  # black (the default/common e-coat) -> deep charcoal
+    return coats.coat_matte(color=rgb)
 
 
 _CHEM = fin.CHEMICAL_FINISHES
