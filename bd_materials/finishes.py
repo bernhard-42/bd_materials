@@ -78,10 +78,20 @@ class Chemical(Enum):
 
 
 CHEMICAL_FINISHES: dict[Chemical, Finish] = {
-    Chemical.ANODIZED: Finish("Anodized"),
-    Chemical.CHEM_FILM: Finish("Chemical conversion coat (Chem film)"),
-    Chemical.CONDUCTIVE_OXIDATION: Finish("Electrically conductive oxidation"),
-    Chemical.BLACK_OXIDE: Finish("Black oxide"),
+    Chemical.ANODIZED: Finish(
+        "Anodized",
+        notes=(
+            "typical colors: natural, black, gray, gold, rose gold, red, blue, "
+            "champagne, brown, purple, green, orange"
+        ),
+    ),
+    Chemical.CHEM_FILM: Finish(
+        "Chemical conversion coat (Chem film)", notes="typical colors: clear, gold"
+    ),
+    Chemical.CONDUCTIVE_OXIDATION: Finish(
+        "Electrically conductive oxidation", notes="color: clear"
+    ),
+    Chemical.BLACK_OXIDE: Finish("Black oxide", notes="color: black"),
     Chemical.PASSIVATION: Finish("Passivation"),
     Chemical.PICKLING: Finish("Pickling"),
     Chemical.DYEING: Finish(
@@ -102,14 +112,21 @@ class MetalPlating(Enum):
 
 
 METAL_PLATING_FINISHES: dict[MetalPlating, Finish] = {
-    MetalPlating.CHROME_PLATING: Finish("Chrome plating"),
-    MetalPlating.GOLD_PLATING: Finish("Gold plating"),
-    MetalPlating.NICKEL_PLATING: Finish("Nickel plating"),
-    MetalPlating.SILVER_PLATING: Finish("Silver plating"),
-    MetalPlating.TIN_PLATING: Finish("Tin plating"),
-    MetalPlating.PVD: Finish("PVD (Physical Vapor Deposition)"),
+    MetalPlating.CHROME_PLATING: Finish("Chrome plating", notes="color: chrome"),
+    MetalPlating.GOLD_PLATING: Finish("Gold plating", notes="color: gold"),
+    MetalPlating.NICKEL_PLATING: Finish("Nickel plating", notes="color: nickel"),
+    MetalPlating.SILVER_PLATING: Finish("Silver plating", notes="color: silver"),
+    MetalPlating.TIN_PLATING: Finish("Tin plating", notes="color: silver"),
+    MetalPlating.PVD: Finish(
+        "PVD (Physical Vapor Deposition)",
+        notes="typical colors: gold, rose gold, black, gunmetal, blue",
+    ),
     MetalPlating.ZINC_PLATING: Finish(
-        "Zinc plating", notes="corrosion protection for ferrous steels"
+        "Zinc plating",
+        notes=(
+            "corrosion protection for ferrous steels; "
+            "typical colors: clear, blue, yellow, black"
+        ),
     ),
     MetalPlating.VACUUM_PLATING: Finish("Vacuum plating"),
 }
@@ -337,9 +354,17 @@ def spray_paint(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     return AppliedFinish(COATING_FINISHES[Coating.SPRAY_PAINT], color, sheen)
 
 
-def electrophoresis() -> AppliedFinish:
-    """Electrophoretic e-coat -- always black (no colour choice)."""
-    return AppliedFinish(COATING_FINISHES[Coating.ELECTROPHORESIS])
+def electrophoresis(color: str = "black") -> AppliedFinish:
+    """Electrophoretic e-coat in ``color`` (automotive-style dip coat).
+
+    Args:
+        color: The e-coat color. Defaults to black (the common automotive primer);
+            white and RAL colors are also available to spec.
+
+    Returns:
+        The applied finish.
+    """
+    return AppliedFinish(COATING_FINISHES[Coating.ELECTROPHORESIS], color)
 
 
 # --- marking ---------------------------------------------------------------
