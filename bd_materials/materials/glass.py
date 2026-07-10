@@ -18,10 +18,10 @@ from typing import ClassVar
 
 from ..finished import FinishedMaterial, Process
 from ..finishes import AppliedFinish
-from ..core import Range, SolidMaterial
+from ..core import Range, SolidMaterial, with_density
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class GlassMaterial(SolidMaterial):
     """A glass: the shared solid ranges (from ``SolidMaterial``; ``tensile_strength``
     is flaw-limited, annealed) plus Vickers hardness, a glass-transition and a
@@ -80,9 +80,28 @@ def soda_lime(
     thickness_mm=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[GlassMaterial]:
+    """Soda-lime glass as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        thickness_mm: Pane thickness in mm; used for the transmissive look (the material
+            is transparent).
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        SODA_LIME_MATERIALS[grade],
+        with_density(SODA_LIME_MATERIALS[grade], density),
         finish,
         color=color,
         thickness_mm=thickness_mm,
@@ -126,9 +145,28 @@ def borosilicate(
     thickness_mm=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[GlassMaterial]:
+    """Borosilicate glass as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        thickness_mm: Pane thickness in mm; used for the transmissive look (the material
+            is transparent).
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        BOROSILICATE_MATERIALS[grade],
+        with_density(BOROSILICATE_MATERIALS[grade], density),
         finish,
         color=color,
         thickness_mm=thickness_mm,

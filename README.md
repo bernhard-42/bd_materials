@@ -162,6 +162,9 @@ al.material.mass(volume_mm3=8000)       # grams  (density x volume)
 al.material.tensile_strength            # Range(min=540, max=600)  MPa
 al.pbr                                  # three.js PbrProperties
 
+# density is a single representative value -- override it per part (e.g. measured):
+metals.aluminum(density=2705).material.mass(volume_mm3=8000)   # uses 2705, not 2700
+
 # 7 — advisory applicability queries (never a constraint)
 from bd_materials import typical_finishes, typical_materials
 typical_finishes(metals.aluminum().material)         # [Anodized, Bead Blast, ...]

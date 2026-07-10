@@ -67,7 +67,14 @@ _KEY_BY_FINISH: dict[fin.Finish, Enum] = {v: k for k, v in _FINISH_BY_KEY.items(
 
 
 def _substrate_key(finish) -> Enum:
-    """Resolve a finish enum member / Finish / AppliedFinish to its table key."""
+    """Resolve a finish to its ``TYPICAL_SUBSTRATES`` key.
+
+    Args:
+        finish: A finish enum member, a ``Finish``, or an ``AppliedFinish``.
+
+    Returns:
+        The finish enum member used as the table key.
+    """
     if isinstance(finish, fin.AppliedFinish):
         finish = finish.finish
     if isinstance(finish, fin.Finish):
@@ -76,11 +83,19 @@ def _substrate_key(finish) -> Enum:
 
 
 def _matches(material: RangeMaterial, substrates: frozenset[str]) -> bool:
+    """Whether ``material``'s category or family is in the substrate set."""
     return material.category in substrates or material.family in substrates
 
 
 def typical_finishes(material: RangeMaterial) -> list[fin.Finish]:
-    """The finishes *typically* used on ``material`` (advisory, not exhaustive)."""
+    """The finishes typically used on a material (advisory, not a constraint).
+
+    Args:
+        material: The material to look up (matched by its ``category`` / ``family``).
+
+    Returns:
+        The finishes ``TYPICAL_SUBSTRATES`` marks as typical for it (possibly empty).
+    """
     return [
         _FINISH_BY_KEY[key]
         for key, subs in TYPICAL_SUBSTRATES.items()
@@ -89,10 +104,14 @@ def typical_finishes(material: RangeMaterial) -> list[fin.Finish]:
 
 
 def typical_materials(finish) -> list[RangeMaterial]:
-    """The catalog materials ``finish`` is *typically* used on (advisory).
+    """The catalog materials a finish is typically used on (advisory).
 
-    ``finish`` may be a finish enum member (``Chemical.ANODIZED``), a ``Finish``,
-    or an ``AppliedFinish``.
+    Args:
+        finish: A finish enum member (e.g. ``Chemical.ANODIZED``), a ``Finish``, or an
+            ``AppliedFinish``.
+
+    Returns:
+        The catalog materials ``TYPICAL_SUBSTRATES`` marks as typical for it.
     """
     subs = TYPICAL_SUBSTRATES[_substrate_key(finish)]
     return [m for m in ALL_MATERIALS if _matches(m, subs)]

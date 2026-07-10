@@ -16,8 +16,8 @@ helper and a pretty ``__str__`` dump aligned with those units.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, fields
-from typing import Any, ClassVar, Literal, cast, get_args
+from dataclasses import dataclass, fields, replace
+from typing import Any, ClassVar, Literal, TypeVar, cast, get_args
 
 
 @dataclass(frozen=True)
@@ -28,14 +28,22 @@ class Range:
     max: float
 
     def __post_init__(self) -> None:
+        """Reject an inverted band (``min`` greater than ``max``)."""
         if self.min > self.max:
             raise ValueError(f"Range min {self.min} > max {self.max}")
 
     def value_at(self, r: float) -> float:
-        """Value at fractional position ``r`` in the band: 0 -> min, 1 -> max.
+        """Sample the band at a fractional position.
 
         Explicit about *where* in the typical range you sample; the band makes no
-        claim that the midpoint (``value_at(0.5)``) is the 'right' choice.
+        claim that the midpoint (``value_at(0.5)``) is the "right" choice.
+
+        Args:
+            r: Fractional position in the band -- 0 -> ``min``, 1 -> ``max`` (values
+                outside [0, 1] extrapolate).
+
+        Returns:
+            The interpolated value ``min + r * (max - min)``.
         """
         return self.min + r * (self.max - self.min)
 
@@ -111,9 +119,12 @@ EVERYTHING = frozenset(
 )
 
 
+@dataclass(frozen=True, kw_only=True)
 class RangeMaterial:
-    """Mixin for range-table dataclasses: a ``mass()`` helper and a pretty
-    ``__str__`` dump (``print(material)`` shows the aligned range table).
+    """Frozen base dataclass for range tables: a ``mass()`` helper and a pretty
+    ``__str__`` dump (``print(material)`` shows the aligned range table). Materials
+    are ``kw_only``, so the defaulted identity fields (``family``/``transparent``)
+    can precede a leaf's no-default property fields.
 
     The subclass must be a dataclass with a ``name`` field and ``Range | None``
     value fields whose names are keys of ``PROPERTY_UNITS``. A ``hardness`` field
@@ -141,18 +152,30 @@ class RangeMaterial:
             )
 
     def mass(self, volume_mm3: float) -> float:
-        """Part mass in grams from a build123d volume in mm³ (m = rho * V).
+        """Part mass in grams from a build123d volume (m = rho * V).
 
         ``density`` is kg/m³ and build123d reports ``.volume`` in mm³, so the unit
         bridges are baked in (mm³ -> m³ x1e-9, kg -> g x1000).
+
+        Args:
+            volume_mm3: The part volume in mm³ (e.g. build123d's ``.volume``).
+
+        Returns:
+            Mass in grams.
         """
         return self.density * volume_mm3 * 1e-6
 
     def __str__(self) -> str:
-        """Aligned 'property  value unit' lines under a '# mechanical properties'
-        then '# thermal properties' header (one per non-empty group, taken from the
-        two unit dicts in order; mirroring the definition blocks); the ``name`` is
-        the title line. 'missing' / 'n/a' for the None / NOT_SUITABLE sentinels."""
+        """Aligned range-table dump, grouped mechanical then thermal.
+
+        Each row is 'property  value unit'; the ``name`` is the title line and a
+        '# mechanical properties' / '# thermal properties' header precedes each group
+        (one per non-empty group, in unit-dict order, mirroring the definition
+        blocks). 'missing' / 'n/a' render the None / NOT_SUITABLE sentinels.
+
+        Returns:
+            The formatted multi-line table.
+        """
         scale = getattr(self, "hardness_scale", "")
         have = {f.name for f in fields(cast(Any, self))}
         width = max(len(n) for n in PROPERTY_UNITS if n in have)
@@ -180,13 +203,36 @@ class RangeMaterial:
         return "\n".join(lines)
 
 
+_MaterialT = TypeVar("_MaterialT", bound=RangeMaterial)
+
+
+def with_density(material: _MaterialT, density: float | None) -> _MaterialT:
+    """Return ``material``, or a per-part frozen copy with ``density`` overridden.
+
+    The family functions use this so a caller can override a grade's single
+    representative density for one part, without mutating the shared catalog entry.
+    Cast-free because every material is a frozen dataclass.
+
+    Args:
+        material: A catalog material (any frozen ``RangeMaterial`` subclass).
+        density: The per-part density in kg/m³, or ``None`` to keep the material's
+            representative value.
+
+    Returns:
+        ``material`` itself when ``density`` is ``None``, else a copy with the new
+        density.
+    """
+    if density is None:
+        return material
+    return replace(material, density=density)
+
+
 # ---------------------------------------------------------------------------
-# Shared base dataclasses (leaf classes add only their category-specific fields
-# + the identity fields family/transparent, which -- being defaulted -- stay
-# last). RangeMaterial itself is a non-dataclass mixin, so a branch's first
-# dataclass (Solid/Areal) redeclares name/density as real fields.
+# Shared base dataclasses. All material dataclasses (incl. RangeMaterial) are
+# frozen + kw_only, so the defaulted identity fields (family/transparent) can
+# precede a leaf's no-default property fields without an ordering error.
 # ---------------------------------------------------------------------------
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SolidMaterial(RangeMaterial):
     """Base for bulk isotropic solids (metals, glass, polymers): the property
     fields common to all of them."""
@@ -203,7 +249,7 @@ class SolidMaterial(RangeMaterial):
     thermal_conductivity: Range | None  # W/(m·K)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PolymerMaterial(SolidMaterial):
     """Base for polymers (plastics, resins): adds the ductility/strength and
     thermal-transition fields plastics and resins share (glass has none of them)."""
@@ -215,7 +261,7 @@ class PolymerMaterial(SolidMaterial):
     heat_deflection_temperature: Range | None  # °C
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ArealMaterial(RangeMaterial):
     """Base for areal goods (paper, textile): grammage-sized planar materials
     (mass from area, not volume). Leaf classes only set ``category``."""

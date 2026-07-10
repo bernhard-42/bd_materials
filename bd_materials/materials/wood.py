@@ -22,10 +22,10 @@ from typing import ClassVar
 
 from ..finished import FinishedMaterial, Process
 from ..finishes import AppliedFinish
-from ..core import Range, RangeMaterial
+from ..core import Range, RangeMaterial, with_density
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class WoodMaterial(RangeMaterial):
     """A wood described by typical-value ranges (along-grain where directional).
 
@@ -167,8 +167,27 @@ def hardwood(
     grade: Hardwood = Hardwood.GENERIC,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[WoodMaterial]:
-    return FinishedMaterial(HARDWOOD_MATERIALS[grade], finish, process=process)
+    """Hardwood as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic species.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(HARDWOOD_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Softwood ----------------------------------------------------------------
@@ -228,8 +247,27 @@ def softwood(
     grade: Softwood = Softwood.GENERIC,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[WoodMaterial]:
-    return FinishedMaterial(SOFTWOOD_MATERIALS[grade], finish, process=process)
+    """Softwood as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic species.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(SOFTWOOD_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Engineered wood ---------------------------------------------------------
@@ -274,8 +312,27 @@ def engineered_wood(
     grade: EngineeredWood = EngineeredWood.MDF,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[WoodMaterial]:
-    return FinishedMaterial(ENGINEERED_WOOD_MATERIALS[grade], finish, process=process)
+    """Engineered wood as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to MDF.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(ENGINEERED_WOOD_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 ALL_WOODS = (

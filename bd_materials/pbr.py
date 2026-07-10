@@ -85,6 +85,7 @@ def _color_value(color):
 
 
 def _metal_name(material: RangeMaterial) -> str:
+    """The bundled metal-factory key for the material (a bare family, else steel/stainless)."""
     fam = material.family
     if fam in _BARE_METALS:
         return fam
@@ -94,6 +95,7 @@ def _metal_name(material: RangeMaterial) -> str:
 
 
 def _is_carbon(material: RangeMaterial) -> bool:
+    """Whether the material is the carbon-fibre (CFRP) family."""
     return material.family == "CFRP"
 
 
@@ -104,12 +106,20 @@ def _metal_tex_base(material: RangeMaterial, texture):
 
 
 def _plain_base(material: RangeMaterial, texture, rgb, thickness):
-    """Look with no colour finish -- substrate + optional texture.
+    """Look for a material with no covering colour finish -- substrate + texture.
 
     Wood/paper/textile pick a bundled factory by ``family`` (the factory key),
     falling back to a generic factory for a family three.js doesn't bundle.
-    ``thickness`` (per part) feeds transmissive materials -- glass and any
-    material flagged ``transparent``.
+
+    Args:
+        material: The material whose bare look to build.
+        texture: A relief variant ("brushed" / "matte"), or ``None`` for smooth.
+        rgb: The base colour as hex / RGB, or ``None`` for the factory default.
+        thickness: Pane thickness (mm) for transmissive materials (glass and anything
+            flagged ``transparent``); ignored otherwise.
+
+    Returns:
+        The resolved ``PbrProperties``.
     """
     cat = material.category
     fam = material.family or ""
@@ -139,6 +149,7 @@ def _plain_base(material: RangeMaterial, texture, rgb, thickness):
 # All handlers share this signature; sheen (gloss/matte) is only used by the
 # paint/coat handler, ignored by the rest.
 def _anodized(m, rgb, texture, sheen):
+    """Anodized look: recolour, keeping any brushed/blasted relief."""
     if m.family == "aluminum" and texture is None:
         return metal.aluminum_anodized(color=rgb)  # tuned preset for the common case
     base = _metal_tex_base(m, texture)  # keep relief; scalar recolour
@@ -146,6 +157,7 @@ def _anodized(m, rgb, texture, sheen):
 
 
 def _pvd(m, rgb, texture, sheen):
+    """PVD look: "clear" shows the substrate metal; a colour becomes a metallic coat."""
     if rgb is None:
         return _metal_tex_base(m, texture)  # clear PVD: bright substrate metal
     if texture:  # keep the brushed/blasted relief
@@ -154,35 +166,42 @@ def _pvd(m, rgb, texture, sheen):
 
 
 def _black_oxide(m, rgb, texture, sheen):
+    """Black-oxide look: near-black, keeping relief or as a matte coat."""
     if texture:  # keep the blasted/brushed relief
         return _metal_tex_base(m, texture).override(color="#141414", roughness=0.5)
     return coats.metallic_coat_matte(color="#141414")
 
 
 def _dyeing(m, rgb, texture, sheen):
+    """Dyed look: aluminium behaves like anodize; polymers tint the base."""
     if m.family == "aluminum":
         return _anodized(m, rgb, texture, sheen)
     return _plain_base(m, texture, rgb, None)  # dyed polymer: base tinted by colour
 
 
 def _chrome(m, rgb, texture, sheen):
+    """Chrome-plated look."""
     return coats.chrome()
 
 
 def _gold(m, rgb, texture, sheen):
+    """Gold-plated look."""
     return metal.gold()
 
 
 def _silver(m, rgb, texture, sheen):
+    """Silver-plated look."""
     return metal.silver()
 
 
 def _nickel(m, rgb, texture, sheen):
+    """Nickel-plated look (tinted silver until metal.nickel is bundled)."""
     fn = getattr(metal, "nickel", None)  # adopt metal.nickel once bundled
     return fn() if fn else metal.silver().override(color="#b9b9b2")
 
 
 def _tin(m, rgb, texture, sheen):
+    """Tin-plated look (matte / satin)."""
     # tin plating is matte/satin (matte tin is the solderability standard); prefer
     # the matte factory, else roughen the glossy plain-tin factory
     fn = getattr(metal, "tin_matte", None)
@@ -190,6 +209,7 @@ def _tin(m, rgb, texture, sheen):
 
 
 def _zinc(m, rgb, texture, sheen):
+    """Zinc-plated look (satin), optionally tinted."""
     # zinc plating is satin; prefer the matte zinc factory, else roughen the glossy
     # plain-zinc factory
     fn = getattr(metal, "zinc_matte", None)
@@ -198,11 +218,13 @@ def _zinc(m, rgb, texture, sheen):
 
 
 def _coat(m, rgb, texture, sheen):
+    """Painted / coated look in ``rgb``; gloss or matte per ``sheen``."""
     fn = coats.coat_matte if sheen == fin.Sheen.MATTE else coats.coat_gloss
     return fn(color=rgb)
 
 
 def _ecoat(m, rgb, texture, sheen):
+    """Electrophoretic e-coat look (black by default)."""
     return coats.coat_matte(color=rgb or "#101010")
 
 
@@ -230,8 +252,15 @@ _SURFACE = {
 
 
 def _normalize(finish):
-    """finish -> list of (Finish, colour, sheen); unwraps AppliedFinish, tolerates
-    a raw Finish."""
+    """Normalize the ``finish`` argument to a list of (Finish, colour, sheen).
+
+    Args:
+        finish: ``None``, a single ``AppliedFinish`` / ``Finish``, or a list of them.
+
+    Returns:
+        A list of ``(Finish, colour, sheen)`` tuples; a raw ``Finish`` yields
+        ``(finish, None, None)``.
+    """
     if finish is None:
         return []
     seq = finish if isinstance(finish, (list, tuple)) else [finish]
@@ -252,15 +281,21 @@ def get_pbr_properties(
     thickness_mm=None,
     pbr=None,
 ):
-    """Resolve a bundled three.js ``PbrProperties`` for a finished material.
+    """Resolve a bundled three.js look for a finished material.
 
-    ``finish`` is an ``AppliedFinish`` (from a finish function like
-    ``spray_paint("blue")``) or a list of them -- each carries its own colour.
-    ``process`` (a ``Process``) nudges the default surface (printed -> rough).
-    ``color`` is the material's own base colour, applied only when no surface
-    finish covers it (e.g. a coloured filament or tinted resin); it has no
-    effect on bare metals, whose colour is intrinsic. ``pbr`` (if given) is
-    returned unchanged.
+    Args:
+        material: The material being rendered (dispatched on its ``category``).
+        finish: An ``AppliedFinish`` (e.g. from ``spray_paint("blue")``) or a list of
+            them -- each carries its own colour.
+        process: A ``Process`` that nudges the default surface (printed -> rough).
+        color: The material's own base colour, applied only when no surface finish
+            covers it (e.g. a coloured filament or tinted resin); ignored for bare
+            metals, whose colour is intrinsic.
+        thickness_mm: Pane thickness (mm) for transmissive materials.
+        pbr: A ready-made look, returned unchanged if given.
+
+    Returns:
+        The resolved ``PbrProperties``.
     """
     if pbr is not None:
         return pbr

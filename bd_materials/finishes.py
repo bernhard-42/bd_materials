@@ -228,88 +228,143 @@ class AppliedFinish:
 
 # --- mechanical (no colour) ------------------------------------------------
 def bead_blast() -> AppliedFinish:
+    """Bead-blasted matte finish."""
     return AppliedFinish(MECHANICAL_FINISHES[Mechanical.BEAD_BLAST])
 
 
 def brushed() -> AppliedFinish:
+    """Brushed directional-satin finish."""
     return AppliedFinish(MECHANICAL_FINISHES[Mechanical.BRUSHED])
 
 
 def fine_sanding() -> AppliedFinish:
+    """Fine-sanded smooth-matte finish."""
     return AppliedFinish(MECHANICAL_FINISHES[Mechanical.FINE_SANDING])
 
 
 def smooth_machining() -> AppliedFinish:
+    """Smooth as-machined finish (Ra 1.6 µm)."""
     return AppliedFinish(MECHANICAL_FINISHES[Mechanical.SMOOTH_MACHINING])
 
 
 def electropolish() -> AppliedFinish:
+    """Electropolished bright finish."""
     return AppliedFinish(MECHANICAL_FINISHES[Mechanical.ELECTROPOLISHED])
 
 
 # --- chemical --------------------------------------------------------------
 def anodize(color) -> AppliedFinish:
-    # colour is mandatory: anodising is done to add colour (natural/clear anodise
-    # is still an explicit "natural" choice, not the absence of one).
+    """Anodized finish in ``color``.
+
+    Args:
+        color: A colour from the anodize palette. Mandatory -- anodising is done to add
+            colour ("natural" is still an explicit choice, not the absence of one).
+
+    Returns:
+        The applied finish.
+    """
     return AppliedFinish(CHEMICAL_FINISHES[Chemical.ANODIZED], color)
 
 
 def chem_film() -> AppliedFinish:
+    """Chromate conversion coating (chem film)."""
     return AppliedFinish(CHEMICAL_FINISHES[Chemical.CHEM_FILM])
 
 
 def conductive_oxidation() -> AppliedFinish:
+    """Electrically-conductive oxidation coating."""
     return AppliedFinish(CHEMICAL_FINISHES[Chemical.CONDUCTIVE_OXIDATION])
 
 
 def black_oxide() -> AppliedFinish:
+    """Black-oxide conversion finish."""
     return AppliedFinish(CHEMICAL_FINISHES[Chemical.BLACK_OXIDE])
 
 
 def passivate() -> AppliedFinish:
+    """Passivation finish (stainless corrosion resistance)."""
     return AppliedFinish(CHEMICAL_FINISHES[Chemical.PASSIVATION])
 
 
 def pickle() -> AppliedFinish:
+    """Pickling finish (oxide / scale removal)."""
     return AppliedFinish(CHEMICAL_FINISHES[Chemical.PICKLING])
 
 
 def dye(color) -> AppliedFinish:
+    """Dyed finish in ``color`` (anodized aluminium or dyeable polymers).
+
+    Args:
+        color: The dye colour.
+
+    Returns:
+        The applied finish.
+    """
     return AppliedFinish(CHEMICAL_FINISHES[Chemical.DYEING], color)
 
 
 # --- metal plating ---------------------------------------------------------
 def chrome() -> AppliedFinish:
+    """Chrome plating."""
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.CHROME_PLATING])
 
 
 def gold_plate() -> AppliedFinish:
+    """Gold plating."""
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.GOLD_PLATING])
 
 
 def nickel_plate() -> AppliedFinish:
+    """Nickel plating."""
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.NICKEL_PLATING])
 
 
 def silver_plate() -> AppliedFinish:
+    """Silver plating."""
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.SILVER_PLATING])
 
 
 def tin_plate() -> AppliedFinish:
+    """Tin plating (matte, solderable)."""
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.TIN_PLATING])
 
 
 def pvd(color="clear") -> AppliedFinish:
-    # "clear" = bright natural PVD (substrate shows through); colours are opt-in.
+    """PVD coating in ``color``.
+
+    Args:
+        color: "clear" (default) is bright natural PVD, with the substrate showing
+            through; colours are opt-in.
+
+    Returns:
+        The applied finish.
+    """
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.PVD], color)
 
 
 def zinc_plate(color="clear") -> AppliedFinish:
-    # "clear" = clear/bright chromate -> the natural zinc look (the default).
+    """Zinc plating in ``color``.
+
+    Args:
+        color: "clear" (default) is the clear/bright chromate -- the natural zinc look;
+            others are chromate tints.
+
+    Returns:
+        The applied finish.
+    """
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.ZINC_PLATING], color)
 
 
 def vacuum_plating(color, sheen=Sheen.GLOSS) -> AppliedFinish:
+    """Vacuum-metallised plating in ``color``.
+
+    Args:
+        color: The plating colour.
+        sheen: Gloss (default) or matte.
+
+    Returns:
+        The applied finish.
+    """
     return AppliedFinish(
         METAL_PLATING_FINISHES[MetalPlating.VACUUM_PLATING], color, sheen
     )
@@ -317,29 +372,56 @@ def vacuum_plating(color, sheen=Sheen.GLOSS) -> AppliedFinish:
 
 # --- coating / paint (sheen: gloss default, matte optional) ----------------
 def powder_coat(color, sheen=Sheen.GLOSS) -> AppliedFinish:
+    """Powder coat in ``color``.
+
+    Args:
+        color: The coat colour (any, to spec).
+        sheen: Gloss (default) or matte.
+
+    Returns:
+        The applied finish.
+    """
     return AppliedFinish(COATING_FINISHES[Coating.POWDER_COAT], color, sheen)
 
 
 def spray_paint(color, sheen=Sheen.GLOSS) -> AppliedFinish:
+    """Spray paint in ``color``.
+
+    Args:
+        color: The paint colour (any, to spec).
+        sheen: Gloss (default) or matte.
+
+    Returns:
+        The applied finish.
+    """
     return AppliedFinish(COATING_FINISHES[Coating.SPRAY_PAINT], color, sheen)
 
 
 def electrophoresis() -> AppliedFinish:
-    # e-coat is always black -- no colour choice.
+    """Electrophoretic e-coat -- always black (no colour choice)."""
     return AppliedFinish(COATING_FINISHES[Coating.ELECTROPHORESIS])
 
 
 # --- marking ---------------------------------------------------------------
 def laser_engrave() -> AppliedFinish:
+    """Laser-engraved marking."""
     return AppliedFinish(MARKING_FINISHES[Marking.LASER_ENGRAVING])
 
 
 def etch() -> AppliedFinish:
+    """Etched marking."""
     return AppliedFinish(MARKING_FINISHES[Marking.ETCHING])
 
 
 def silkscreen(color="black") -> AppliedFinish:
-    # black is the common default; note PBR ignores markings, so colour is metadata.
+    """Silkscreen marking in ``color`` (default black).
+
+    Args:
+        color: The ink colour. Note PBR ignores markings, so this is metadata.
+
+    Returns:
+        The applied finish.
+    """
     return AppliedFinish(MARKING_FINISHES[Marking.SILKSCREEN], color)
 
 

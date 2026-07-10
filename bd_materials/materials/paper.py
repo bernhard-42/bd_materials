@@ -15,10 +15,10 @@ from typing import ClassVar
 
 from ..finished import FinishedMaterial, Process
 from ..finishes import AppliedFinish
-from ..core import ArealMaterial, Range
+from ..core import ArealMaterial, Range, with_density
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PaperMaterial(ArealMaterial):
     """A paper good: the shared areal ranges (from ``ArealMaterial``). ``family`` is
     the three.js paper factory key; a part's colour lives on the ``FinishedMaterial``.
@@ -57,9 +57,29 @@ def paper(
     color="white",
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PaperMaterial]:
+    """Office paper as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to office.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        PAPER_MATERIALS[grade], finish, color=color, process=process
+        with_density(PAPER_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 
@@ -90,8 +110,27 @@ def cardboard(
     grade: Cardboard = Cardboard.CORRUGATED,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PaperMaterial]:
-    return FinishedMaterial(CARDBOARD_MATERIALS[grade], finish, process=process)
+    """Corrugated cardboard as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to corrugated.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(CARDBOARD_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Foamboard ---------------------------------------------------------------
@@ -121,9 +160,29 @@ def foamboard(
     color="white",
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PaperMaterial]:
+    """Foamboard as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        FOAMBOARD_MATERIALS[grade], finish, color=color, process=process
+        with_density(FOAMBOARD_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 

@@ -21,10 +21,10 @@ from typing import ClassVar
 
 from ..finished import FinishedMaterial, Process
 from ..finishes import AppliedFinish
-from ..core import NOT_SUITABLE, PolymerMaterial, Range
+from ..core import NOT_SUITABLE, PolymerMaterial, Range, with_density
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PlasticMaterial(PolymerMaterial):
     """A plastic: the shared polymer ranges (from ``PolymerMaterial``) plus a Shore
     hardness. ``family`` is the PBR/identity key; ``transparent`` is True for clear
@@ -102,8 +102,30 @@ def pla(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(PLA_MATERIALS[grade], finish, color=color, process=process)
+    """PLA as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(PLA_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- ABS ---------------------------------------------------------------------
@@ -167,8 +189,30 @@ def abs_(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(ABS_MATERIALS[grade], finish, color=color, process=process)
+    """ABS as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(ABS_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- Nylon (PA) --------------------------------------------------------------
@@ -280,9 +324,29 @@ def nylon(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
+    """Nylon (PA) as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to PA12.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        NYLON_MATERIALS[grade], finish, color=color, process=process
+        with_density(NYLON_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 
@@ -347,8 +411,30 @@ def peek(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(PEEK_MATERIALS[grade], finish, color=color, process=process)
+    """PEEK as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to moulded.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(PEEK_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- TPU ---------------------------------------------------------------------
@@ -412,8 +498,30 @@ def tpu(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(TPU_MATERIALS[grade], finish, color=color, process=process)
+    """TPU as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to Shore 95A.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(TPU_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- PC (polycarbonate) ------------------------------------------------------
@@ -455,9 +563,28 @@ def pc(
     thickness_mm=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
+    """Polycarbonate (PC) as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        thickness_mm: Pane thickness in mm; used for the transmissive look (the material
+            is transparent).
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        PC_MATERIALS[grade],
+        with_density(PC_MATERIALS[grade], density),
         finish,
         color=color,
         thickness_mm=thickness_mm,
@@ -502,8 +629,30 @@ def pp(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(PP_MATERIALS[grade], finish, color=color, process=process)
+    """Polypropylene (PP) as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(PP_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- POM (acetal) ------------------------------------------------------------
@@ -543,8 +692,30 @@ def pom(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(POM_MATERIALS[grade], finish, color=color, process=process)
+    """Acetal (POM) as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(POM_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- PTFE --------------------------------------------------------------------
@@ -584,8 +755,30 @@ def ptfe(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(PTFE_MATERIALS[grade], finish, color=color, process=process)
+    """PTFE as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(PTFE_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- PMMA (acrylic) ----------------------------------------------------------
@@ -627,9 +820,28 @@ def pmma(
     thickness_mm=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
+    """Acrylic (PMMA) as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        thickness_mm: Pane thickness in mm; used for the transmissive look (the material
+            is transparent).
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        PMMA_MATERIALS[grade],
+        with_density(PMMA_MATERIALS[grade], density),
         finish,
         color=color,
         thickness_mm=thickness_mm,
@@ -674,8 +886,30 @@ def pe(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(PE_MATERIALS[grade], finish, color=color, process=process)
+    """Polyethylene (PE) as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to HDPE.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(PE_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- Phenolic ----------------------------------------------------------------
@@ -715,9 +949,29 @@ def phenolic(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
+    """Phenolic as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to Bakelite.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        PHENOLIC_MATERIALS[grade], finish, color=color, process=process
+        with_density(PHENOLIC_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 
@@ -758,9 +1012,29 @@ def rubber(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
+    """Rubber as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        RUBBER_MATERIALS[grade], finish, color=color, process=process
+        with_density(RUBBER_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 
@@ -825,8 +1099,30 @@ def petg(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(PETG_MATERIALS[grade], finish, color=color, process=process)
+    """PETG as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(PETG_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- ASA ---------------------------------------------------------------------
@@ -868,8 +1164,30 @@ def asa(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(ASA_MATERIALS[grade], finish, color=color, process=process)
+    """ASA as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(ASA_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- PPS ---------------------------------------------------------------------
@@ -910,8 +1228,30 @@ def pps(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(PPS_MATERIALS[grade], finish, color=color, process=process)
+    """PPS as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to carbon-filled.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(PPS_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- FR4 ---------------------------------------------------------------------
@@ -952,8 +1292,30 @@ def fr4(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(FR4_MATERIALS[grade], finish, color=color, process=process)
+    """FR4 as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(FR4_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- CFRP --------------------------------------------------------------------
@@ -993,8 +1355,30 @@ def cfrp(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
-    return FinishedMaterial(CFRP_MATERIALS[grade], finish, color=color, process=process)
+    """CFRP as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to plate.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(CFRP_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 ALL_PLASTICS = (

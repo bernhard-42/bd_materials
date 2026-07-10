@@ -19,10 +19,10 @@ from typing import ClassVar
 
 from ..finished import FinishedMaterial, Process
 from ..finishes import AppliedFinish
-from ..core import NOT_SUITABLE, PolymerMaterial, Range
+from ..core import NOT_SUITABLE, PolymerMaterial, Range, with_density
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ResinMaterial(PolymerMaterial):
     """A photopolymer resin: the shared polymer ranges (from ``PolymerMaterial``) plus
     a Shore hardness. ``hardness_scale`` is "Shore D" for rigid resins, "Shore A" for
@@ -77,9 +77,29 @@ def standard(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
+    """Standard resin as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        STANDARD_MATERIALS[grade], finish, color=color, process=process
+        with_density(STANDARD_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 
@@ -120,9 +140,29 @@ def tough(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
+    """Tough resin as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        TOUGH_MATERIALS[grade], finish, color=color, process=process
+        with_density(TOUGH_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 
@@ -163,9 +203,29 @@ def high_temp(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
+    """High-temperature resin as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        HIGH_TEMP_MATERIALS[grade], finish, color=color, process=process
+        with_density(HIGH_TEMP_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 
@@ -207,9 +267,29 @@ def ceramic(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
+    """Ceramic-filled resin as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        CERAMIC_MATERIALS[grade], finish, color=color, process=process
+        with_density(CERAMIC_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 
@@ -250,9 +330,29 @@ def castable(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
+    """Castable resin as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        CASTABLE_MATERIALS[grade], finish, color=color, process=process
+        with_density(CASTABLE_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 
@@ -294,8 +394,30 @@ def esd(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
-    return FinishedMaterial(ESD_MATERIALS[grade], finish, color=color, process=process)
+    """ESD (static-dissipative) resin as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(ESD_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
+    )
 
 
 # --- Transparent -------------------------------------------------------------
@@ -337,9 +459,28 @@ def transparent(
     thickness_mm=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
+    """Transparent resin as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        thickness_mm: Pane thickness in mm; used for the transmissive look (the material
+            is transparent).
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        TRANSPARENT_MATERIALS[grade],
+        with_density(TRANSPARENT_MATERIALS[grade], density),
         finish,
         color=color,
         thickness_mm=thickness_mm,
@@ -384,9 +525,29 @@ def flexible(
     color=None,
     finish: _Finish = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
+    """Flexible resin as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic.
+        color: Base colour for the part -- a standard-palette name, a hex string, or an
+            RGB tuple.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
     return FinishedMaterial(
-        FLEXIBLE_MATERIALS[grade], finish, color=color, process=process
+        with_density(FLEXIBLE_MATERIALS[grade], density),
+        finish,
+        color=color,
+        process=process,
     )
 
 

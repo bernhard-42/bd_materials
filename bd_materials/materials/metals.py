@@ -15,10 +15,10 @@ from typing import ClassVar
 
 from ..finished import FinishedMaterial, Process
 from ..finishes import AppliedFinish
-from ..core import Range, SolidMaterial
+from ..core import Range, SolidMaterial, with_density
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class MetalMaterial(SolidMaterial):
     """A metal: the shared solid ranges (from ``SolidMaterial``) plus yield,
     shear strength, hardness (HB/HRC/HV), and a melting range.
@@ -181,8 +181,27 @@ def aluminum(
     grade: Alu = Alu.G6061_T6,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(ALU_MATERIALS[grade], finish, process=process)
+    """Aluminium as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to 6061-T6.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(ALU_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Stainless steel ---------------------------------------------------------
@@ -351,8 +370,27 @@ def stainless(
     grade: Stainless = Stainless.G304_ANNEALED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(STAINLESS_MATERIALS[grade], finish, process=process)
+    """Stainless steel as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to 304 annealed.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(STAINLESS_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Mild steel --------------------------------------------------------------
@@ -433,8 +471,27 @@ def mild_steel(
     grade: MildSteel = MildSteel.G1018_COLD_DRAWN,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(MILD_STEEL_MATERIALS[grade], finish, process=process)
+    """Mild steel as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to 1018 cold-drawn.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(MILD_STEEL_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Alloy steel -------------------------------------------------------------
@@ -515,8 +572,27 @@ def alloy_steel(
     grade: AlloySteel = AlloySteel.G4140_QUENCHED_TEMPERED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(ALLOY_STEEL_MATERIALS[grade], finish, process=process)
+    """Alloy steel as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to 4140 quenched & tempered.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(ALLOY_STEEL_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Spring steel ------------------------------------------------------------
@@ -553,8 +629,27 @@ def spring_steel(
     grade: SpringSteel = SpringSteel.GENERIC_QUENCHED_TEMPERED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(SPRING_STEEL_MATERIALS[grade], finish, process=process)
+    """Spring steel as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic quenched & tempered.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(SPRING_STEEL_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Tool steel --------------------------------------------------------------
@@ -723,8 +818,27 @@ def tool_steel(
     grade: ToolSteel = ToolSteel.D2_HARDENED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(TOOL_STEEL_MATERIALS[grade], finish, process=process)
+    """Tool steel as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to D2 hardened.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(TOOL_STEEL_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Titanium ----------------------------------------------------------------
@@ -783,8 +897,27 @@ def titanium(
     grade: Titanium = Titanium.GR5_ANNEALED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(TITANIUM_MATERIALS[grade], finish, process=process)
+    """Titanium as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to Grade 5 annealed.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(TITANIUM_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Brass -------------------------------------------------------------------
@@ -843,8 +976,27 @@ def brass(
     grade: Brass = Brass.C360_HALF_HARD,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(BRASS_MATERIALS[grade], finish, process=process)
+    """Brass as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to C360 half-hard.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(BRASS_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Copper ------------------------------------------------------------------
@@ -881,8 +1033,27 @@ def copper(
     grade: Copper = Copper.C110_ANNEALED,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(COPPER_MATERIALS[grade], finish, process=process)
+    """Copper as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to C110 annealed.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(COPPER_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 # --- Magnesium ---------------------------------------------------------------
@@ -919,8 +1090,27 @@ def magnesium(
     grade: Magnesium = Magnesium.GENERIC_STRUCTURAL,
     finish: AppliedFinish | list[AppliedFinish] | None = None,
     process: Process | None = None,
+    density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
-    return FinishedMaterial(MAGNESIUM_MATERIALS[grade], finish, process=process)
+    """Magnesium as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to generic structural.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(MAGNESIUM_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
 
 
 ALL_METALS = (

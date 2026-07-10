@@ -67,6 +67,24 @@ class FinishedMaterial(Generic[MaterialT]):
         process: Process | None = None,
         pbr: PbrProperties | None = None,
     ) -> None:
+        """Bundle a material with the per-part choices.
+
+        Args:
+            material: The range ``Material`` (physics) this part is made of.
+            finish: An ``AppliedFinish`` or list of them; mutually exclusive with
+                ``process``.
+            color: A selectable base colour (name, hex string, or RGB tuple).
+            thickness_mm: Pane thickness in mm, meaningful only for a ``transparent``
+                material.
+            process: An as-made surface hint; mutually exclusive with ``finish``.
+            pbr: A ready-made look that overrides everything else; cannot be combined
+                with ``finish`` / ``process`` / ``color`` / ``thickness_mm``.
+
+        Raises:
+            TypeError: If ``material`` is not a range ``Material``.
+            ValueError: If ``pbr`` is combined with other look inputs, or ``finish``
+                and ``process`` are both given.
+        """
         if not isinstance(material, RangeMaterial):
             raise TypeError(
                 "material must be a range Material (e.g. metals.aluminum().material), "
@@ -97,11 +115,14 @@ class FinishedMaterial(Generic[MaterialT]):
 
     @property
     def pbr(self) -> PbrProperties:
-        """The resolved three.js ``PbrProperties`` (needs ``threejs_materials``).
+        """The resolved three.js look (needs ``threejs_materials``).
 
-        The explicit override if supplied, else derived from the material's
-        identity, the selected colour/thickness, the finish(es), and the process.
-        The viz stack is imported here and nowhere else.
+        The explicit override if supplied, else derived from the material's identity,
+        the selected colour/thickness, the finish(es), and the process. The viz stack
+        is imported here and nowhere else.
+
+        Returns:
+            The resolved ``PbrProperties``.
         """
         if self._pbr is not None:
             return self._pbr
@@ -120,6 +141,7 @@ class FinishedMaterial(Generic[MaterialT]):
         return str(self.material)
 
     def __repr__(self) -> str:
+        """Compact repr: the material name plus any per-part choices set."""
         parts = [self.material.name]
         if self.color is not None:
             parts.append(f"color={self.color!r}")

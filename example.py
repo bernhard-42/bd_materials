@@ -129,6 +129,13 @@ al.pbr  # three.js PbrProperties
 
 # %%
 
+# density is a single representative value -- override it per part (e.g. measured):
+al2 = metals.aluminum(metals.Alu.G7075_T6, density=2805)
+print(f"{al2.material.density=}  (catalog default {al.material.density})")
+print(f"{al2.material.mass(volume_mm3=8000)=}")  # mass reflects the override
+
+# %%
+
 # 7 — advisory applicability queries (never a constraint)
 
 print("Typical finishes for a aluminum:\n")
