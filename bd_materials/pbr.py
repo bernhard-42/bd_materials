@@ -36,7 +36,6 @@ _ROUGH_PROCESSES = frozenset({Process.FDM, Process.SLS, Process.MJF, Process.SLM
 _COLOR_HEX: dict[str, str | None] = {
     "natural": None,
     "clear": None,
-    fin.CUSTOM: None,
     "black": "#111111",
     "white": "#f5f5f5",
     "gray": "#808080",

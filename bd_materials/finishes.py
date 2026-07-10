@@ -7,50 +7,23 @@ Finishes are grouped by process into enums (:class:`Mechanical`, :class:`Chemica
 which bind a colour (and, for paints/coatings, a :class:`Sheen`) to a finish and
 return an :class:`AppliedFinish`.
 
-A ``Finish`` is now purely its intrinsic spec (name, standard colour palette,
-notes). Where a finish is *typically* used (its substrates) is a separate concern
-and lives in :mod:`.applicability` -- one central material<->finish table.
+A ``Finish`` is purely its intrinsic spec (name + optional notes). Where a finish is
+*typically* used (its substrates) is a separate concern and lives in
+:mod:`.applicability` -- one central material<->finish table.
 
 Finishes are advisory, not gated: **any finish may be specified on any material**.
 
-``colors`` is a standard palette per finish drawn from ``STANDARD_COLORS``:
-``()`` = no colour choice (N/A / substrate colour), ``("black",)`` = single,
-``("champagne", "rose gold", ...)`` = palette, and ``CUSTOM`` = any colour to
-spec (RAL/Pantone paint & powder). Sheen (matte/gloss) is a per-application choice
-like colour -- it rides on the ``AppliedFinish``, not the ``Finish``.
+Which colours a finish is typically offered in is advisory and deliberately not
+modelled on the ``Finish`` -- any colour may be applied per part (a name in
+``pbr._COLOR_HEX`` renders as that swatch; anything else passes through). Sheen
+(matte/gloss) is a per-application choice like colour -- it rides on the
+``AppliedFinish``, not the ``Finish``.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-
-# --- standard finish colours (controlled vocabulary) -----------------------
-CUSTOM = "custom"  # any colour to specification (RAL / Pantone)
-STANDARD_COLORS = frozenset(
-    {
-        "natural",
-        "clear",
-        "black",
-        "white",
-        "gray",
-        "gunmetal",
-        "silver",
-        "nickel",
-        "chrome",
-        "gold",
-        "rose gold",
-        "champagne",
-        "brown",
-        "red",
-        "orange",
-        "yellow",
-        "green",
-        "blue",
-        "purple",
-        CUSTOM,
-    }
-)
 
 
 class Sheen(Enum):
@@ -62,12 +35,11 @@ class Sheen(Enum):
 
 @dataclass(frozen=True)
 class Finish:
-    """A surface finish's intrinsic spec. ``colors`` is its standard palette
-    (``()`` = no colour choice). Substrate applicability lives in
-    :mod:`.applicability`, not here."""
+    """A surface finish's intrinsic spec (name + optional notes). Which colours a
+    finish is typically offered in is advisory and not modelled here; substrate
+    applicability lives in :mod:`.applicability`, not here."""
 
     name: str
-    colors: tuple[str, ...] = ()  # standard palette; () = N/A / substrate colour
     notes: str | None = None
 
 
@@ -106,36 +78,14 @@ class Chemical(Enum):
 
 
 CHEMICAL_FINISHES: dict[Chemical, Finish] = {
-    Chemical.ANODIZED: Finish(
-        "Anodized",
-        colors=(
-            "natural",
-            "black",
-            "gray",
-            "gold",
-            "rose gold",
-            "red",
-            "blue",
-            "champagne",
-            "brown",
-            "purple",
-            "green",
-            "orange",
-        ),
-    ),
-    Chemical.CHEM_FILM: Finish(
-        "Chemical conversion coat (Chem film)", colors=("clear", "gold")
-    ),
-    Chemical.CONDUCTIVE_OXIDATION: Finish(
-        "Electrically conductive oxidation", colors=("clear",)
-    ),
-    Chemical.BLACK_OXIDE: Finish("Black oxide", colors=("black",)),
+    Chemical.ANODIZED: Finish("Anodized"),
+    Chemical.CHEM_FILM: Finish("Chemical conversion coat (Chem film)"),
+    Chemical.CONDUCTIVE_OXIDATION: Finish("Electrically conductive oxidation"),
+    Chemical.BLACK_OXIDE: Finish("Black oxide"),
     Chemical.PASSIVATION: Finish("Passivation"),
     Chemical.PICKLING: Finish("Pickling"),
     Chemical.DYEING: Finish(
-        "Dyeing",
-        colors=(CUSTOM,),
-        notes="anodized aluminum, or dyeable polymers (esp. nylon)",
+        "Dyeing", notes="anodized aluminum, or dyeable polymers (esp. nylon)"
     ),
 }
 
@@ -152,21 +102,16 @@ class MetalPlating(Enum):
 
 
 METAL_PLATING_FINISHES: dict[MetalPlating, Finish] = {
-    MetalPlating.CHROME_PLATING: Finish("Chrome plating", colors=("chrome",)),
-    MetalPlating.GOLD_PLATING: Finish("Gold plating", colors=("gold",)),
-    MetalPlating.NICKEL_PLATING: Finish("Nickel plating", colors=("nickel",)),
-    MetalPlating.SILVER_PLATING: Finish("Silver plating", colors=("silver",)),
-    MetalPlating.TIN_PLATING: Finish("Tin plating", colors=("silver",)),
-    MetalPlating.PVD: Finish(
-        "PVD (Physical Vapor Deposition)",
-        colors=("gold", "rose gold", "black", "gunmetal", "blue"),
-    ),
+    MetalPlating.CHROME_PLATING: Finish("Chrome plating"),
+    MetalPlating.GOLD_PLATING: Finish("Gold plating"),
+    MetalPlating.NICKEL_PLATING: Finish("Nickel plating"),
+    MetalPlating.SILVER_PLATING: Finish("Silver plating"),
+    MetalPlating.TIN_PLATING: Finish("Tin plating"),
+    MetalPlating.PVD: Finish("PVD (Physical Vapor Deposition)"),
     MetalPlating.ZINC_PLATING: Finish(
-        "Zinc plating",
-        colors=("clear", "blue", "yellow", "black"),
-        notes="corrosion protection for ferrous steels",
+        "Zinc plating", notes="corrosion protection for ferrous steels"
     ),
-    MetalPlating.VACUUM_PLATING: Finish("Vacuum plating", colors=(CUSTOM,)),
+    MetalPlating.VACUUM_PLATING: Finish("Vacuum plating"),
 }
 
 
@@ -177,9 +122,9 @@ class Coating(Enum):
 
 
 COATING_FINISHES: dict[Coating, Finish] = {
-    Coating.POWDER_COAT: Finish("Powder coat", colors=(CUSTOM,)),
-    Coating.ELECTROPHORESIS: Finish("Electrophoresis", colors=("black",)),
-    Coating.SPRAY_PAINT: Finish("Spray painting", colors=(CUSTOM,)),
+    Coating.POWDER_COAT: Finish("Powder coat"),
+    Coating.ELECTROPHORESIS: Finish("Electrophoresis"),
+    Coating.SPRAY_PAINT: Finish("Spray painting"),
 }
 
 
@@ -192,11 +137,11 @@ class Marking(Enum):
 MARKING_FINISHES: dict[Marking, Finish] = {
     Marking.LASER_ENGRAVING: Finish("Laser engraving"),
     Marking.ETCHING: Finish("Etching"),
-    Marking.SILKSCREEN: Finish("Silkscreen", colors=(CUSTOM,)),
+    Marking.SILKSCREEN: Finish("Silkscreen"),
 }
 
 
-# All finishes flattened; used for palette validation and by :mod:`.applicability`.
+# All finishes flattened; used by :mod:`.applicability`.
 ALL_FINISHES = (
     *MECHANICAL_FINISHES.values(),
     *CHEMICAL_FINISHES.values(),
@@ -204,11 +149,6 @@ ALL_FINISHES = (
     *COATING_FINISHES.values(),
     *MARKING_FINISHES.values(),
 )
-
-for _finish in ALL_FINISHES:
-    _unknown = set(_finish.colors) - STANDARD_COLORS
-    if len(_unknown) > 0:
-        raise ValueError(f"{_finish.name}: non-standard colours {sorted(_unknown)}")
 
 
 # ===========================================================================
@@ -257,8 +197,8 @@ def anodize(color: str) -> AppliedFinish:
     """Anodized finish in ``color``.
 
     Args:
-        color: A colour from the anodize palette. Mandatory -- anodising is done to add
-            colour ("natural" is still an explicit choice, not the absence of one).
+        color: The anodize colour. Mandatory -- anodising is done to add colour
+            ("natural" is still an explicit choice, not the absence of one).
 
     Returns:
         The applied finish.
@@ -430,8 +370,6 @@ __all__ = [
     "Finish",
     "AppliedFinish",
     "Sheen",
-    "CUSTOM",
-    "STANDARD_COLORS",
     # catalog (maintenance backbone)
     "Mechanical",
     "Chemical",
