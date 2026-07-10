@@ -17,8 +17,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import ClassVar
 
-from ..finished import FinishedMaterial, Process
-from ..finishes import AppliedFinish
+from ..finished import Color, FinishedMaterial, FinishSpec, Process
 from ..core import NOT_SUITABLE, PolymerMaterial, Range, with_density
 
 
@@ -35,9 +34,6 @@ class ResinMaterial(PolymerMaterial):
     hardness_scale: str  # "Shore D" (rigid) / "Shore A" (flexible)
     family: str | None = None
     transparent: bool = False
-
-
-_Finish = AppliedFinish | list[AppliedFinish] | None
 
 
 # --- Standard ----------------------------------------------------------------
@@ -74,8 +70,8 @@ STANDARD_MATERIALS: dict[Standard, ResinMaterial] = {
 
 def standard(
     grade: Standard = Standard.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
@@ -137,8 +133,8 @@ TOUGH_MATERIALS: dict[Tough, ResinMaterial] = {
 
 def tough(
     grade: Tough = Tough.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
@@ -200,8 +196,8 @@ HIGH_TEMP_MATERIALS: dict[HighTemp, ResinMaterial] = {
 
 def high_temp(
     grade: HighTemp = HighTemp.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
@@ -264,8 +260,8 @@ CERAMIC_MATERIALS: dict[Ceramic, ResinMaterial] = {
 
 def ceramic(
     grade: Ceramic = Ceramic.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
@@ -327,8 +323,8 @@ CASTABLE_MATERIALS: dict[Castable, ResinMaterial] = {
 
 def castable(
     grade: Castable = Castable.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
@@ -391,8 +387,8 @@ ESD_MATERIALS: dict[Esd, ResinMaterial] = {
 
 def esd(
     grade: Esd = Esd.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
@@ -455,9 +451,9 @@ TRANSPARENT_MATERIALS: dict[Transparent, ResinMaterial] = {
 
 def transparent(
     grade: Transparent = Transparent.GENERIC,
-    color=None,
-    thickness_mm=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    thickness_mm: float | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
@@ -522,8 +518,8 @@ FLEXIBLE_MATERIALS: dict[Flexible, ResinMaterial] = {
 
 def flexible(
     grade: Flexible = Flexible.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:

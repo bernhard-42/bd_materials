@@ -207,7 +207,7 @@ ALL_FINISHES = (
 
 for _finish in ALL_FINISHES:
     _unknown = set(_finish.colors) - STANDARD_COLORS
-    if _unknown:
+    if len(_unknown) > 0:
         raise ValueError(f"{_finish.name}: non-standard colours {sorted(_unknown)}")
 
 
@@ -253,7 +253,7 @@ def electropolish() -> AppliedFinish:
 
 
 # --- chemical --------------------------------------------------------------
-def anodize(color) -> AppliedFinish:
+def anodize(color: str) -> AppliedFinish:
     """Anodized finish in ``color``.
 
     Args:
@@ -291,7 +291,7 @@ def pickle() -> AppliedFinish:
     return AppliedFinish(CHEMICAL_FINISHES[Chemical.PICKLING])
 
 
-def dye(color) -> AppliedFinish:
+def dye(color: str) -> AppliedFinish:
     """Dyed finish in ``color`` (anodized aluminium or dyeable polymers).
 
     Args:
@@ -329,7 +329,7 @@ def tin_plate() -> AppliedFinish:
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.TIN_PLATING])
 
 
-def pvd(color="clear") -> AppliedFinish:
+def pvd(color: str = "clear") -> AppliedFinish:
     """PVD coating in ``color``.
 
     Args:
@@ -342,7 +342,7 @@ def pvd(color="clear") -> AppliedFinish:
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.PVD], color)
 
 
-def zinc_plate(color="clear") -> AppliedFinish:
+def zinc_plate(color: str = "clear") -> AppliedFinish:
     """Zinc plating in ``color``.
 
     Args:
@@ -355,7 +355,7 @@ def zinc_plate(color="clear") -> AppliedFinish:
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.ZINC_PLATING], color)
 
 
-def vacuum_plating(color, sheen=Sheen.GLOSS) -> AppliedFinish:
+def vacuum_plating(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Vacuum-metallised plating in ``color``.
 
     Args:
@@ -371,7 +371,7 @@ def vacuum_plating(color, sheen=Sheen.GLOSS) -> AppliedFinish:
 
 
 # --- coating / paint (sheen: gloss default, matte optional) ----------------
-def powder_coat(color, sheen=Sheen.GLOSS) -> AppliedFinish:
+def powder_coat(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Powder coat in ``color``.
 
     Args:
@@ -384,7 +384,7 @@ def powder_coat(color, sheen=Sheen.GLOSS) -> AppliedFinish:
     return AppliedFinish(COATING_FINISHES[Coating.POWDER_COAT], color, sheen)
 
 
-def spray_paint(color, sheen=Sheen.GLOSS) -> AppliedFinish:
+def spray_paint(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Spray paint in ``color``.
 
     Args:
@@ -413,7 +413,7 @@ def etch() -> AppliedFinish:
     return AppliedFinish(MARKING_FINISHES[Marking.ETCHING])
 
 
-def silkscreen(color="black") -> AppliedFinish:
+def silkscreen(color: str = "black") -> AppliedFinish:
     """Silkscreen marking in ``color`` (default black).
 
     Args:

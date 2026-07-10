@@ -19,8 +19,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import ClassVar
 
-from ..finished import FinishedMaterial, Process
-from ..finishes import AppliedFinish
+from ..finished import Color, FinishedMaterial, FinishSpec, Process
 from ..core import NOT_SUITABLE, PolymerMaterial, Range, with_density
 
 
@@ -36,9 +35,6 @@ class PlasticMaterial(PolymerMaterial):
     hardness_scale: str  # "Shore D", "Shore A", ...
     family: str | None = None
     transparent: bool = False
-
-
-_Finish = AppliedFinish | list[AppliedFinish] | None
 
 
 # --- PLA ---------------------------------------------------------------------
@@ -99,8 +95,8 @@ PLA_MATERIALS: dict[PLA, PlasticMaterial] = {
 
 def pla(
     grade: PLA = PLA.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -186,8 +182,8 @@ ABS_MATERIALS: dict[ABS, PlasticMaterial] = {
 
 def abs_(
     grade: ABS = ABS.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -321,8 +317,8 @@ NYLON_MATERIALS: dict[Nylon, PlasticMaterial] = {
 
 def nylon(
     grade: Nylon = Nylon.PA12,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -408,8 +404,8 @@ PEEK_MATERIALS: dict[Peek, PlasticMaterial] = {
 
 def peek(
     grade: Peek = Peek.MOLDED,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -495,8 +491,8 @@ TPU_MATERIALS: dict[TPU, PlasticMaterial] = {
 
 def tpu(
     grade: TPU = TPU.SHORE_95A,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -559,9 +555,9 @@ PC_MATERIALS: dict[PC, PlasticMaterial] = {
 
 def pc(
     grade: PC = PC.GENERIC,
-    color=None,
-    thickness_mm=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    thickness_mm: float | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -626,8 +622,8 @@ PP_MATERIALS: dict[PP, PlasticMaterial] = {
 
 def pp(
     grade: PP = PP.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -689,8 +685,8 @@ POM_MATERIALS: dict[POM, PlasticMaterial] = {
 
 def pom(
     grade: POM = POM.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -752,8 +748,8 @@ PTFE_MATERIALS: dict[PTFE, PlasticMaterial] = {
 
 def ptfe(
     grade: PTFE = PTFE.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -816,9 +812,9 @@ PMMA_MATERIALS: dict[PMMA, PlasticMaterial] = {
 
 def pmma(
     grade: PMMA = PMMA.GENERIC,
-    color=None,
-    thickness_mm=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    thickness_mm: float | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -883,8 +879,8 @@ PE_MATERIALS: dict[PE, PlasticMaterial] = {
 
 def pe(
     grade: PE = PE.HDPE,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -946,8 +942,8 @@ PHENOLIC_MATERIALS: dict[Phenolic, PlasticMaterial] = {
 
 def phenolic(
     grade: Phenolic = Phenolic.BAKELITE,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -1009,8 +1005,8 @@ RUBBER_MATERIALS: dict[Rubber, PlasticMaterial] = {
 
 def rubber(
     grade: Rubber = Rubber.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -1096,8 +1092,8 @@ PETG_MATERIALS: dict[PETG, PlasticMaterial] = {
 
 def petg(
     grade: PETG = PETG.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -1161,8 +1157,8 @@ ASA_MATERIALS: dict[Asa, PlasticMaterial] = {
 
 def asa(
     grade: Asa = Asa.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -1225,8 +1221,8 @@ PPS_MATERIALS: dict[PPS, PlasticMaterial] = {
 
 def pps(
     grade: PPS = PPS.CF,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -1289,8 +1285,8 @@ FR4_MATERIALS: dict[FR4, PlasticMaterial] = {
 
 def fr4(
     grade: FR4 = FR4.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
@@ -1352,8 +1348,8 @@ CFRP_MATERIALS: dict[CFRP, PlasticMaterial] = {
 
 def cfrp(
     grade: CFRP = CFRP.PLATE,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:

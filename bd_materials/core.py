@@ -185,7 +185,7 @@ class RangeMaterial:
             ("thermal", THERMAL_PROPERTY_UNITS),
         ):
             names = [n for n in units if n in have]
-            if not names:
+            if len(names) == 0:
                 continue
             lines.append(f"  # {group} properties")
             for name in names:

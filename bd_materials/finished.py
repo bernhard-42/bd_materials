@@ -26,6 +26,9 @@ if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-fre
 # colour input accepted by ``color=`` (name / hex string, or an RGB tuple)
 Color = str | tuple[float, float, float]
 
+# finish input accepted by ``finish=`` (a single applied finish, a list, or none)
+FinishSpec = AppliedFinish | list[AppliedFinish] | None
+
 # the concrete material class a FinishedMaterial carries (MetalMaterial, ...), so
 # ``.material`` keeps its category-specific physics fields for type checkers
 MaterialT = TypeVar("MaterialT", bound=RangeMaterial)
@@ -60,7 +63,7 @@ class FinishedMaterial(Generic[MaterialT]):
     def __init__(
         self,
         material: MaterialT,
-        finish: AppliedFinish | list[AppliedFinish] | None = None,
+        finish: FinishSpec = None,
         *,
         color: Color | None = None,
         thickness_mm: float | None = None,

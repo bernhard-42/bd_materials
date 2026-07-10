@@ -1,7 +1,7 @@
 """Bridge from a finished material to a bundled three.js PBR material.
 
-``get_pbr_properties(material, finish, process, color, pbr)`` resolves the right
-``threejs_materials`` factory for how a part looks -- the function behind
+``get_pbr_properties(material, finish, process, color, thickness_mm, pbr)`` resolves
+the right ``threejs_materials`` factory for how a part looks -- the function behind
 the ``FinishedMaterial.pbr`` property (the user-facing entry, in ``finished``).
 
 ``finish`` is an ``AppliedFinish`` (from a finish function like
@@ -17,12 +17,17 @@ this module and ``FinishedMaterial.pbr`` pull it in).
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from threejs_materials import coats, glass, metal, paper, plastic, textile, wood
 
 from . import finishes as fin
 from .core import FERROUS, RangeMaterial
-from .finished import Process
+from .finished import Color, FinishSpec, Process
 from .finishes import AppliedFinish
+
+if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-free)
+    from threejs_materials import PbrProperties
 
 # as-printed / as-built routes default to a rough surface; the rest stay smooth
 _ROUGH_PROCESSES = frozenset({Process.FDM, Process.SLS, Process.MJF, Process.SLM})
@@ -56,13 +61,6 @@ _BARE_METALS = frozenset(
     {"aluminum", "brass", "copper", "stainless", "titanium", "tin", "gold", "silver"}
 )
 
-_TEXTILE = {
-    "Woven Fabric": "fabric_weave",
-    "Knit Fabric": "fabric_knit",
-    "Felt": "felt",
-    "Leather": "leather",
-}
-
 # mechanical finishes -> metal surface-relief variant (None elsewhere = smooth)
 _MECH = fin.MECHANICAL_FINISHES
 _TEXTURE = {
@@ -72,7 +70,7 @@ _TEXTURE = {
 }
 
 
-def _color_value(color):
+def _color_value(color: Color | None) -> Color | None:
     """A standard colour name -> hex; hex / CSS name / RGB tuple pass through."""
     if color is None:
         return None
@@ -99,13 +97,20 @@ def _is_carbon(material: RangeMaterial) -> bool:
     return material.family == "CFRP"
 
 
-def _metal_tex_base(material: RangeMaterial, texture):
+def _metal_tex_base(material: RangeMaterial, texture: str | None) -> PbrProperties:
     """Bare metal, optionally with a brushed/matte relief variant."""
     name = _metal_name(material)
-    return getattr(metal, f"{name}_{texture}")() if texture else getattr(metal, name)()
+    if texture is not None:
+        return getattr(metal, f"{name}_{texture}")()
+    return getattr(metal, name)()
 
 
-def _plain_base(material: RangeMaterial, texture, rgb, thickness):
+def _plain_base(
+    material: RangeMaterial,
+    texture: str | None,
+    rgb: Color | None,
+    thickness: float | None,
+) -> PbrProperties:
     """Look for a material with no covering colour finish -- substrate + texture.
 
     Wood/paper/textile pick a bundled factory by ``family`` (the factory key),
@@ -122,17 +127,20 @@ def _plain_base(material: RangeMaterial, texture, rgb, thickness):
         The resolved ``PbrProperties``.
     """
     cat = material.category
-    fam = material.family or ""
+    fam = material.family if material.family is not None else ""
     if cat == "metal":
         return _metal_tex_base(material, texture)
     if cat == "wood":
-        return (getattr(wood, fam, None) or wood.oak)(color=rgb)
+        factory = getattr(wood, fam, None)
+        return (factory if factory is not None else wood.oak)(color=rgb)
     if cat == "glass":
         return glass.glass(color=rgb, thickness=thickness)
     if cat == "paper":
-        return (getattr(paper, fam, None) or paper.paper)(color=rgb)
+        factory = getattr(paper, fam, None)
+        return (factory if factory is not None else paper.paper)(color=rgb)
     if cat == "textile":
-        return (getattr(textile, fam, None) or textile.fabric_weave)(color=rgb)
+        factory = getattr(textile, fam, None)
+        return (factory if factory is not None else textile.fabric_weave)(color=rgb)
     # plastic / resin (composites stay in this branch)
     if material.transparent:
         # transmissive: refraction depends on pane thickness (three.js acrylic
@@ -140,7 +148,7 @@ def _plain_base(material: RangeMaterial, texture, rgb, thickness):
         return plastic.acrylic(color=rgb, thickness=thickness)
     if _is_carbon(material):
         return plastic.carbon_fiber(color=rgb)
-    if texture:
+    if texture is not None:
         return plastic.plastic_rough(color=rgb)
     return plastic.plastic_clean(color=rgb)
 
@@ -148,84 +156,116 @@ def _plain_base(material: RangeMaterial, texture, rgb, thickness):
 # --- surface (colour) finishes: (material, rgb, texture, sheen) -> PbrProperties ---
 # All handlers share this signature; sheen (gloss/matte) is only used by the
 # paint/coat handler, ignored by the rest.
-def _anodized(m, rgb, texture, sheen):
+def _anodized(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Anodized look: recolour, keeping any brushed/blasted relief."""
     if m.family == "aluminum" and texture is None:
         return metal.aluminum_anodized(color=rgb)  # tuned preset for the common case
     base = _metal_tex_base(m, texture)  # keep relief; scalar recolour
-    return base.override(color=rgb, roughness=0.3) if rgb else base
+    if rgb is not None:
+        return base.override(color=rgb, roughness=0.3)
+    return base
 
 
-def _pvd(m, rgb, texture, sheen):
+def _pvd(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """PVD look: "clear" shows the substrate metal; a colour becomes a metallic coat."""
     if rgb is None:
         return _metal_tex_base(m, texture)  # clear PVD: bright substrate metal
-    if texture:  # keep the brushed/blasted relief
+    if texture is not None:  # keep the brushed/blasted relief
         return _metal_tex_base(m, texture).override(color=rgb, roughness=0.15)
     return coats.metallic_coat_gloss(color=rgb)
 
 
-def _black_oxide(m, rgb, texture, sheen):
+def _black_oxide(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Black-oxide look: near-black, keeping relief or as a matte coat."""
-    if texture:  # keep the blasted/brushed relief
+    if texture is not None:  # keep the blasted/brushed relief
         return _metal_tex_base(m, texture).override(color="#141414", roughness=0.5)
     return coats.metallic_coat_matte(color="#141414")
 
 
-def _dyeing(m, rgb, texture, sheen):
+def _dyeing(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Dyed look: aluminium behaves like anodize; polymers tint the base."""
     if m.family == "aluminum":
         return _anodized(m, rgb, texture, sheen)
     return _plain_base(m, texture, rgb, None)  # dyed polymer: base tinted by colour
 
 
-def _chrome(m, rgb, texture, sheen):
+def _chrome(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Chrome-plated look."""
     return coats.chrome()
 
 
-def _gold(m, rgb, texture, sheen):
+def _gold(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Gold-plated look."""
     return metal.gold()
 
 
-def _silver(m, rgb, texture, sheen):
+def _silver(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Silver-plated look."""
     return metal.silver()
 
 
-def _nickel(m, rgb, texture, sheen):
+def _nickel(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Nickel-plated look (tinted silver until metal.nickel is bundled)."""
     fn = getattr(metal, "nickel", None)  # adopt metal.nickel once bundled
-    return fn() if fn else metal.silver().override(color="#b9b9b2")
+    if fn is not None:
+        return fn()
+    return metal.silver().override(color="#b9b9b2")
 
 
-def _tin(m, rgb, texture, sheen):
+def _tin(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Tin-plated look (matte / satin)."""
     # tin plating is matte/satin (matte tin is the solderability standard); prefer
     # the matte factory, else roughen the glossy plain-tin factory
     fn = getattr(metal, "tin_matte", None)
-    return fn() if fn else metal.tin().override(roughness=0.4)
+    if fn is not None:
+        return fn()
+    return metal.tin().override(roughness=0.4)
 
 
-def _zinc(m, rgb, texture, sheen):
+def _zinc(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Zinc-plated look (satin), optionally tinted."""
     # zinc plating is satin; prefer the matte zinc factory, else roughen the glossy
     # plain-zinc factory
     fn = getattr(metal, "zinc_matte", None)
-    base = fn() if fn else metal.zinc().override(roughness=0.4)
-    return base.override(color=rgb) if rgb else base
+    base = fn() if fn is not None else metal.zinc().override(roughness=0.4)
+    if rgb is not None:
+        return base.override(color=rgb)
+    return base
 
 
-def _coat(m, rgb, texture, sheen):
+def _coat(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Painted / coated look in ``rgb``; gloss or matte per ``sheen``."""
     fn = coats.coat_matte if sheen == fin.Sheen.MATTE else coats.coat_gloss
     return fn(color=rgb)
 
 
-def _ecoat(m, rgb, texture, sheen):
+def _ecoat(
+    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+) -> PbrProperties:
     """Electrophoretic e-coat look (black by default)."""
-    return coats.coat_matte(color=rgb or "#101010")
+    return coats.coat_matte(color=rgb if rgb is not None else "#101010")
 
 
 _CHEM = fin.CHEMICAL_FINISHES
@@ -251,7 +291,9 @@ _SURFACE = {
 # chem film, conductive oxidation, laser, etch, silkscreen) leaves the look as-is.
 
 
-def _normalize(finish):
+def _normalize(
+    finish: FinishSpec,
+) -> list[tuple[fin.Finish, str | None, fin.Sheen | None]]:
     """Normalize the ``finish`` argument to a list of (Finish, colour, sheen).
 
     Args:
@@ -275,12 +317,12 @@ def _normalize(finish):
 
 def get_pbr_properties(
     material: RangeMaterial,
-    finish=None,
-    process=None,
-    color=None,
-    thickness_mm=None,
-    pbr=None,
-):
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    color: Color | None = None,
+    thickness_mm: float | None = None,
+    pbr: PbrProperties | None = None,
+) -> PbrProperties:
     """Resolve a bundled three.js look for a finished material.
 
     Args:

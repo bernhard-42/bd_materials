@@ -16,8 +16,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import ClassVar
 
-from ..finished import FinishedMaterial, Process
-from ..finishes import AppliedFinish
+from ..finished import Color, FinishedMaterial, FinishSpec, Process
 from ..core import Range, SolidMaterial, with_density
 
 
@@ -39,9 +38,6 @@ class GlassMaterial(SolidMaterial):
     # limit (glass softens far lower, ~730/820C -- see max_service_temp)
     family: str | None = None
     transparent: bool = False
-
-
-_Finish = AppliedFinish | list[AppliedFinish] | None
 
 
 # --- Soda-lime ---------------------------------------------------------------
@@ -76,9 +72,9 @@ SODA_LIME_MATERIALS: dict[SodaLime, GlassMaterial] = {
 
 def soda_lime(
     grade: SodaLime = SodaLime.GENERIC,
-    color=None,
-    thickness_mm=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    thickness_mm: float | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[GlassMaterial]:
@@ -141,9 +137,9 @@ BOROSILICATE_MATERIALS: dict[Borosilicate, GlassMaterial] = {
 
 def borosilicate(
     grade: Borosilicate = Borosilicate.GENERIC,
-    color=None,
-    thickness_mm=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    thickness_mm: float | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[GlassMaterial]:

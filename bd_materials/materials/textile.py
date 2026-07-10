@@ -13,8 +13,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import ClassVar
 
-from ..finished import FinishedMaterial, Process
-from ..finishes import AppliedFinish
+from ..finished import Color, FinishedMaterial, FinishSpec, Process
 from ..core import ArealMaterial, Range, with_density
 
 
@@ -25,9 +24,6 @@ class TextileMaterial(ArealMaterial):
     """
 
     category: ClassVar[str] = "textile"
-
-
-_Finish = AppliedFinish | list[AppliedFinish] | None
 
 
 # --- Woven -------------------------------------------------------------------
@@ -54,8 +50,8 @@ WOVEN_MATERIALS: dict[Woven, TextileMaterial] = {
 
 def woven(
     grade: Woven = Woven.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[TextileMaterial]:
@@ -107,8 +103,8 @@ FELT_MATERIALS: dict[Felt, TextileMaterial] = {
 
 def felt(
     grade: Felt = Felt.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[TextileMaterial]:
@@ -160,8 +156,8 @@ LEATHER_MATERIALS: dict[Leather, TextileMaterial] = {
 
 def leather(
     grade: Leather = Leather.GENERIC,
-    color=None,
-    finish: _Finish = None,
+    color: Color | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[TextileMaterial]:

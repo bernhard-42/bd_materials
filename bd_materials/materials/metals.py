@@ -13,8 +13,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import ClassVar
 
-from ..finished import FinishedMaterial, Process
-from ..finishes import AppliedFinish
+from ..finished import FinishedMaterial, FinishSpec, Process
 from ..core import Range, SolidMaterial, with_density
 
 
@@ -179,7 +178,7 @@ ALU_MATERIALS: dict[Alu, MetalMaterial] = {
 
 def aluminum(
     grade: Alu = Alu.G6061_T6,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
@@ -368,7 +367,7 @@ STAINLESS_MATERIALS: dict[Stainless, MetalMaterial] = {
 
 def stainless(
     grade: Stainless = Stainless.G304_ANNEALED,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
@@ -469,7 +468,7 @@ MILD_STEEL_MATERIALS: dict[MildSteel, MetalMaterial] = {
 
 def mild_steel(
     grade: MildSteel = MildSteel.G1018_COLD_DRAWN,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
@@ -570,7 +569,7 @@ ALLOY_STEEL_MATERIALS: dict[AlloySteel, MetalMaterial] = {
 
 def alloy_steel(
     grade: AlloySteel = AlloySteel.G4140_QUENCHED_TEMPERED,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
@@ -627,7 +626,7 @@ SPRING_STEEL_MATERIALS: dict[SpringSteel, MetalMaterial] = {
 
 def spring_steel(
     grade: SpringSteel = SpringSteel.GENERIC_QUENCHED_TEMPERED,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
@@ -816,7 +815,7 @@ TOOL_STEEL_MATERIALS: dict[ToolSteel, MetalMaterial] = {
 
 def tool_steel(
     grade: ToolSteel = ToolSteel.D2_HARDENED,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
@@ -895,7 +894,7 @@ TITANIUM_MATERIALS: dict[Titanium, MetalMaterial] = {
 
 def titanium(
     grade: Titanium = Titanium.GR5_ANNEALED,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
@@ -974,7 +973,7 @@ BRASS_MATERIALS: dict[Brass, MetalMaterial] = {
 
 def brass(
     grade: Brass = Brass.C360_HALF_HARD,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
@@ -1031,7 +1030,7 @@ COPPER_MATERIALS: dict[Copper, MetalMaterial] = {
 
 def copper(
     grade: Copper = Copper.C110_ANNEALED,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:
@@ -1088,7 +1087,7 @@ MAGNESIUM_MATERIALS: dict[Magnesium, MetalMaterial] = {
 
 def magnesium(
     grade: Magnesium = Magnesium.GENERIC_STRUCTURAL,
-    finish: AppliedFinish | list[AppliedFinish] | None = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[MetalMaterial]:

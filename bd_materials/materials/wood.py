@@ -20,8 +20,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import ClassVar
 
-from ..finished import FinishedMaterial, Process
-from ..finishes import AppliedFinish
+from ..finished import FinishedMaterial, FinishSpec, Process
 from ..core import Range, RangeMaterial, with_density
 
 
@@ -45,9 +44,6 @@ class WoodMaterial(RangeMaterial):
     thermal_conductivity: Range | None  # W/(m·K)
     family: str | None = None
     transparent: bool = False
-
-
-_Finish = AppliedFinish | list[AppliedFinish] | None
 
 
 # --- Hardwood ----------------------------------------------------------------
@@ -165,7 +161,7 @@ HARDWOOD_MATERIALS: dict[Hardwood, WoodMaterial] = {
 
 def hardwood(
     grade: Hardwood = Hardwood.GENERIC,
-    finish: _Finish = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[WoodMaterial]:
@@ -245,7 +241,7 @@ SOFTWOOD_MATERIALS: dict[Softwood, WoodMaterial] = {
 
 def softwood(
     grade: Softwood = Softwood.GENERIC,
-    finish: _Finish = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[WoodMaterial]:
@@ -310,7 +306,7 @@ ENGINEERED_WOOD_MATERIALS: dict[EngineeredWood, WoodMaterial] = {
 
 def engineered_wood(
     grade: EngineeredWood = EngineeredWood.MDF,
-    finish: _Finish = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[WoodMaterial]:

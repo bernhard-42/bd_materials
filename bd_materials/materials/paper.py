@@ -13,8 +13,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import ClassVar
 
-from ..finished import FinishedMaterial, Process
-from ..finishes import AppliedFinish
+from ..finished import Color, FinishedMaterial, FinishSpec, Process
 from ..core import ArealMaterial, Range, with_density
 
 
@@ -25,9 +24,6 @@ class PaperMaterial(ArealMaterial):
     """
 
     category: ClassVar[str] = "paper"
-
-
-_Finish = AppliedFinish | list[AppliedFinish] | None
 
 
 # --- Paper -------------------------------------------------------------------
@@ -54,8 +50,8 @@ PAPER_MATERIALS: dict[Paper, PaperMaterial] = {
 
 def paper(
     grade: Paper = Paper.OFFICE,
-    color="white",
-    finish: _Finish = None,
+    color: Color | None = "white",
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PaperMaterial]:
@@ -108,7 +104,7 @@ CARDBOARD_MATERIALS: dict[Cardboard, PaperMaterial] = {
 
 def cardboard(
     grade: Cardboard = Cardboard.CORRUGATED,
-    finish: _Finish = None,
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PaperMaterial]:
@@ -157,8 +153,8 @@ FOAMBOARD_MATERIALS: dict[Foamboard, PaperMaterial] = {
 
 def foamboard(
     grade: Foamboard = Foamboard.GENERIC,
-    color="white",
-    finish: _Finish = None,
+    color: Color | None = "white",
+    finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
 ) -> FinishedMaterial[PaperMaterial]:
