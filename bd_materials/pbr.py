@@ -273,11 +273,14 @@ def _coat(
 def _ecoat(
     m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
-    """Electrophoretic e-coat look; the thin semi-transparent film reads as a deep
-    charcoal even for "black", never optical-void black; other colors pass through."""
+    """Electrophoretic e-coat look: a thin semi-transparent film over the substrate
+    metal, so it reads as a tinted semi-gloss metallic with the metal grain showing
+    through -- deep charcoal for "black" (its default/common color), never pitch black;
+    other colors pass through."""
     if rgb is None or rgb == _COLOR_HEX["black"]:
         rgb = _ECOAT_CHARCOAL  # black (the default/common e-coat) -> deep charcoal
-    return coats.coat_matte(color=rgb)
+    # tint the substrate metal (keeps metalness + any grain) at a semi-gloss roughness
+    return _metal_tex_base(m, texture).override(color=rgb, roughness=0.3)
 
 
 _CHEM = fin.CHEMICAL_FINISHES
