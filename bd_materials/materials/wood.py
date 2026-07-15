@@ -18,10 +18,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from ..finished import FinishedMaterial, FinishSpec, Process
-from ..core import Range, RangeMaterial, with_density
+from ..core import Range, RangeInput, RangeMaterial, as_range, with_density
+
+if TYPE_CHECKING:
+    from threejs_materials import PbrProperties
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -353,6 +356,67 @@ ALL_WOODS = (
     *SOFTWOOD_MATERIALS.values(),
     *ENGINEERED_WOOD_MATERIALS.values(),
 )
+
+
+def custom_wood(
+    name: str,
+    density: float,
+    *,
+    family: str = "oak",
+    transparent: bool = False,
+    modulus_of_elasticity: RangeInput = None,
+    modulus_of_rupture: RangeInput = None,
+    compressive_strength_parallel: RangeInput = None,
+    janka_hardness: RangeInput = None,
+    specific_heat_capacity: RangeInput = None,
+    thermal_conductivity: RangeInput = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    pbr: PbrProperties | None = None,
+) -> FinishedMaterial[WoodMaterial]:
+    """Define a custom wood and return it as a ``FinishedMaterial``.
+
+    Each property value may be a ``Range``, a bare number (an exact value, ``min ==
+    max``), or ``None`` (missing). The property keyword args are the ``WoodMaterial``
+    fields (along-grain where directional).
+
+    Args:
+        name: Identifier for the material.
+        density: Single representative density (kg/m³, ~12% MC).
+        family: PBR wood-grain key (e.g. ``"walnut"``); an unknown key falls back to
+            oak. Defaults to ``"oak"``.
+        transparent: Intrinsic see-through flag (wood is opaque). Default ``False``.
+        scale: Texture UV scale ``(u, v)`` for the grain; ``(2, 2)`` tiles it twice as
+            fine. A textured finish's scale takes precedence.
+        rotation: Grain texture rotation in degrees (counterclockwise).
+        finish: Surface finish -- mutually exclusive with ``process`` and ``pbr``.
+        process: As-made surface hint -- mutually exclusive with ``finish`` and ``pbr``.
+        pbr: A ready-made three.js look; overrides the resolved one.
+
+    Returns:
+        A ``FinishedMaterial`` wrapping the custom wood.
+    """
+    return FinishedMaterial(
+        WoodMaterial(
+            name=name,
+            density=density,
+            family=family,
+            transparent=transparent,
+            modulus_of_elasticity=as_range(modulus_of_elasticity),
+            modulus_of_rupture=as_range(modulus_of_rupture),
+            compressive_strength_parallel=as_range(compressive_strength_parallel),
+            janka_hardness=as_range(janka_hardness),
+            specific_heat_capacity=as_range(specific_heat_capacity),
+            thermal_conductivity=as_range(thermal_conductivity),
+        ),
+        finish,
+        scale=scale,
+        rotation=rotation,
+        process=process,
+        pbr=pbr,
+    )
 
 
 if __name__ == "__main__":

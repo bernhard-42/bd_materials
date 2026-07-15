@@ -11,10 +11,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from ..finished import FinishedMaterial, FinishSpec, Process
-from ..core import Range, SolidMaterial, with_density
+from ..core import Range, RangeInput, SolidMaterial, as_range, with_density
+
+if TYPE_CHECKING:
+    from threejs_materials import PbrProperties
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1122,6 +1125,77 @@ ALL_METALS = (
     *COPPER_MATERIALS.values(),
     *MAGNESIUM_MATERIALS.values(),
 )
+
+
+def custom_metal(
+    name: str,
+    density: float,
+    *,
+    family: str = "stainless",
+    transparent: bool = False,
+    tensile_strength: RangeInput = None,
+    yield_strength: RangeInput = None,
+    shear_strength: RangeInput = None,
+    modulus_of_elasticity: RangeInput = None,
+    shear_modulus: RangeInput = None,
+    poisson_ratio: RangeInput = None,
+    hardness: RangeInput = None,
+    hardness_scale: str = "HB",
+    max_service_temp: RangeInput = None,
+    melting_temperature: RangeInput = None,
+    specific_heat_capacity: RangeInput = None,
+    thermal_conductivity: RangeInput = None,
+    thermal_expansion: RangeInput = None,
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    pbr: PbrProperties | None = None,
+) -> FinishedMaterial[MetalMaterial]:
+    """Define a custom metal and return it as a ``FinishedMaterial``.
+
+    Each property value may be a ``Range``, a bare number (an exact value, ``min ==
+    max``), or ``None`` (missing); ``NOT_SUITABLE`` marks a property that does not
+    apply. The property keyword args are the ``MetalMaterial`` fields.
+
+    Args:
+        name: Identifier for the material.
+        density: Single representative density (kg/m³).
+        family: PBR look key (e.g. ``"titanium"``); an unknown key falls back per the
+            PBR bridge. Defaults to ``"stainless"``.
+        transparent: Intrinsic see-through flag (metals are opaque). Default ``False``.
+        hardness_scale: Scale for ``hardness`` (``"HB"`` / ``"HRC"`` / ``"HV"``).
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process`` and ``pbr``.
+        process: As-made surface hint. Mutually exclusive with ``finish`` and ``pbr``.
+        pbr: A ready-made three.js look; overrides the resolved one (and cannot be
+            combined with ``finish`` / ``process``).
+
+    Returns:
+        A ``FinishedMaterial`` wrapping the custom metal.
+    """
+    return FinishedMaterial(
+        MetalMaterial(
+            name=name,
+            density=density,
+            family=family,
+            transparent=transparent,
+            tensile_strength=as_range(tensile_strength),
+            modulus_of_elasticity=as_range(modulus_of_elasticity),
+            shear_modulus=as_range(shear_modulus),
+            poisson_ratio=as_range(poisson_ratio),
+            specific_heat_capacity=as_range(specific_heat_capacity),
+            max_service_temp=as_range(max_service_temp),
+            thermal_expansion=as_range(thermal_expansion),
+            thermal_conductivity=as_range(thermal_conductivity),
+            yield_strength=as_range(yield_strength),
+            shear_strength=as_range(shear_strength),
+            hardness=as_range(hardness),
+            hardness_scale=hardness_scale,
+            melting_temperature=as_range(melting_temperature),
+        ),
+        finish,
+        process=process,
+        pbr=pbr,
+    )
 
 
 if __name__ == "__main__":

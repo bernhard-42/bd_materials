@@ -14,10 +14,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from ..finished import Color, FinishedMaterial, FinishSpec, Process
-from ..core import Range, SolidMaterial, with_density
+from ..core import Range, RangeInput, SolidMaterial, as_range, with_density
+
+if TYPE_CHECKING:
+    from threejs_materials import PbrProperties
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -172,6 +175,80 @@ ALL_GLASSES = (
     *SODA_LIME_MATERIALS.values(),
     *BOROSILICATE_MATERIALS.values(),
 )
+
+
+def custom_glass(
+    name: str,
+    density: float,
+    *,
+    family: str = "glass",
+    transparent: bool = True,
+    tensile_strength: RangeInput = None,
+    modulus_of_elasticity: RangeInput = None,
+    shear_modulus: RangeInput = None,
+    poisson_ratio: RangeInput = None,
+    hardness: RangeInput = None,
+    hardness_scale: str = "HV",
+    glass_transition_temperature: RangeInput = None,
+    melting_temperature: RangeInput = None,
+    max_service_temp: RangeInput = None,
+    specific_heat_capacity: RangeInput = None,
+    thermal_conductivity: RangeInput = None,
+    thermal_expansion: RangeInput = None,
+    color: Color | None = None,
+    thickness_mm: float | None = None,
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    pbr: PbrProperties | None = None,
+) -> FinishedMaterial[GlassMaterial]:
+    """Define a custom glass and return it as a ``FinishedMaterial``.
+
+    Each property value may be a ``Range``, a bare number (an exact value, ``min ==
+    max``), or ``None`` (missing); ``NOT_SUITABLE`` marks a property that does not
+    apply. The property keyword args are the ``GlassMaterial`` fields.
+
+    Args:
+        name: Identifier for the material.
+        density: Single representative density (kg/m³).
+        family: PBR look key; glass renders category-first, so this is mostly identity.
+            Defaults to ``"glass"``.
+        transparent: Intrinsic see-through flag (glass is transmissive). Default
+            ``True``; ``thickness_mm`` sets the pane thickness.
+        hardness_scale: Scale for ``hardness`` (``"HV"`` Vickers).
+        color: Optional glass tint (name / hex / RGB tuple).
+        thickness_mm: Pane thickness in mm for the transmissive look.
+        finish: Surface finish -- mutually exclusive with ``process`` and ``pbr``.
+        process: As-made surface hint -- mutually exclusive with ``finish`` and ``pbr``.
+        pbr: A ready-made three.js look; overrides the resolved one.
+
+    Returns:
+        A ``FinishedMaterial`` wrapping the custom glass.
+    """
+    return FinishedMaterial(
+        GlassMaterial(
+            name=name,
+            density=density,
+            family=family,
+            transparent=transparent,
+            tensile_strength=as_range(tensile_strength),
+            modulus_of_elasticity=as_range(modulus_of_elasticity),
+            shear_modulus=as_range(shear_modulus),
+            poisson_ratio=as_range(poisson_ratio),
+            specific_heat_capacity=as_range(specific_heat_capacity),
+            max_service_temp=as_range(max_service_temp),
+            thermal_expansion=as_range(thermal_expansion),
+            thermal_conductivity=as_range(thermal_conductivity),
+            hardness=as_range(hardness),
+            hardness_scale=hardness_scale,
+            glass_transition_temperature=as_range(glass_transition_temperature),
+            melting_temperature=as_range(melting_temperature),
+        ),
+        finish,
+        color=color,
+        thickness_mm=thickness_mm,
+        process=process,
+        pbr=pbr,
+    )
 
 
 if __name__ == "__main__":

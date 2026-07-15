@@ -227,6 +227,29 @@ def with_density(material: _MaterialT, density: float | None) -> _MaterialT:
     return replace(material, density=density)
 
 
+# a property value accepted by the custom_<category> functions: a Range, a bare scalar
+# (an exact value, min == max), or None (missing)
+RangeInput = Range | float | None
+
+
+def as_range(value: RangeInput) -> Range | None:
+    """Coerce a scalar to a degenerate ``Range(v, v)``; pass a ``Range`` / ``None`` through.
+
+    Used by the ``custom_<category>`` functions so a caller can give an exact value as a
+    bare number (read as ``min == max``) instead of ``Range(v, v)``. A ``Range`` (incl.
+    ``NOT_SUITABLE``) or ``None`` (missing) passes through unchanged.
+
+    Args:
+        value: A ``Range``, a scalar exact value, or ``None``.
+
+    Returns:
+        The equivalent ``Range``, or ``None``.
+    """
+    if value is None or isinstance(value, Range):
+        return value
+    return Range(value, value)
+
+
 # ---------------------------------------------------------------------------
 # Shared base dataclasses. All material dataclasses (incl. RangeMaterial) are
 # frozen + kw_only, so the defaulted identity fields (family/transparent) can

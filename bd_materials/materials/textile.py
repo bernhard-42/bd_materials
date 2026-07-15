@@ -11,10 +11,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from ..finished import Color, FinishedMaterial, FinishSpec, Process
-from ..core import ArealMaterial, Range, with_density
+from ..core import ArealMaterial, Range, RangeInput, as_range, with_density
+
+if TYPE_CHECKING:
+    from threejs_materials import PbrProperties
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -211,6 +214,67 @@ ALL_TEXTILES = (
     *FELT_MATERIALS.values(),
     *LEATHER_MATERIALS.values(),
 )
+
+
+def custom_textile(
+    name: str,
+    density: float,
+    *,
+    family: str = "fabric_weave",
+    transparent: bool = False,
+    areal_density: RangeInput = None,
+    thickness: RangeInput = None,
+    tensile_strength: RangeInput = None,
+    thermal_conductivity: RangeInput = None,
+    specific_heat_capacity: RangeInput = None,
+    color: Color | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    pbr: PbrProperties | None = None,
+) -> FinishedMaterial[TextileMaterial]:
+    """Define a custom textile and return it as a ``FinishedMaterial``.
+
+    Each property value may be a ``Range``, a bare number (an exact value, ``min ==
+    max``), or ``None`` (missing). The property keyword args are the ``TextileMaterial``
+    fields (areal: grammage-sized planar goods).
+
+    Args:
+        name: Identifier for the material.
+        density: Apparent single representative density (kg/m³).
+        family: PBR look key (e.g. ``"felt"`` / ``"leather"``); an unknown key falls
+            back to a woven weave. Defaults to ``"fabric_weave"``.
+        transparent: Intrinsic see-through flag. Default ``False``.
+        color: Selectable base color (name / hex / RGB tuple).
+        scale: Texture UV scale ``(u, v)``; ``(2, 2)`` tiles the weave twice as fine.
+        rotation: Weave texture rotation in degrees (counterclockwise).
+        finish: Surface finish -- mutually exclusive with ``process`` and ``pbr``.
+        process: As-made surface hint -- mutually exclusive with ``finish`` and ``pbr``.
+        pbr: A ready-made three.js look; overrides the resolved one.
+
+    Returns:
+        A ``FinishedMaterial`` wrapping the custom textile.
+    """
+    return FinishedMaterial(
+        TextileMaterial(
+            name=name,
+            density=density,
+            family=family,
+            transparent=transparent,
+            areal_density=as_range(areal_density),
+            thickness=as_range(thickness),
+            tensile_strength=as_range(tensile_strength),
+            thermal_conductivity=as_range(thermal_conductivity),
+            specific_heat_capacity=as_range(specific_heat_capacity),
+        ),
+        finish,
+        color=color,
+        scale=scale,
+        rotation=rotation,
+        process=process,
+        pbr=pbr,
+    )
 
 
 if __name__ == "__main__":

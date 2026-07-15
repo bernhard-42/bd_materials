@@ -15,10 +15,20 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from ..finished import Color, FinishedMaterial, FinishSpec, Process
-from ..core import NOT_SUITABLE, PolymerMaterial, Range, with_density
+from ..core import (
+    NOT_SUITABLE,
+    PolymerMaterial,
+    Range,
+    RangeInput,
+    as_range,
+    with_density,
+)
+
+if TYPE_CHECKING:
+    from threejs_materials import PbrProperties
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -555,6 +565,87 @@ ALL_RESINS = (
     *TRANSPARENT_MATERIALS.values(),
     *FLEXIBLE_MATERIALS.values(),
 )
+
+
+def custom_resin(
+    name: str,
+    density: float,
+    *,
+    family: str = "resin",
+    transparent: bool = False,
+    tensile_strength: RangeInput = None,
+    yield_strength: RangeInput = None,
+    shear_strength: RangeInput = None,
+    modulus_of_elasticity: RangeInput = None,
+    shear_modulus: RangeInput = None,
+    poisson_ratio: RangeInput = None,
+    elongation_at_break: RangeInput = None,
+    hardness: RangeInput = None,
+    hardness_scale: str = "Shore D",
+    glass_transition_temperature: RangeInput = None,
+    heat_deflection_temperature: RangeInput = None,
+    max_service_temp: RangeInput = None,
+    specific_heat_capacity: RangeInput = None,
+    thermal_conductivity: RangeInput = None,
+    thermal_expansion: RangeInput = None,
+    color: Color | None = None,
+    thickness_mm: float | None = None,
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    pbr: PbrProperties | None = None,
+) -> FinishedMaterial[ResinMaterial]:
+    """Define a custom resin and return it as a ``FinishedMaterial``.
+
+    Each property value may be a ``Range``, a bare number (an exact value, ``min ==
+    max``), or ``None`` (missing); ``NOT_SUITABLE`` marks a property that does not
+    apply. The property keyword args are the ``ResinMaterial`` fields.
+
+    Args:
+        name: Identifier for the material.
+        density: Single representative density (kg/m³).
+        family: PBR look key; an unknown key falls back per the PBR bridge. Defaults to
+            ``"resin"``.
+        transparent: Intrinsic see-through flag; set for a clear resin (uses
+            ``thickness_mm``). Default ``False``.
+        hardness_scale: Shore scale for ``hardness`` (``"Shore D"`` rigid / ``"Shore A"``
+            flexible).
+        color: Selectable base color (name / hex / RGB tuple).
+        thickness_mm: Pane thickness in mm, meaningful only when ``transparent``.
+        finish: Surface finish -- mutually exclusive with ``process`` and ``pbr``.
+        process: As-made surface hint -- mutually exclusive with ``finish`` and ``pbr``.
+        pbr: A ready-made three.js look; overrides the resolved one.
+
+    Returns:
+        A ``FinishedMaterial`` wrapping the custom resin.
+    """
+    return FinishedMaterial(
+        ResinMaterial(
+            name=name,
+            density=density,
+            family=family,
+            transparent=transparent,
+            tensile_strength=as_range(tensile_strength),
+            modulus_of_elasticity=as_range(modulus_of_elasticity),
+            shear_modulus=as_range(shear_modulus),
+            poisson_ratio=as_range(poisson_ratio),
+            specific_heat_capacity=as_range(specific_heat_capacity),
+            max_service_temp=as_range(max_service_temp),
+            thermal_expansion=as_range(thermal_expansion),
+            thermal_conductivity=as_range(thermal_conductivity),
+            yield_strength=as_range(yield_strength),
+            shear_strength=as_range(shear_strength),
+            elongation_at_break=as_range(elongation_at_break),
+            glass_transition_temperature=as_range(glass_transition_temperature),
+            heat_deflection_temperature=as_range(heat_deflection_temperature),
+            hardness=as_range(hardness),
+            hardness_scale=hardness_scale,
+        ),
+        finish,
+        color=color,
+        thickness_mm=thickness_mm,
+        process=process,
+        pbr=pbr,
+    )
 
 
 if __name__ == "__main__":

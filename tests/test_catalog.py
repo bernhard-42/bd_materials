@@ -15,7 +15,7 @@ categories. These tests target what those do *not* cover:
 import pytest
 
 from bd_materials import finishes
-from bd_materials.core import ALLOWED_CATEGORIES
+from bd_materials.core import ALLOWED_CATEGORIES, NOT_SUITABLE, Range
 from bd_materials.finished import FinishedMaterial, Process
 from bd_materials.finishes import Sheen
 from bd_materials.materials import (
@@ -24,6 +24,7 @@ from bd_materials.materials import (
     metals,
     paper,
     plastics,
+    resins,
     textile,
     wood,
 )
@@ -181,3 +182,90 @@ def test_texture_scale_and_rotation_apply():
     # precedence: a textured finish's transform wins over the material's
     both = wood.hardwood(scale=(2, 2), finish=finishes.brushed(scale=(4, 4))).pbr
     assert both.texture_repeat == (0.25, 0.25)
+
+
+# --- custom_<category> user-defined materials ---
+
+_CUSTOM_BUILDERS = {
+    "metal": lambda: metals.custom_metal(name="X", density=4500, tensile_strength=900),
+    "plastic": lambda: plastics.custom_plastic(name="X", density=1100, color="red"),
+    "resin": lambda: resins.custom_resin(
+        name="X", density=1150, hardness=80, hardness_scale="Shore A"
+    ),
+    "glass": lambda: glass.custom_glass(name="X", density=2500, thickness_mm=6),
+    "wood": lambda: wood.custom_wood(
+        name="X", density=650, janka_hardness=4000, scale=(2, 2)
+    ),
+    "paper": lambda: paper.custom_paper(name="X", density=700, areal_density=250),
+    "textile": lambda: textile.custom_textile(name="X", density=400, color="blue"),
+}
+
+
+@pytest.mark.parametrize(
+    "category,build", list(_CUSTOM_BUILDERS.items()), ids=list(_CUSTOM_BUILDERS)
+)
+def test_custom_material_builds(category, build):
+    """Each custom_<category> returns a FinishedMaterial of the right category."""
+    fm = build()
+    assert isinstance(fm, FinishedMaterial)
+    assert fm.material.category == category
+    assert fm.material.mass(1_000_000) > 0
+
+
+def test_custom_scalar_becomes_exact_range():
+    """A scalar property is read as an exact value (min == max); Range/NOT_SUITABLE/None
+    pass through."""
+    m = metals.custom_metal(
+        name="C",
+        density=8000,
+        tensile_strength=500,  # scalar -> exact Range(500, 500)
+        yield_strength=Range(300, 420),  # Range kept as-is
+        hardness=NOT_SUITABLE,  # n/a passes through (same sentinel)
+        shear_strength=None,  # missing
+    ).material
+    assert m.tensile_strength == Range(500, 500)
+    assert m.yield_strength == Range(300, 420)
+    assert m.shear_strength is None
+    assert m.hardness is NOT_SUITABLE
+
+
+def test_custom_matches_direct_dataclass_construction():
+    """custom_metal builds the same MetalMaterial as constructing the dataclass."""
+    built = metals.custom_metal(
+        name="C", density=8000, tensile_strength=500, yield_strength=Range(300, 420)
+    ).material
+    direct = metals.MetalMaterial(
+        name="C",
+        density=8000,
+        family="stainless",
+        tensile_strength=Range(500, 500),
+        yield_strength=Range(300, 420),
+        shear_strength=None,
+        modulus_of_elasticity=None,
+        shear_modulus=None,
+        poisson_ratio=None,
+        specific_heat_capacity=None,
+        max_service_temp=None,
+        thermal_expansion=None,
+        thermal_conductivity=None,
+        hardness=None,
+        hardness_scale="HB",
+        melting_temperature=None,
+    )
+    assert repr(built) == repr(direct)
+
+
+@requires_threejs
+@pytest.mark.parametrize(
+    "build", list(_CUSTOM_BUILDERS.values()), ids=list(_CUSTOM_BUILDERS)
+)
+def test_custom_material_resolves_pbr(build):
+    """Each custom material resolves a three.js look via its category branch."""
+    assert build().pbr is not None
+
+
+@requires_threejs
+def test_custom_material_accepts_pbr_override():
+    """A custom function passes a ready-made pbr straight through as the override."""
+    look = metals.aluminum().pbr
+    assert wood.custom_wood(name="W", density=650, pbr=look).pbr is look
