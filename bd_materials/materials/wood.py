@@ -160,6 +160,8 @@ def hardwood(
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
 ) -> FinishedMaterial[WoodMaterial]:
     """Hardwood as a ``FinishedMaterial``.
 
@@ -171,6 +173,9 @@ def hardwood(
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture (grain/weave);
+            ``(2, 2)`` tiles it twice as fine. Default ``(1, 1)``.
+        rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
 
     Returns:
         A ``FinishedMaterial`` for the selected grade.
@@ -179,6 +184,8 @@ def hardwood(
         with_density(HARDWOOD_MATERIALS[grade], density),
         finish,
         process=process,
+        scale=scale,
+        rotation=rotation,
     )
 
 
@@ -240,6 +247,8 @@ def softwood(
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
 ) -> FinishedMaterial[WoodMaterial]:
     """Softwood as a ``FinishedMaterial``.
 
@@ -251,6 +260,9 @@ def softwood(
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture (grain/weave);
+            ``(2, 2)`` tiles it twice as fine. Default ``(1, 1)``.
+        rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
 
     Returns:
         A ``FinishedMaterial`` for the selected grade.
@@ -259,6 +271,8 @@ def softwood(
         with_density(SOFTWOOD_MATERIALS[grade], density),
         finish,
         process=process,
+        scale=scale,
+        rotation=rotation,
     )
 
 
@@ -305,6 +319,8 @@ def engineered_wood(
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
 ) -> FinishedMaterial[WoodMaterial]:
     """Engineered wood as a ``FinishedMaterial``.
 
@@ -316,6 +332,9 @@ def engineered_wood(
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture (grain/weave);
+            ``(2, 2)`` tiles it twice as fine. Default ``(1, 1)``.
+        rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
 
     Returns:
         A ``FinishedMaterial`` for the selected grade.
@@ -324,6 +343,8 @@ def engineered_wood(
         with_density(ENGINEERED_WOOD_MATERIALS[grade], density),
         finish,
         process=process,
+        scale=scale,
+        rotation=rotation,
     )
 
 

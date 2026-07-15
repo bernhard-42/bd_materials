@@ -138,6 +138,12 @@ _PBR_CASES = {
     "alu_brushed_anodize": lambda: metals.aluminum(
         finish=[finishes.brushed(), finishes.anodize("black")]
     ),
+    # texture UV transform: substrate (family fn) and finish
+    "oak_scaled": lambda: wood.hardwood(wood.Hardwood.OAK, scale=(2, 2), rotation=30),
+    "woven_scaled": lambda: textile.woven(scale=(2, 2)),
+    "alu_brushed_scaled": lambda: metals.aluminum(
+        finish=finishes.brushed(scale=(3, 1), rotation=90)
+    ),
 }
 
 
@@ -154,3 +160,24 @@ def test_every_material_resolves_a_pbr_look(material):
 def test_finish_color_process_paths_resolve(build):
     """Every finish / color / process path in pbr.py resolves without error."""
     assert build().pbr is not None
+
+
+@requires_threejs
+def test_texture_scale_and_rotation_apply():
+    """scale/rotation reach the resolved texture UV; a finish's transform wins."""
+    # default: no UV transform
+    assert wood.hardwood(wood.Hardwood.OAK).pbr.texture_repeat is None
+    # substrate texture, via the family function (scale(2,2) -> repeat (0.5, 0.5))
+    oak = wood.hardwood(wood.Hardwood.OAK, scale=(2, 2), rotation=30).pbr
+    assert oak.texture_repeat == (0.5, 0.5)
+    assert oak.texture_rotation == 30
+    # finish texture, via the textured verb
+    assert metals.aluminum(
+        finish=finishes.brushed(scale=(4, 4))
+    ).pbr.texture_repeat == (
+        0.25,
+        0.25,
+    )
+    # precedence: a textured finish's transform wins over the material's
+    both = wood.hardwood(scale=(2, 2), finish=finishes.brushed(scale=(4, 4))).pbr
+    assert both.texture_repeat == (0.25, 0.25)

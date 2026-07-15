@@ -54,6 +54,8 @@ def woven(
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
 ) -> FinishedMaterial[TextileMaterial]:
     """Woven fabric as a ``FinishedMaterial``.
 
@@ -67,6 +69,9 @@ def woven(
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture (grain/weave);
+            ``(2, 2)`` tiles it twice as fine. Default ``(1, 1)``.
+        rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
 
     Returns:
         A ``FinishedMaterial`` for the selected grade.
@@ -76,6 +81,8 @@ def woven(
         finish,
         color=color,
         process=process,
+        scale=scale,
+        rotation=rotation,
     )
 
 
@@ -107,6 +114,8 @@ def felt(
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
 ) -> FinishedMaterial[TextileMaterial]:
     """Felt as a ``FinishedMaterial``.
 
@@ -120,6 +129,9 @@ def felt(
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture (grain/weave);
+            ``(2, 2)`` tiles it twice as fine. Default ``(1, 1)``.
+        rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
 
     Returns:
         A ``FinishedMaterial`` for the selected grade.
@@ -129,6 +141,8 @@ def felt(
         finish,
         color=color,
         process=process,
+        scale=scale,
+        rotation=rotation,
     )
 
 
@@ -160,6 +174,8 @@ def leather(
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
 ) -> FinishedMaterial[TextileMaterial]:
     """Leather as a ``FinishedMaterial``.
 
@@ -173,6 +189,9 @@ def leather(
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture (grain/weave);
+            ``(2, 2)`` tiles it twice as fine. Default ``(1, 1)``.
+        rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
 
     Returns:
         A ``FinishedMaterial`` for the selected grade.
@@ -182,6 +201,8 @@ def leather(
         finish,
         color=color,
         process=process,
+        scale=scale,
+        rotation=rotation,
     )
 
 

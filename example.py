@@ -44,11 +44,11 @@ m = metals.stainless(metals.Stainless.G316L_AS_BUILT)  # SLM as-built
 show(sb, materials=[m.pbr])
 # %%
 
-m = wood.hardwood(wood.Hardwood.ASH)
+m = wood.hardwood(wood.Hardwood.ASH, rotation=90)
 show(sb, materials=[m.pbr])
 # %%
 
-m = wood.softwood(wood.Softwood.PINE)
+m = wood.softwood(wood.Softwood.PINE, scale=(2, 2))
 show(sb, materials=[m.pbr])
 # %%
 

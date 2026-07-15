@@ -67,6 +67,8 @@ class FinishedMaterial(Generic[MaterialT]):
         *,
         color: Color | None = None,
         thickness_mm: float | None = None,
+        scale: tuple[float, float] = (1.0, 1.0),
+        rotation: float = 0.0,
         process: Process | None = None,
         pbr: PbrProperties | None = None,
     ) -> None:
@@ -79,9 +81,14 @@ class FinishedMaterial(Generic[MaterialT]):
             color: A selectable base color (name, hex string, or RGB tuple).
             thickness_mm: Pane thickness in mm, meaningful only for a ``transparent``
                 material.
+            scale: Texture UV scale ``(u, v)`` for a substrate texture (wood grain,
+                fabric weave, ...); ``(2, 2)`` tiles it twice as fine. A textured
+                finish's own scale takes precedence over this. Default ``(1, 1)``.
+            rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
             process: An as-made surface hint; mutually exclusive with ``finish``.
             pbr: A ready-made look that overrides everything else; cannot be combined
-                with ``finish`` / ``process`` / ``color`` / ``thickness_mm``.
+                with ``finish`` / ``process`` / ``color`` / ``thickness_mm`` /
+                ``scale`` / ``rotation``.
 
         Raises:
             TypeError: If ``material`` is not a range ``Material``.
@@ -98,10 +105,12 @@ class FinishedMaterial(Generic[MaterialT]):
             or process is not None
             or color is not None
             or thickness_mm is not None
+            or scale != (1.0, 1.0)
+            or rotation != 0.0
         ):
             raise ValueError(
                 "pbr=... is a full override; do not combine it with finish, "
-                "process, color, or thickness_mm"
+                "process, color, thickness_mm, scale, or rotation"
             )
         if finish is not None and process is not None:
             raise ValueError(
@@ -113,6 +122,8 @@ class FinishedMaterial(Generic[MaterialT]):
         self.finish = finish
         self.color = color
         self.thickness_mm = thickness_mm
+        self.scale = scale
+        self.rotation = rotation
         self.process = process
         self._pbr = pbr
 
@@ -137,6 +148,8 @@ class FinishedMaterial(Generic[MaterialT]):
             self.process,
             color=self.color,
             thickness_mm=self.thickness_mm,
+            scale=self.scale,
+            rotation=self.rotation,
         )
 
     def __str__(self) -> str:
@@ -150,6 +163,10 @@ class FinishedMaterial(Generic[MaterialT]):
             parts.append(f"color={self.color!r}")
         if self.thickness_mm is not None:
             parts.append(f"thickness_mm={self.thickness_mm}")
+        if self.scale != (1.0, 1.0):
+            parts.append(f"scale={self.scale}")
+        if self.rotation != 0.0:
+            parts.append(f"rotation={self.rotation}")
         if self.finish is not None:
             parts.append(f"finish={self.finish!r}")
         if self.process is not None:

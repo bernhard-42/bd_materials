@@ -54,6 +54,8 @@ def paper(
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
 ) -> FinishedMaterial[PaperMaterial]:
     """Office paper as a ``FinishedMaterial``.
 
@@ -67,6 +69,9 @@ def paper(
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture (grain/weave);
+            ``(2, 2)`` tiles it twice as fine. Default ``(1, 1)``.
+        rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
 
     Returns:
         A ``FinishedMaterial`` for the selected grade.
@@ -76,6 +81,8 @@ def paper(
         finish,
         color=color,
         process=process,
+        scale=scale,
+        rotation=rotation,
     )
 
 
@@ -107,6 +114,8 @@ def cardboard(
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
 ) -> FinishedMaterial[PaperMaterial]:
     """Corrugated cardboard as a ``FinishedMaterial``.
 
@@ -118,6 +127,9 @@ def cardboard(
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture (grain/weave);
+            ``(2, 2)`` tiles it twice as fine. Default ``(1, 1)``.
+        rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
 
     Returns:
         A ``FinishedMaterial`` for the selected grade.
@@ -126,6 +138,8 @@ def cardboard(
         with_density(CARDBOARD_MATERIALS[grade], density),
         finish,
         process=process,
+        scale=scale,
+        rotation=rotation,
     )
 
 
@@ -157,6 +171,8 @@ def foamboard(
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
 ) -> FinishedMaterial[PaperMaterial]:
     """Foamboard as a ``FinishedMaterial``.
 
@@ -170,6 +186,9 @@ def foamboard(
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture (grain/weave);
+            ``(2, 2)`` tiles it twice as fine. Default ``(1, 1)``.
+        rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
 
     Returns:
         A ``FinishedMaterial`` for the selected grade.
@@ -179,6 +198,8 @@ def foamboard(
         finish,
         color=color,
         process=process,
+        scale=scale,
+        rotation=rotation,
     )
 
 

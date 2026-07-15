@@ -314,28 +314,20 @@ _SURFACE = {
 # chem film, conductive oxidation, laser, etch, silkscreen) leaves the look as-is.
 
 
-def _normalize(
-    finish: FinishSpec,
-) -> list[tuple[fin.Finish, str | None, fin.Sheen | None]]:
-    """Normalize the ``finish`` argument to a list of (Finish, color, sheen).
+def _normalize(finish: FinishSpec) -> list[AppliedFinish]:
+    """Normalize the ``finish`` argument to a list of ``AppliedFinish``.
 
     Args:
-        finish: ``None``, a single ``AppliedFinish`` / ``Finish``, or a list of them.
+        finish: ``None``, a single ``AppliedFinish``, or a list of them.
 
     Returns:
-        A list of ``(Finish, color, sheen)`` tuples; a raw ``Finish`` yields
-        ``(finish, None, None)``.
+        A list of ``AppliedFinish`` (empty if ``finish`` is ``None``).
     """
     if finish is None:
         return []
-    seq = finish if isinstance(finish, (list, tuple)) else [finish]
-    out = []
-    for f in seq:
-        if isinstance(f, AppliedFinish):
-            out.append((f.finish, f.color, f.sheen))
-        else:  # a raw Finish -> no color / sheen
-            out.append((f, None, None))
-    return out
+    if isinstance(finish, AppliedFinish):
+        return [finish]
+    return list(finish)
 
 
 def get_pbr_properties(
@@ -344,6 +336,8 @@ def get_pbr_properties(
     process: Process | None = None,
     color: Color | None = None,
     thickness_mm: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
     pbr: PbrProperties | None = None,
 ) -> PbrProperties:
     """Resolve a bundled three.js look for a finished material.
@@ -357,6 +351,10 @@ def get_pbr_properties(
             covers it (e.g. a colored filament or tinted resin); ignored for bare
             metals, whose color is intrinsic.
         thickness_mm: Pane thickness (mm) for transmissive materials.
+        scale: Texture UV scale ``(u, v)`` for the substrate texture; a textured
+            finish's own scale takes precedence.
+        rotation: Texture rotation in degrees (counterclockwise); a textured finish's
+            own rotation takes precedence.
         pbr: A ready-made look, returned unchanged if given.
 
     Returns:
@@ -366,25 +364,36 @@ def get_pbr_properties(
         return pbr
 
     texture = None
+    finish_uv = None  # (scale, rotation) from a textured finish, else None
     surface = None
     surface_color = None
     surface_sheen = None
-    for f, col, sheen in _normalize(finish):
+    for af in _normalize(finish):
+        f = af.finish
         if f in _TEXTURE:
             texture = _TEXTURE[f]
+            finish_uv = (af.scale, af.rotation)
         elif f in _SURFACE:
             surface = f
-            surface_color = col
-            surface_sheen = sheen
+            surface_color = af.color
+            surface_sheen = af.sheen
     if texture is None and process in _ROUGH_PROCESSES:
         texture = "matte"  # as-printed / as-built relief
 
     if surface is None:
         # No covering/coloring finish -> the per-part color (case-2 selection);
         # bare metals pass color=None and render their intrinsic look.
-        return _plain_base(material, texture, _color_value(color), thickness_mm)
-    rgb = _color_value(surface_color)
-    return _SURFACE[surface](material, rgb, texture, surface_sheen)
+        result = _plain_base(material, texture, _color_value(color), thickness_mm)
+    else:
+        rgb = _color_value(surface_color)
+        result = _SURFACE[surface](material, rgb, texture, surface_sheen)
+
+    # texture UV transform: a textured finish's own transform wins over the material's
+    if finish_uv is not None and finish_uv != ((1.0, 1.0), 0.0):
+        scale, rotation = finish_uv
+    if scale != (1.0, 1.0) or rotation != 0.0:
+        result = result.scale(scale[0], scale[1], rotation=rotation)
+    return result
 
 
 __all__ = ["get_pbr_properties"]

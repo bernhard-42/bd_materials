@@ -175,28 +175,61 @@ ALL_FINISHES = (
 
 @dataclass(frozen=True)
 class AppliedFinish:
-    """A finish plus its per-application appearance choices (color, sheen) --
-    produced by the finish functions below."""
+    """A finish plus its per-application appearance choices (color, sheen) and, for
+    textured finishes, the texture UV transform (scale, rotation) -- produced by the
+    finish functions below."""
 
     finish: Finish
     color: str | None = None
     sheen: Sheen | None = None  # None = finish has no sheen choice
+    scale: tuple[float, float] = (1.0, 1.0)  # texture UV scale (u, v); 1 = as-authored
+    rotation: float = 0.0  # texture rotation in degrees (counterclockwise)
 
 
 # --- mechanical (no color) ------------------------------------------------
-def bead_blast() -> AppliedFinish:
-    """Bead-blasted matte finish."""
-    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.BEAD_BLAST])
+def bead_blast(scale: tuple[float, float] = (1.0, 1.0)) -> AppliedFinish:
+    """Bead-blasted matte finish.
+
+    Args:
+        scale: Texture UV scale ``(u, v)``; ``(2, 2)`` tiles the blast grain twice as
+            fine. Isotropic, so no rotation. Default ``(1, 1)`` is the as-authored size.
+
+    Returns:
+        The applied finish.
+    """
+    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.BEAD_BLAST], scale=scale)
 
 
-def brushed() -> AppliedFinish:
-    """Brushed directional-satin finish."""
-    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.BRUSHED])
+def brushed(
+    scale: tuple[float, float] = (1.0, 1.0), rotation: float = 0.0
+) -> AppliedFinish:
+    """Brushed directional-satin finish.
+
+    Args:
+        scale: Texture UV scale ``(u, v)``; ``(2, 2)`` tiles the brush grain twice as
+            fine. Default ``(1, 1)`` is the as-authored size.
+        rotation: Texture rotation in degrees (counterclockwise), e.g. to run the brush
+            lines across the part. Default ``0``.
+
+    Returns:
+        The applied finish.
+    """
+    return AppliedFinish(
+        MECHANICAL_FINISHES[Mechanical.BRUSHED], scale=scale, rotation=rotation
+    )
 
 
-def fine_sanding() -> AppliedFinish:
-    """Fine-sanded smooth-matte finish."""
-    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.FINE_SANDING])
+def fine_sanding(scale: tuple[float, float] = (1.0, 1.0)) -> AppliedFinish:
+    """Fine-sanded smooth-matte finish.
+
+    Args:
+        scale: Texture UV scale ``(u, v)``; ``(2, 2)`` tiles the grain twice as fine.
+            Isotropic, so no rotation. Default ``(1, 1)`` is the as-authored size.
+
+    Returns:
+        The applied finish.
+    """
+    return AppliedFinish(MECHANICAL_FINISHES[Mechanical.FINE_SANDING], scale=scale)
 
 
 def smooth_machining() -> AppliedFinish:
