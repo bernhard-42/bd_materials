@@ -175,6 +175,15 @@ metals.aluminum(density=2705).material.mass(volume_mm3=8000)   # uses 2705, not 
 from bd_materials import typical_finishes, typical_materials
 typical_finishes(metals.aluminum().material)         # [Anodized, Bead Blast, ...]
 typical_materials(finishes.Chemical.ANODIZED)        # [Alu_G6061_T6, ..., Titanium_...]
+
+# 9 — define your own material (not in the catalog): custom_<category>(...)
+metals.custom_metal(name="MyAlloy", density=4500, family="titanium",
+                    tensile_strength=900, yield_strength=830,   # bare numbers = exact
+                    hardness=350, hardness_scale="HB",
+                    finish=finishes.anodize("blue"))            # -> a FinishedMaterial
+#   each property is a Range(lo, hi) band, a bare number (exact value, min == max),
+#   None (missing) or NOT_SUITABLE (n/a). Returns a FinishedMaterial, so finishes /
+#   color / scale apply just like a catalog material; pass pbr=... for a ready-made look.
 ```
 
 Grade enums live on their module (`metals.Alu`, `glass.Borosilicate`, …) or import directly: `from bd_materials.materials.metals import Alu`. Families with a single grade (e.g. `glass.borosilicate()`, `resins.tough()`) default to it, so you never need the enum until a family has more than one grade.
@@ -213,6 +222,8 @@ FinishedMaterial(material, finish=None, *, color=None, thickness_mm=None,
 `scale=(u, v)` / `rotation` (degrees, CCW) are a **texture UV transform** — `scale(2, 2)` tiles a texture twice as fine. They apply to a **substrate** texture (wood grain, fabric weave, paper — set on the `wood`/`textile`/`paper` family functions) or a **finish** texture (`brushed` grain — set on the finish verb); a textured finish's transform takes precedence.
 
 Each category module also exposes its `<Cat>Material` class, its grade enum(s), a public `<FAMILY>_MATERIALS` dict per family, and an `ALL_<CATEGORY>` tuple.
+
+**Define your own material** with `custom_<category>()` — `custom_metal`, `custom_plastic`, `custom_resin`, `custom_glass`, `custom_wood`, `custom_paper`, `custom_textile`. `name` and `density` are the two required (positional) args; everything else is keyword-only — the rest of the identity (`family`, `transparent`, `hardness_scale` where it applies) plus every property field, each a `Range`, a bare number (an exact value, `min == max`, coerced via `core.as_range`), or `None` (missing / `NOT_SUITABLE`). It returns a **`FinishedMaterial`**, so a finish, color and the texture transform apply exactly as for a catalog material, and `pbr=` supplies a ready-made look. Coercion lives in the function, so the catalog stays strict `Range`.
 
 ---
 
