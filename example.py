@@ -21,89 +21,97 @@ set_defaults(studio_env_intensity=0.75, studio_env_rotation=48)
 
 ## 1 — defaults only: the most common grade, bare surface
 
-m = metals.aluminum()  # 6061-T6
-show(sb, materials=[m.pbr])
+sb.material = metals.aluminum()  # 6061-T6
+show(sb)
 # %%
 
-m = plastics.pla()  # generic PLA
-show(sb, materials=[m.pbr])
+sb.material = plastics.pla()  # generic PLA
+show(sb)
 # %%
 
-m = wood.hardwood()  # generic hardwood
-show(sb, materials=[m.pbr])
+sb.material = wood.hardwood()  # generic hardwood
+show(sb)
 # %%
 
 
 ## 2 — pick a grade (grade is first-positional)
 
-m = metals.aluminum(metals.Alu.G7075_T6)
-show(sb, materials=[m.pbr])
+sb.material = metals.aluminum(metals.Alu.G7075_T6)
+show(sb)
 # %%
 
-m = metals.stainless(metals.Stainless.G316L_AS_BUILT)  # SLM as-built
-show(sb, materials=[m.pbr])
+sb.material = metals.stainless(metals.Stainless.G316L_AS_BUILT)  # SLM as-built
+show(sb)
 # %%
 
-m = wood.hardwood(wood.Hardwood.ASH, rotation=90)
-show(sb, materials=[m.pbr])
+sb.material = wood.hardwood(wood.Hardwood.ASH, rotation=90)
+show(sb)
 # %%
 
-m = wood.softwood(wood.Softwood.PINE, scale=(2, 2))
-show(sb, materials=[m.pbr])
+sb.material = wood.softwood(wood.Softwood.PINE, scale=(2, 2))
+show(sb)
 # %%
 
-m = resins.tough()
-show(sb, materials=[m.pbr])
+sb.material = resins.tough()
+show(sb)
 # %%
 
 
 ## 3 — selectable color (plastics/resins/paper/textile) and transparent panes
 
-m = plastics.pla(color="red")
-show(sb, materials=[m.pbr])
+sb.material = plastics.pla(color="red")
+show(sb)
 # %%
 
-m = plastics.pmma(color="clear", thickness_mm=3)  # transparent -> pane thickness
-show(sb, materials=[m.pbr])
+sb.material = plastics.pmma(
+    color="clear", thickness_mm=3
+)  # transparent -> pane thickness
+show(sb)
 # %%
 
-m = glass.borosilicate(color="green", thickness_mm=5)
-show(sb, materials=[m.pbr])
+sb.material = glass.borosilicate(color="green", thickness_mm=5)
+show(sb)
 # %%
 
 
 ## 4 — a finish (color and, for paints/coats, a sheen ride on the finish)
 
-m = metals.aluminum(finish=finishes.anodize("champagne"))  # finish on default grade
-show(sb, materials=[m.pbr])
+sb.material = metals.aluminum(
+    finish=finishes.anodize("champagne")
+)  # finish on default grade
+show(sb)
 # %%
 
-m = metals.aluminum(metals.Alu.G7075_T6, finishes.anodize("blue"))  # grade + finish
-show(sb, materials=[m.pbr])
+sb.material = metals.aluminum(
+    metals.Alu.G7075_T6, finishes.anodize("blue")
+)  # grade + finish
+show(sb)
 # %%
 
-m = metals.mild_steel(finish=finishes.powder_coat("green", finishes.Sheen.MATTE))
-show(sb, materials=[m.pbr])
+sb.material = metals.mild_steel(
+    finish=finishes.powder_coat("green", finishes.Sheen.MATTE)
+)
+show(sb)
 # %%
 
-m = metals.brass()
-show(sb, materials=[m.pbr])
+sb.material = metals.brass()
+show(sb)
 # %%
 
-m = metals.brass(finish=finishes.pvd("gold"))
-show(sb, materials=[m.pbr])
+sb.material = metals.brass(finish=finishes.pvd("gold"))
+show(sb)
 # %%
 
 
 ## 5 — process nudges the *bare* as-made surface (a print reads rough)
 
-m = plastics.pla(color="black", process=Process.FDM)
-show(sb, materials=[m.pbr])
+sb.material = plastics.pla(color="black", process=Process.FDM)
+show(sb)
 
 # %% compared to
 
-m = plastics.pla(color="black")
-show(sb, materials=[m.pbr])
+sb.material = plastics.pla(color="black")
+show(sb)
 # %%
 
 
@@ -116,7 +124,7 @@ print(f"{al.material.mass(volume_mm3=8000)=}")  # grams  (density x volume)
 
 assert al.material.tensile_strength is not None
 
-print(f"{al.material.tensile_strength=}")  # Range(mi)n=540, max=600  MPa
+print(f"{al.material.tensile_strength=}")  # Range min=540, max=600  MPa
 print(f"{al.material.tensile_strength.value_at(0)=}")  # 540 Pa (min)
 print(f"{al.material.tensile_strength.value_at(1)=}")  # 600 Pa (max)
 print(f"{al.material.tensile_strength.value_at(0.2)=}")  # 552 Pa (max)
@@ -145,78 +153,86 @@ for m in typical_materials(finishes.Chemical.ANODIZED):
 
 # %%
 
-m = metals.aluminum()
-show(sb, materials=[m.pbr])
+sb.material = metals.aluminum()
+show(sb)
 
 # %%
 
-m = metals.aluminum(finish=finishes.brushed())
-show(sb, materials=[m.pbr])
+sb.material = metals.aluminum(finish=finishes.brushed())
+show(sb)
 
 # %%
 
-m = metals.aluminum(finish=finishes.fine_sanding())
-show(sb, materials=[m.pbr])
+sb.material = metals.aluminum(finish=finishes.fine_sanding())
+show(sb)
 
 # %%
 
-m = metals.aluminum(finish=finishes.anodize("#e8723b"))
-show(sb, materials=[m.pbr])
+sb.material = metals.aluminum(finish=finishes.anodize("#e8723b"))
+show(sb)
 
 # %%
 
-m = metals.aluminum(finish=[finishes.bead_blast(), finishes.anodize("#e8723b")])
-show(sb, materials=[m.pbr])
+sb.material = metals.aluminum(
+    finish=[finishes.bead_blast(), finishes.anodize("#e8723b")]
+)
+show(sb)
 
 # %%
 
-m = metals.tool_steel(metals.ToolSteel.D2_HARDENED)
-show(sb, materials=[m.pbr])
+sb.material = metals.tool_steel(metals.ToolSteel.D2_HARDENED)
+show(sb)
 
 # %%
 
-m = metals.tool_steel(metals.ToolSteel.D2_HARDENED, finish=finishes.brushed())
-show(sb, materials=[m.pbr])
+sb.material = metals.tool_steel(metals.ToolSteel.D2_HARDENED, finish=finishes.brushed())
+show(sb)
 
 # %%
 
-m = metals.tool_steel(
+sb.material = metals.tool_steel(
     metals.ToolSteel.D2_HARDENED, finish=[finishes.brushed(), finishes.pvd("red")]
 )
-show(sb, materials=[m.pbr])
+show(sb)
 
 # %%
 
-m = metals.tool_steel(metals.ToolSteel.D2_HARDENED, finish=finishes.black_oxide())
-show(sb, materials=[m.pbr])
+sb.material = metals.tool_steel(
+    metals.ToolSteel.D2_HARDENED, finish=finishes.black_oxide()
+)
+show(sb)
 
 # %%
 
-m = metals.tool_steel(metals.ToolSteel.D2_HARDENED, finish=finishes.zinc_plate())
-show(sb, materials=[m.pbr])
+sb.material = metals.tool_steel(
+    metals.ToolSteel.D2_HARDENED, finish=finishes.zinc_plate()
+)
+show(sb)
 
 # %%
 
-m = metals.tool_steel(metals.ToolSteel.D2_HARDENED, finish=finishes.anodize("green"))
-show(sb, materials=[m.pbr])
+sb.material = metals.tool_steel(
+    metals.ToolSteel.D2_HARDENED, finish=finishes.anodize("green")
+)
+show(sb)
 
 # %%
-m = metals.tool_steel(
+sb.material = metals.tool_steel(
     metals.ToolSteel.D2_HARDENED,
     finish=[finishes.bead_blast(), finishes.anodize("green")],
 )
-show(sb, materials=[m.pbr])
+show(sb)
 
 # %%
-m = metals.aluminum(
+sb.material = metals.aluminum(
     finish=[finishes.brushed(), finishes.electrophoresis()],
 )
-show(sb, materials=[m.pbr])
+show(sb)
 
 # %%
-m = metals.tool_steel(
+sb.material = metals.tool_steel(
     finish=[finishes.brushed(), finishes.electrophoresis()],
 )
-show(sb, materials=[m.pbr])
+show(sb)
 
 # %%

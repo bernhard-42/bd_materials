@@ -151,11 +151,17 @@ metals.aluminum(metals.Alu.G7075_T6, finishes.anodize("blue")) # grade + finish
 metals.mild_steel(finish=finishes.powder_coat("green", finishes.Sheen.MATTE))
 metals.brass(finish=finishes.pvd("gold"))
 
-# 5 — process nudges the *bare* as-made surface (a print reads rough)
+# 5 — texture scale & rotation (a UV transform on the resolved look)
+metals.aluminum(finish=finishes.brushed(scale=(2, 2), rotation=90))  # finer, cross-grain
+wood.hardwood(wood.Hardwood.OAK, scale=(2, 2))       # tile the wood-grain texture
+#   brushed takes scale+rotation (directional); bead_blast/fine_sanding are isotropic
+#   (scale only). wood/textile/paper take both; a textured finish's transform wins.
+
+# 6 — process nudges the *bare* as-made surface (a print reads rough)
 plastics.pla(color="black", process=Process.FDM)
 #   note: finish and process are mutually exclusive (a finished part is smooth)
 
-# 6 — inspect the physics, compute mass, resolve the look
+# 7 — inspect the physics, compute mass, resolve the look
 al = metals.aluminum(metals.Alu.G7075_T6)
 print(al.material)                      # aligned "property  min to max  unit" table
 al.material.mass(volume_mm3=8000)       # grams  (density x volume)
@@ -165,7 +171,7 @@ al.pbr                                  # three.js PbrProperties
 # density is a single representative value -- override it per part (e.g. measured):
 metals.aluminum(density=2705).material.mass(volume_mm3=8000)   # uses 2705, not 2700
 
-# 7 — advisory applicability queries (never a constraint)
+# 8 — advisory applicability queries (never a constraint)
 from bd_materials import typical_finishes, typical_materials
 typical_finishes(metals.aluminum().material)         # [Anodized, Bead Blast, ...]
 typical_materials(finishes.Chemical.ANODIZED)        # [Alu_G6061_T6, ..., Titanium_...]
@@ -195,14 +201,16 @@ Each category is a frozen dataclass with the physics-range fields relevant to it
 | `WoodMaterial`                      | along-grain `modulus_of_elasticity`, `modulus_of_rupture`, `compressive_strength_parallel`, `janka_hardness`                                 |
 | `PaperMaterial` / `TextileMaterial` | areal goods: `areal_density` (grammage), `thickness`, in-plane `tensile_strength`                                                            |
 
-Intrinsic facts (`family`, `category`, `transparent`) live on the **`Material`**; per-part choices (`color`, `thickness_mm`, `finish`, `process`) live on the **`FinishedMaterial`**:
+Intrinsic facts (`family`, `category`, `transparent`) live on the **`Material`**; per-part choices (`color`, `thickness_mm`, `scale`, `rotation`, `finish`, `process`) live on the **`FinishedMaterial`**:
 
 ```
 FinishedMaterial(material, finish=None, *, color=None, thickness_mm=None,
-                 process=None, pbr=None)
+                 scale=(1, 1), rotation=0, process=None, pbr=None)
     .material   # the physics (a shared, immutable range table)
     .pbr        # the resolved three.js look (for the OCP VSCode viewer)
 ```
+
+`scale=(u, v)` / `rotation` (degrees, CCW) are a **texture UV transform** — `scale(2, 2)` tiles a texture twice as fine. They apply to a **substrate** texture (wood grain, fabric weave, paper — set on the `wood`/`textile`/`paper` family functions) or a **finish** texture (`brushed` grain — set on the finish verb); a textured finish's transform takes precedence.
 
 Each category module also exposes its `<Cat>Material` class, its grade enum(s), a public `<FAMILY>_MATERIALS` dict per family, and an `ALL_<CATEGORY>` tuple.
 
@@ -214,7 +222,7 @@ In **`bd_materials.finishes`**:
 
 - **`Finish`** — a finish's intrinsic spec: `name`, `colors` (its standard palette), `notes`.
 - **`Sheen`** — `GLOSS` (default) / `MATTE`, a per-application choice for paints/coatings.
-- **`AppliedFinish`** — a `Finish` plus the per-part `color` and `sheen`. This is what the verb functions return and what `FinishedMaterial(finish=…)` accepts.
+- **`AppliedFinish`** — a `Finish` plus the per-part `color` and `sheen` (and, for the textured verbs, the `scale`/`rotation` UV transform). This is what the verb functions return and what `FinishedMaterial(finish=…)` accepts. `brushed(scale=(2, 2), rotation=90)` takes both (directional grain); `bead_blast`/`fine_sanding` are isotropic → `scale` only.
 - Group enums (`Mechanical`, `Chemical`, `MetalPlating`, `Coating`, `Marking`) + their `<GROUP>_FINISHES` dicts are the maintenance backbone; the **verb functions are the API**.
 
 Color is handled per finish:
