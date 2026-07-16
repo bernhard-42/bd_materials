@@ -236,3 +236,13 @@ sb.material = metals.tool_steel(
 show(sb)
 
 # %%
+
+from threejs_materials import PbrProperties
+
+mat = plastics.custom_plastic(
+    "carbon fiber",
+    density=1500,  # kg/m^3
+    pbr=PbrProperties.from_gpuopen("Carbon biColor Coat"),
+)
+sb.material = mat
+show(sb)
