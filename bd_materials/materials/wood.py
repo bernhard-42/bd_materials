@@ -192,6 +192,72 @@ def hardwood(
     )
 
 
+def ash(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """Ash hardwood as a ``FinishedMaterial`` (see :func:`hardwood` for the args)."""
+    return hardwood(Hardwood.ASH, finish, process, density, scale, rotation)
+
+
+def beech(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """Beech hardwood as a ``FinishedMaterial`` (see :func:`hardwood` for the args)."""
+    return hardwood(Hardwood.BEECH, finish, process, density, scale, rotation)
+
+
+def birch(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """Birch hardwood as a ``FinishedMaterial`` (see :func:`hardwood` for the args)."""
+    return hardwood(Hardwood.BIRCH, finish, process, density, scale, rotation)
+
+
+def maple(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """Maple hardwood as a ``FinishedMaterial`` (see :func:`hardwood` for the args)."""
+    return hardwood(Hardwood.MAPLE, finish, process, density, scale, rotation)
+
+
+def oak(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """Oak hardwood as a ``FinishedMaterial`` (see :func:`hardwood` for the args)."""
+    return hardwood(Hardwood.OAK, finish, process, density, scale, rotation)
+
+
+def walnut(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """Walnut hardwood as a ``FinishedMaterial`` (see :func:`hardwood` for the args)."""
+    return hardwood(Hardwood.WALNUT, finish, process, density, scale, rotation)
+
+
 # --- Softwood ----------------------------------------------------------------
 class Softwood(Enum):
     GENERIC = auto()  # early-phase, before a species is chosen
@@ -279,6 +345,28 @@ def softwood(
     )
 
 
+def spruce(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """Spruce softwood as a ``FinishedMaterial`` (see :func:`softwood` for the args)."""
+    return softwood(Softwood.SPRUCE, finish, process, density, scale, rotation)
+
+
+def pine(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """Pine softwood as a ``FinishedMaterial`` (see :func:`softwood` for the args)."""
+    return softwood(Softwood.PINE, finish, process, density, scale, rotation)
+
+
 # --- Engineered wood ---------------------------------------------------------
 class EngineeredWood(Enum):
     MDF = auto()
@@ -348,6 +436,32 @@ def engineered_wood(
         process=process,
         scale=scale,
         rotation=rotation,
+    )
+
+
+def mdf(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """MDF board as a ``FinishedMaterial`` (see :func:`engineered_wood` for the args)."""
+    return engineered_wood(
+        EngineeredWood.MDF, finish, process, density, scale, rotation
+    )
+
+
+def osb(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """OSB board as a ``FinishedMaterial`` (see :func:`engineered_wood` for the args)."""
+    return engineered_wood(
+        EngineeredWood.OSB, finish, process, density, scale, rotation
     )
 
 
