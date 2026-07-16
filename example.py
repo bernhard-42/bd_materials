@@ -1,7 +1,6 @@
 # %%
-
-from build123d import *
-from ocp_vscode import *
+# from build123d import *
+from ocp_vscode import show, set_defaults
 from ocp_vscode.utils import create_shader_ball
 from bd_materials import (
     metals,
@@ -14,6 +13,7 @@ from bd_materials import (
     typical_finishes,
     typical_materials,
 )
+from threejs_materials import PbrProperties
 
 sb = create_shader_ball("sb")
 set_defaults(studio_env_intensity=0.75, studio_env_rotation=48)
@@ -237,7 +237,6 @@ show(sb)
 
 # %%
 
-from threejs_materials import PbrProperties
 
 mat = plastics.custom_plastic(
     "carbon fiber",
