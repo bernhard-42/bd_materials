@@ -15,7 +15,10 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: Multimedia :: Graphics :: 3D Modeling",
 ]
-dependencies = ["threejs-materials>=1.2.1,<1.3.0"]
+# webcolors: color-name -> RGB, the same resolver build123d + ocp-tessellate use, so a
+# named color matches build123d's Color(name). Deliberately a compatible-release range
+# (not an exact pin) to co-install cleanly with those packages, which require ~=24.8.0.
+dependencies = ["threejs-materials>=1.2.1,<1.3.0", "webcolors~=24.8.0"]
 
 [project.optional-dependencies]
 test = ["pytest==9.0.3"]

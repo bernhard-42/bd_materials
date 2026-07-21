@@ -287,13 +287,16 @@ woven | felt | leather
 Anywhere a `color=` is accepted (material families and the finish verbs), the value is **color-like** — the same shapes as build123d's `ColorLike`:
 
 ```python
-plastics.pla(color="red")                 # palette / CSS name
+plastics.pla(color="red")                 # any CSS3 name (via webcolors)
+plastics.pla(color="dodgerblue")          # ...all ~147 of them
 plastics.pla(color="#ff8800")             # hex "#rrggbb" / "#rrggbbaa"
 plastics.pla(color=0xff8800)              # packed 0xRRGGBB int
 plastics.pla(color=(1.0, 0.5, 0.0))       # 0..1 RGB(A) tuple
 plastics.pla(color=("red", 0.5))          # (name, alpha)
 plastics.pc(color=Color("white"), opacity=0.45)   # a build123d Color
 ```
+
+Named colors resolve through **webcolors** — the same resolver build123d and ocp-tessellate use — so `color="name"` equals build123d's `Color("name")` for every CSS3 name. (bd_materials adds a few of its own: the no-tint sentinels `"natural"`/`"clear"` and the metallic looks `"gunmetal"`/`"nickel"`/`"chrome"`/`"rose gold"`/`"champagne"`.)
 
 bd_materials **cannot import build123d** (build123d depends on bd_materials), so it accepts these **structurally**, never by importing the type — a build123d `Color` is `Iterable[float]`, and a raw OCP `Quantity_ColorRGBA` is duck-typed. Alpha is dropped: transparency is the dedicated `opacity` / `thickness_mm` axes, not a color channel.
 
@@ -383,4 +386,4 @@ _Not on pypi yet_
 pip install -e .
 ```
 
-The one runtime dependency is [threejs-materials](https://github.com/bernhard-42/threejs-materials) without materialx support, using just the out-of-the-box existing materials. `FinishedMaterial.pbr` yields a three.js material for the OCP VSCode viewer.
+Runtime dependencies: [threejs-materials](https://github.com/bernhard-42/threejs-materials) (without materialx support — just the out-of-the-box materials; `FinishedMaterial.pbr` yields a three.js material for the OCP VSCode viewer) and [webcolors](https://pypi.org/project/webcolors/) (`~=24.8.0`, the same color-name resolver build123d and ocp-tessellate use, so a named `color=` matches build123d's `Color(name)`).

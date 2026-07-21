@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+import webcolors
 from threejs_materials import coats, glass, metal, paper, plastic, textile, wood
 
 from . import finishes as fin
@@ -37,33 +38,22 @@ _Rgb = str | tuple[float, float, float]
 # as-printed / as-built routes default to a rough surface; the rest stay smooth
 _ROUGH_PROCESSES = frozenset({Process.FDM, Process.SLS, Process.MJF, Process.SLM})
 
-# --- color names -> sRGB hex (None = leave factory default / not colorable) --
-# TRUE colors, not a curated palette: an OCCT/CSS-known name resolves to its literal
-# value, so a bare ``color="red"`` matches build123d's ``Color("red")`` exactly. The
-# material-metallic names (gunmetal / nickel / chrome / rose gold / champagne) have no
-# standard literal, so they keep a representative hex. The "not-so-black for legibility"
-# treatment is deliberately NOT applied here -- it is scoped to the dark *finishes* only
-# (``_BLACK_OXIDE_GREY`` for black oxide, ``_ECOAT_CHARCOAL`` for e-coat).
+# --- bd_materials-specific color names -> sRGB hex (None = no tint) -----------
+# CSS3 named colors are NOT listed here: they are resolved by ``webcolors`` (the same
+# resolver build123d + ocp-tessellate use), so a bare ``color="red"`` matches build123d's
+# ``Color("red")`` exactly, and every CSS3 name works. Only what webcolors cannot express
+# lives here: the no-tint sentinels (``natural`` / ``clear``), and the material-appearance
+# names with no standard literal (gunmetal / nickel / chrome / rose gold / champagne). The
+# "not-so-black for legibility" treatment is deliberately NOT here -- it is scoped to the
+# dark *finishes* only (``_BLACK_OXIDE_GREY`` for black oxide, ``_ECOAT_CHARCOAL`` e-coat).
 _COLOR_HEX: dict[str, str | None] = {
-    "natural": None,
-    "clear": None,
-    "black": "#000000",
-    "white": "#ffffff",
-    "gray": "#808080",
-    "gunmetal": "#2a3439",  # material appearance; no standard literal
-    "silver": "#c0c0c0",
-    "nickel": "#b8b8b0",  # material appearance; no standard literal
-    "chrome": "#c8ccce",  # material appearance; no standard literal
-    "gold": "#ffd700",
-    "rose gold": "#b76e79",  # material appearance; no standard literal
-    "champagne": "#e6c99a",  # material appearance; no standard literal
-    "brown": "#a52a2a",
-    "red": "#ff0000",
-    "orange": "#ffa500",
-    "yellow": "#ffff00",
-    "green": "#008000",
-    "blue": "#0000ff",
-    "purple": "#800080",
+    "natural": None,  # no tint -- the factory / substrate look
+    "clear": None,  # no tint
+    "gunmetal": "#2a3439",
+    "nickel": "#b8b8b0",
+    "chrome": "#c8ccce",
+    "rose gold": "#b76e79",
+    "champagne": "#e6c99a",
 }
 
 # metal families with a dedicated bundled factory (else steel / stainless)
@@ -100,18 +90,29 @@ def _normalize_color(color: Color | None) -> _Rgb | None:
     imported unless one is actually passed). Alpha is dropped -- transparency is the
     dedicated ``opacity`` / ``thickness_mm`` axes.
 
+    A name string resolves in order: a bd_materials-specific name (``_COLOR_HEX`` -- the
+    no-tint sentinels + material-appearance names), a ``#rrggbb`` hex (passed through),
+    then any CSS3 name via ``webcolors`` (matching build123d's ``Color(name)``); an
+    unrecognized name is passed through unchanged.
+
     Args:
         color: The color input, or ``None``.
 
     Returns:
-        A palette-resolved hex / pass-through name string, a ``(r, g, b)`` tuple, or
-        ``None``.
+        A resolved hex / pass-through name string, a ``(r, g, b)`` tuple, or ``None``.
     """
     if color is None:
         return None
     if isinstance(color, str):
         key = color.strip().lower()
-        return _COLOR_HEX[key] if key in _COLOR_HEX else color
+        if key in _COLOR_HEX:  # sentinels (-> None) + material-appearance names
+            return _COLOR_HEX[key]
+        if key.startswith("#"):  # a hex literal passes through
+            return color
+        try:
+            return webcolors.name_to_hex(key)  # CSS3 name -> literal (== Color(name))
+        except ValueError:
+            return color  # unrecognized name -- pass through
     if isinstance(color, bool):  # guard: bool is a subclass of int
         raise TypeError(f"invalid color: {color!r}")
     if isinstance(color, int):  # packed 0xRRGGBB
@@ -391,7 +392,7 @@ def _ecoat(
     On other metals (steel, ...) it is an opaque epoxy e-coat -- a covering satin film
     that hides the substrate texture.
     """
-    if rgb is None or rgb == _COLOR_HEX["black"]:
+    if rgb is None or rgb == _normalize_color("black"):
         rgb = _ECOAT_CHARCOAL  # black (the default/common e-coat) -> deep charcoal
     if m.family == "aluminum":
         # semi-transparent: tint the metal base, keeping metalness + any relief

@@ -230,9 +230,11 @@ def test_pbr_setter_pins_a_tuned_look():
     "color,expected",
     [
         (None, None),
-        ("white", "#ffffff"),  # name -> its true literal
+        ("white", "#ffffff"),  # bd_materials/CSS name -> literal
         ("#ff8800", "#ff8800"),  # hex passthrough
-        ("dodgerblue", "dodgerblue"),  # unknown/CSS name passthrough
+        ("dodgerblue", "#1e90ff"),  # any CSS3 name resolves via webcolors
+        ("chrome", "#c8ccce"),  # bd_materials material-appearance name
+        ("notacolorname", "notacolorname"),  # unrecognized name passes through
         ("  Red ", "#ff0000"),  # name is trimmed + case-folded, then resolved
         (0xFF8800, "#ff8800"),  # packed 0xRRGGBB int
         ((1.0, 0.5, 0.0), (1.0, 0.5, 0.0)),  # rgb tuple
@@ -268,7 +270,7 @@ def test_normalize_color_accepts_build123d_color():
 
 
 @requires_threejs
-@pytest.mark.parametrize("name", ["white", "black", "red", "green", "blue"])
+@pytest.mark.parametrize("name", ["white", "black", "red", "green", "blue", "gold"])
 def test_named_color_matches_build123d_literal(name):
     """A named palette color resolves to the same value as build123d's ``Color(name)``."""
     b3d = pytest.importorskip("build123d")
