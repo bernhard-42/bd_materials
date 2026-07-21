@@ -85,8 +85,9 @@ def soda_lime(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
         opacity: How see-through this part is, ``0.0`` (clear) to ``1.0`` (opaque);
@@ -159,8 +160,9 @@ def borosilicate(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
         opacity: How see-through this part is, ``0.0`` (clear) to ``1.0`` (opaque);
@@ -235,7 +237,8 @@ def custom_glass(
         transparent: Intrinsic see-through flag (glass is transmissive). Default
             ``True``; ``thickness_mm`` sets the pane thickness.
         hardness_scale: Scale for ``hardness`` (``"HV"`` Vickers).
-        color: Optional glass tint (name / hex / RGB tuple).
+        color: Optional glass tint -- a build123d ``ColorLike`` (name, hex,
+            ``0xRRGGBB`` int, RGB(A) tuple, or a ``Color``).
         thickness_mm: Pane thickness in mm for the transmissive look.
         opacity: How see-through the part is, ``0.0`` (clear) to ``1.0`` (opaque);
             meaningful only when ``transparent``. ``None`` keeps the clear look.

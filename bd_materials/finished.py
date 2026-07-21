@@ -82,7 +82,8 @@ class FinishedMaterial(Generic[MaterialT]):
             material: The range ``Material`` (physics) this part is made of.
             finish: An ``AppliedFinish`` or list of them; mutually exclusive with
                 ``process``.
-            color: A selectable base color (name, hex string, or RGB tuple).
+            color: A selectable base color -- a build123d ``ColorLike`` (name, hex,
+                ``0xRRGGBB`` int, RGB(A) tuple, or a ``Color``).
             thickness_mm: Pane thickness in mm, meaningful only for a ``transparent``
                 material.
             opacity: How see-through this part is, from ``0.0`` (fully clear) to ``1.0``

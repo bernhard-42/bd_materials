@@ -64,8 +64,9 @@ def woven(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -124,8 +125,9 @@ def felt(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -184,8 +186,9 @@ def leather(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -246,7 +249,8 @@ def custom_textile(
         family: PBR look key (e.g. ``"felt"`` / ``"leather"``); an unknown key falls
             back to a woven weave. Defaults to ``"fabric_weave"``.
         transparent: Intrinsic see-through flag. Default ``False``.
-        color: Selectable base color (name / hex / RGB tuple).
+        color: Selectable base color -- a build123d ``ColorLike`` (name, hex,
+            ``0xRRGGBB`` int, RGB(A) tuple, or a ``Color``).
         scale: Texture UV scale ``(u, v)``; ``(2, 2)`` tiles the weave twice as fine.
         rotation: Weave texture rotation in degrees (counterclockwise).
         finish: Surface finish -- mutually exclusive with ``process`` and ``pbr``.

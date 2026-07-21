@@ -460,9 +460,9 @@ def get_pbr_properties(
         finish: An ``AppliedFinish`` (e.g. from ``spray_paint("blue")``) or a list of
             them -- each carries its own color.
         process: A ``Process`` that nudges the default surface (printed -> rough).
-        color: The material's own base color, applied only when no surface finish
-            covers it (e.g. a colored filament or tinted resin); ignored for bare
-            metals, whose color is intrinsic.
+        color: The material's own base color -- any build123d ``ColorLike`` -- applied
+            only when no surface finish covers it (e.g. a colored filament or tinted
+            resin); ignored for bare metals, whose color is intrinsic.
         thickness_mm: Pane thickness (mm) for transmissive materials.
         opacity: How see-through the part is, ``0.0`` (clear) to ``1.0`` (opaque), for a
             ``transparent`` material; ``None`` keeps the intrinsic clear look.

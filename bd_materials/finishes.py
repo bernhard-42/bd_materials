@@ -249,7 +249,8 @@ def anodize(color: Color) -> AppliedFinish:
     """Anodized finish in ``color``.
 
     Args:
-        color: The anodize color. Mandatory -- anodizing is done to add color
+        color: The anodize color -- any build123d ``ColorLike`` (name / hex / int /
+            RGB tuple / ``Color``). Mandatory -- anodizing is done to add color
             ("natural" is still an explicit choice, not the absence of one).
 
     Returns:
@@ -287,7 +288,8 @@ def dye(color: Color) -> AppliedFinish:
     """Dyed finish in ``color`` (anodized aluminum or dyeable polymers).
 
     Args:
-        color: The dye color.
+        color: The dye color -- any build123d ``ColorLike`` (name / hex / int / RGB
+            tuple / ``Color``).
 
     Returns:
         The applied finish.
@@ -326,7 +328,7 @@ def pvd(color: Color = "clear") -> AppliedFinish:
 
     Args:
         color: "clear" (default) is bright natural PVD, with the substrate showing
-            through; colors are opt-in.
+            through; colors are opt-in. Any build123d ``ColorLike``.
 
     Returns:
         The applied finish.
@@ -339,7 +341,7 @@ def zinc_plate(color: Color = "clear") -> AppliedFinish:
 
     Args:
         color: "clear" (default) is the clear/bright chromate -- the natural zinc look;
-            others are chromate tints.
+            others are chromate tints. Any build123d ``ColorLike``.
 
     Returns:
         The applied finish.
@@ -351,7 +353,8 @@ def vacuum_plating(color: Color, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Vacuum-metallised plating in ``color``.
 
     Args:
-        color: The plating color.
+        color: The plating color -- any build123d ``ColorLike`` (name / hex / int /
+            RGB tuple / ``Color``).
         sheen: Gloss (default) or matte.
 
     Returns:
@@ -367,7 +370,7 @@ def powder_coat(color: Color, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Powder coat in ``color``.
 
     Args:
-        color: The coat color (any, to spec).
+        color: The coat color (any, to spec) -- any build123d ``ColorLike``.
         sheen: Gloss (default) or matte.
 
     Returns:
@@ -380,7 +383,7 @@ def spray_paint(color: Color, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Spray paint in ``color``.
 
     Args:
-        color: The paint color (any, to spec).
+        color: The paint color (any, to spec) -- any build123d ``ColorLike``.
         sheen: Gloss (default) or matte.
 
     Returns:
@@ -393,8 +396,8 @@ def electrophoresis(color: Color = "black") -> AppliedFinish:
     """Electrophoretic e-coat in ``color`` (automotive-style dip coat).
 
     Args:
-        color: The e-coat color. Defaults to black (the common automotive primer);
-            white and RAL colors are also available to spec.
+        color: The e-coat color -- any build123d ``ColorLike``. Defaults to black (the
+            common automotive primer); white and RAL colors are also available to spec.
 
     Returns:
         The applied finish.
@@ -417,7 +420,8 @@ def silkscreen(color: Color = "black") -> AppliedFinish:
     """Silkscreen marking in ``color`` (default black).
 
     Args:
-        color: The ink color. Note PBR ignores markings, so this is metadata.
+        color: The ink color -- any build123d ``ColorLike``. Note PBR ignores markings,
+            so this is metadata.
 
     Returns:
         The applied finish.

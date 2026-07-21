@@ -112,8 +112,9 @@ def pla(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -199,8 +200,9 @@ def abs_(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -334,8 +336,9 @@ def nylon(
 
     Args:
         grade: Grade to select; defaults to PA12.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -421,8 +424,9 @@ def peek(
 
     Args:
         grade: Grade to select; defaults to moulded.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -508,8 +512,9 @@ def tpu(
 
     Args:
         grade: Grade to select; defaults to Shore 95A.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -575,8 +580,9 @@ def pc(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
         opacity: How see-through this part is, ``0.0`` (clear) to ``1.0`` (opaque);
@@ -649,8 +655,9 @@ def pp(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -712,8 +719,9 @@ def pom(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -775,8 +783,9 @@ def ptfe(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -842,8 +851,9 @@ def pmma(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
         opacity: How see-through this part is, ``0.0`` (clear) to ``1.0`` (opaque);
@@ -914,8 +924,9 @@ def pe(
 
     Args:
         grade: Grade to select; defaults to HDPE.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -977,8 +988,9 @@ def phenolic(
 
     Args:
         grade: Grade to select; defaults to Bakelite.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -1040,8 +1052,9 @@ def rubber(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -1127,8 +1140,9 @@ def petg(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -1192,8 +1206,9 @@ def asa(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -1256,8 +1271,9 @@ def pps(
 
     Args:
         grade: Grade to select; defaults to carbon-filled.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -1320,8 +1336,9 @@ def fr4(
 
     Args:
         grade: Grade to select; defaults to generic.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -1383,8 +1400,9 @@ def cfrp(
 
     Args:
         grade: Grade to select; defaults to plate.
-        color: Base color for the part -- a standard-palette name, a hex string, or an
-            RGB tuple.
+        color: Base color for the part -- a build123d ``ColorLike``: a CSS3/palette
+            name, a ``#rrggbb`` hex, a ``0xRRGGBB`` int, an RGB(A) tuple, or a
+            ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -1468,7 +1486,8 @@ def custom_plastic(
         transparent: Intrinsic see-through flag; set for a transmissive plastic (uses
             ``thickness_mm``). Default ``False``.
         hardness_scale: Scale for ``hardness`` (``"Shore D"`` / ``"Shore A"``).
-        color: Selectable base color (name / hex / RGB tuple).
+        color: Selectable base color -- a build123d ``ColorLike`` (name, hex,
+            ``0xRRGGBB`` int, RGB(A) tuple, or a ``Color``).
         thickness_mm: Pane thickness in mm, meaningful only when ``transparent``.
         opacity: How see-through the part is, ``0.0`` (clear) to ``1.0`` (opaque);
             meaningful only when ``transparent``. ``None`` keeps the clear look.
