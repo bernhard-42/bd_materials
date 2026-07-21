@@ -100,6 +100,7 @@ _PBR_CASES = {
     "pla_color_fdm": lambda: plastics.pla(color="red", process=Process.FDM),
     "pmma_clear_pane": lambda: plastics.pmma(color="clear", thickness_mm=3),
     "pc_pane": lambda: plastics.pc(thickness_mm=4),
+    "pc_translucent": lambda: plastics.pc(color="white", opacity=0.65, roughness=0.3),
     "cfrp": lambda: plastics.cfrp(),
     "boro_pane": lambda: glass.borosilicate(color="green", thickness_mm=5),
     "oak": lambda: wood.hardwood(),
@@ -161,6 +162,64 @@ def test_every_material_resolves_a_pbr_look(material):
 def test_finish_color_process_paths_resolve(build):
     """Every finish / color / process path in pbr.py resolves without error."""
     assert build().pbr is not None
+
+
+@requires_threejs
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda o: plastics.pc(color="white", opacity=o),
+        lambda o: plastics.pmma(opacity=o),
+        lambda o: glass.borosilicate(opacity=o),
+    ],
+    ids=["pc", "pmma", "boro"],
+)
+@pytest.mark.parametrize("opacity", [0.0, 0.35, 1.0])
+def test_opacity_maps_to_transmission(build, opacity):
+    """A transparent part's ``opacity`` dials three.js ``transmission`` = 1 - opacity."""
+    assert build(opacity).pbr.values.transmission == pytest.approx(1.0 - opacity)
+
+
+@requires_threejs
+def test_opacity_none_keeps_intrinsic_clear_look():
+    """Omitting ``opacity`` leaves the intrinsic fully-transmissive look untouched."""
+    assert plastics.pc().pbr.values.transmission == pytest.approx(1.0)
+
+
+@requires_threejs
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda r: plastics.pc(roughness=r),
+        lambda r: plastics.pmma(roughness=r),
+        lambda r: glass.borosilicate(roughness=r),
+    ],
+    ids=["pc", "pmma", "boro"],
+)
+@pytest.mark.parametrize("roughness", [0.0, 0.3, 1.0])
+def test_roughness_overrides_transmissive_surface(build, roughness):
+    """A transparent part's ``roughness`` overrides the factory surface value."""
+    assert build(roughness).pbr.values.roughness == pytest.approx(roughness)
+
+
+@requires_threejs
+def test_opacity_and_roughness_are_independent():
+    """``opacity`` and ``roughness`` set transmission and surface separately."""
+    v = plastics.pc(color="white", opacity=0.45, roughness=0.3).pbr.values
+    assert v.transmission == pytest.approx(0.55)  # opacity-driven
+    assert v.roughness == pytest.approx(0.3)  # roughness-driven
+
+
+@requires_threejs
+def test_pbr_setter_pins_a_tuned_look():
+    """Assigning ``.pbr`` pins a tuned look while the field-derived values persist."""
+    m = plastics.pc(color="white", thickness_mm=2, opacity=0.45)
+    m.pbr = m.pbr.override(roughness=0.45)  # resolve -> tune -> store back
+    v = m.pbr.values
+    assert v.roughness == pytest.approx(0.45)  # the override
+    assert v.transmission == pytest.approx(0.55)  # opacity-derived, preserved
+    assert v.thickness == pytest.approx(2)  # thickness_mm, preserved
+    assert m.opacity == 0.45  # per-part fields stay as provenance
 
 
 @requires_threejs

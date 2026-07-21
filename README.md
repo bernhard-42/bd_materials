@@ -190,7 +190,116 @@ Grade enums live on their module (`metals.Alu`, `glass.Borosilicate`, …) or im
 
 ---
 
-## 5. Material classes
+## 5. API reference — parameters by category
+
+Every family function returns a **`FinishedMaterial`** and shares a common trailer (`finish`, `process`, `density`); the **appearance** parameters differ by category, following each category's color/texture model. `grade` is always first-positional and defaults to the most common grade. All parameters below the grade are keyword-friendly and optional.
+
+### `metals` — fixed intrinsic color
+
+```python
+aluminum | stainless | mild_steel | alloy_steel | spring_steel |
+tool_steel | titanium | brass | copper | magnesium
+    (grade=<default>, finish=None, process=None, density=None)
+```
+
+The metal's look is derived from its `family` — there is **no `color`** (recolor via a finish, e.g. `anodize`/`powder_coat`). Brushed/blasted relief comes from the `finish`, which carries its own `scale`/`rotation`.
+
+### `plastics` — selectable color; transparent grades add pane/opacity/roughness
+
+```python
+# opaque grades (selectable filament/part color)
+pla | abs_ | nylon | peek | tpu | pp | pom | ptfe | pe | phenolic |
+rubber | petg | asa | pps | fr4 | cfrp
+    (grade=<default>, color=None, finish=None, process=None, density=None)
+
+# transparent grades
+pc | pmma
+    (grade=<default>, color=None, thickness_mm=None, opacity=None,
+     roughness=None, finish=None, process=None, density=None)
+```
+
+### `resins` — selectable color; the transparent resin adds pane/opacity/roughness
+
+```python
+standard | tough | high_temp | ceramic | castable | esd | flexible
+    (grade=<default>, color=None, finish=None, process=None, density=None)
+
+transparent
+    (grade=<default>, color=None, thickness_mm=None, opacity=None,
+     roughness=None, finish=None, process=None, density=None)
+```
+
+### `glass` — always transmissive
+
+```python
+soda_lime | borosilicate
+    (grade=<default>, color=None, thickness_mm=None, opacity=None,
+     roughness=None, finish=None, process=None, density=None)
+```
+
+### `wood` — fixed intrinsic color + substrate texture
+
+```python
+hardwood | softwood | engineered_wood
+    (grade=<default>, finish=None, process=None, density=None,
+     scale=(1, 1), rotation=0)
+```
+
+The grain look is derived from `family` — **no `color`**; `scale`/`rotation` tile/orient the wood-grain texture.
+
+### `paper` — selectable color (except cardboard) + substrate texture
+
+```python
+paper | foamboard
+    (grade=<default>, color=None, finish=None, process=None, density=None,
+     scale=(1, 1), rotation=0)
+
+cardboard                       # fixed kraft look — no color
+    (grade=<default>, finish=None, process=None, density=None,
+     scale=(1, 1), rotation=0)
+```
+
+### `textile` — selectable color + substrate texture
+
+```python
+woven | felt | leather
+    (grade=<default>, color=None, finish=None, process=None, density=None,
+     scale=(1, 1), rotation=0)
+```
+
+### Parameter glossary
+
+| Parameter      | Type                        | Categories                                                     | Meaning                                                                                                       |
+| -------------- | --------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `grade`        | grade enum                  | all                                                            | Which grade to build; **first-positional**. Single-grade families default it.                                |
+| `color`        | `str` / `(r, g, b)`         | plastics, resins, glass, textile, paper (not cardboard)        | Selectable base color — a palette name, hex string, or RGB tuple. Absent where the color is fixed intrinsic. |
+| `thickness_mm` | `float`                     | transparent (pc, pmma, resin `transparent`, glass)             | Pane thickness (mm) driving the transmissive refraction/tint look.                                           |
+| `opacity`      | `float` `0.0–1.0`           | transparent (as above)                                         | `0.0` fully clear … `1.0` opaque; `None` keeps the clear look. A milky PC V-wheel ≈ `0.65`.                   |
+| `roughness`    | `float` `0.0–1.0`           | transparent (as above)                                         | `0.0` glossy … `1.0` matte/frosted; `None` keeps the factory value. **Independent of `opacity`.**            |
+| `scale`        | `(u, v)`                    | wood, paper, textile                                           | Substrate-texture UV scale; `(2, 2)` tiles it twice as fine. Default `(1, 1)`.                                |
+| `rotation`     | `float` (degrees, CCW)      | wood, paper, textile                                           | Substrate-texture rotation. Default `0`.                                                                      |
+| `finish`       | `AppliedFinish` / `list`    | all                                                            | Surface finish(es), e.g. `anodize("blue")`. **Mutually exclusive with `process`.**                           |
+| `process`      | `Process`                   | all                                                            | As-made surface hint (`FDM`/`SLS`/`MJF`/`SLM` → rough). **Mutually exclusive with `finish`.**                 |
+| `density`      | `float`                     | all                                                            | Per-part override of the representative density (kg/m³) — cast-free copy of the material.                     |
+
+### Beyond these parameters
+
+For a look tweak not modeled by a keyword, resolve `.pbr`, adjust it with `.override(...)`, and (optionally) pin it back — the escape hatch to the full three.js `MeshPhysicalMaterial` surface (clearcoat, `attenuation_color`, `ior`, …):
+
+```python
+m = plastics.pc(color="white", thickness_mm=2, opacity=0.45)
+m.pbr = m.pbr.override(roughness=0.45, clearcoat=1.0)   # store the tuned look back
+```
+
+The per-part fields stay on the object as provenance; `.pbr` now returns the pinned look. (A ready-made look can also be passed at construction as `pbr=…`, which is mutually exclusive with the per-part appearance inputs.)
+
+### Custom materials
+
+Each category exposes `custom_<category>(name, density, *, …)` — `metals.custom_metal`, `plastics.custom_plastic`, `resins.custom_resin`, `glass.custom_glass`, `wood.custom_wood`, `paper.custom_paper`, `textile.custom_textile`. `name` and `density` are required positional; everything else is keyword-only: the rest of the **identity** (`family` PBR key, `transparent`, `hardness_scale` where it applies), **every property field** as a `Range` / bare number (exact value) / `None` / `NOT_SUITABLE`, the **same per-part trailer as that category** (so a transparent `custom_plastic` accepts `thickness_mm`/`opacity`/`roughness`, a `custom_wood` accepts `scale`/`rotation`, …), plus `pbr=` for a ready-made look. Returns a `FinishedMaterial`.
+
+---
+
+## 6. Material classes
 
 Shared primitives live in **`bd_materials.core`**:
 
@@ -210,14 +319,17 @@ Each category is a frozen dataclass with the physics-range fields relevant to it
 | `WoodMaterial`                      | along-grain `modulus_of_elasticity`, `modulus_of_rupture`, `compressive_strength_parallel`, `janka_hardness`                                 |
 | `PaperMaterial` / `TextileMaterial` | areal goods: `areal_density` (grammage), `thickness`, in-plane `tensile_strength`                                                            |
 
-Intrinsic facts (`family`, `category`, `transparent`) live on the **`Material`**; per-part choices (`color`, `thickness_mm`, `scale`, `rotation`, `finish`, `process`) live on the **`FinishedMaterial`**:
+Intrinsic facts (`family`, `category`, `transparent`) live on the **`Material`**; per-part choices (`color`, `thickness_mm`, `opacity`, `roughness`, `scale`, `rotation`, `finish`, `process`) live on the **`FinishedMaterial`**:
 
 ```
 FinishedMaterial(material, finish=None, *, color=None, thickness_mm=None,
-                 scale=(1, 1), rotation=0, process=None, pbr=None)
+                 opacity=None, roughness=None, scale=(1, 1), rotation=0,
+                 process=None, pbr=None)
     .material   # the physics (a shared, immutable range table)
-    .pbr        # the resolved three.js look (for the OCP VSCode viewer)
+    .pbr        # the resolved three.js look (get; set to pin a tuned look)
 ```
+
+`opacity` (`0`→clear, `1`→opaque) and `roughness` (`0`→glossy, `1`→matte) are meaningful only for a `transparent` material (see §5). `.pbr` is settable — assign `.pbr.override(...)` to pin a tuned look for tweaks no keyword models.
 
 `scale=(u, v)` / `rotation` (degrees, CCW) are a **texture UV transform** — `scale(2, 2)` tiles a texture twice as fine. They apply to a **substrate** texture (wood grain, fabric weave, paper — set on the `wood`/`textile`/`paper` family functions) or a **finish** texture (`brushed` grain — set on the finish verb); a textured finish's transform takes precedence.
 
@@ -227,7 +339,7 @@ Each category module also exposes its `<Cat>Material` class, its grade enum(s), 
 
 ---
 
-## 6. Finish classes
+## 7. Finish classes
 
 In **`bd_materials.finishes`**:
 

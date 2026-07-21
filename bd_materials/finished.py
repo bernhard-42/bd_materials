@@ -2,9 +2,11 @@
 
 A ``FinishedMaterial`` bundles a range-based ``Material`` (the shared, immutable
 typical-values table -- physics) with the **per-part choices**: ``color`` (a
-selectable base color), ``thickness_mm`` (pane thickness, only meaningful when the
-material is ``transparent``), ``finish`` (an ``AppliedFinish`` or list of them), and
-``process``. ``.material`` gives the physics; ``.pbr`` resolves the three.js look.
+selectable base color), ``thickness_mm`` (pane thickness), ``opacity`` (how
+see-through this particular part is) and ``roughness`` (its surface gloss/frost) --
+these three only meaningful when the material is ``transparent`` -- ``finish`` (an
+``AppliedFinish`` or list of them), and ``process``. ``.material`` gives the physics;
+``.pbr`` resolves the three.js look.
 
 Color precedence (resolved in ``pbr``): a covering finish color > the selected
 ``color`` > the material's intrinsic look (derived from ``family``).
@@ -67,6 +69,8 @@ class FinishedMaterial(Generic[MaterialT]):
         *,
         color: Color | None = None,
         thickness_mm: float | None = None,
+        opacity: float | None = None,
+        roughness: float | None = None,
         scale: tuple[float, float] = (1.0, 1.0),
         rotation: float = 0.0,
         process: Process | None = None,
@@ -81,6 +85,14 @@ class FinishedMaterial(Generic[MaterialT]):
             color: A selectable base color (name, hex string, or RGB tuple).
             thickness_mm: Pane thickness in mm, meaningful only for a ``transparent``
                 material.
+            opacity: How see-through this part is, from ``0.0`` (fully clear) to ``1.0``
+                (opaque); meaningful only for a ``transparent`` material. ``None`` keeps
+                the material's intrinsic look (clear). Lets a nominally clear polymer
+                (e.g. PC) render as a translucent part -- a milky V-wheel is ``0.65``.
+            roughness: Surface roughness from ``0.0`` (glossy) to ``1.0`` (matte /
+                frosted); meaningful only for a ``transparent`` material. ``None`` keeps
+                the factory value. Independent of ``opacity`` -- a molded translucent
+                part is glossy, an etched pane is rough.
             scale: Texture UV scale ``(u, v)`` for a substrate texture (wood grain,
                 fabric weave, ...); ``(2, 2)`` tiles it twice as fine. A textured
                 finish's own scale takes precedence over this. Default ``(1, 1)``.
@@ -88,7 +100,7 @@ class FinishedMaterial(Generic[MaterialT]):
             process: An as-made surface hint; mutually exclusive with ``finish``.
             pbr: A ready-made look that overrides everything else; cannot be combined
                 with ``finish`` / ``process`` / ``color`` / ``thickness_mm`` /
-                ``scale`` / ``rotation``.
+                ``opacity`` / ``roughness`` / ``scale`` / ``rotation``.
 
         Raises:
             TypeError: If ``material`` is not a range ``Material``.
@@ -105,12 +117,14 @@ class FinishedMaterial(Generic[MaterialT]):
             or process is not None
             or color is not None
             or thickness_mm is not None
+            or opacity is not None
+            or roughness is not None
             or scale != (1.0, 1.0)
             or rotation != 0.0
         ):
             raise ValueError(
                 "pbr=... is a full override; do not combine it with finish, "
-                "process, color, thickness_mm, scale, or rotation"
+                "process, color, thickness_mm, opacity, roughness, scale, or rotation"
             )
         if finish is not None and process is not None:
             raise ValueError(
@@ -122,6 +136,8 @@ class FinishedMaterial(Generic[MaterialT]):
         self.finish = finish
         self.color = color
         self.thickness_mm = thickness_mm
+        self.opacity = opacity
+        self.roughness = roughness
         self.scale = scale
         self.rotation = rotation
         self.process = process
@@ -148,9 +164,27 @@ class FinishedMaterial(Generic[MaterialT]):
             self.process,
             color=self.color,
             thickness_mm=self.thickness_mm,
+            opacity=self.opacity,
+            roughness=self.roughness,
             scale=self.scale,
             rotation=self.rotation,
         )
+
+    @pbr.setter
+    def pbr(self, value: PbrProperties) -> None:
+        """Pin a ready-made look, from now on returned unchanged by ``.pbr``.
+
+        The assignment counterpart to the ``pbr=`` constructor arg: resolve the look
+        from the per-part fields, tune it (e.g. ``.pbr.override(roughness=0.45)``), and
+        store the result back. Unlike the constructor arg -- which forbids mixing a raw
+        ``pbr`` with the per-part fields -- this path is *derived from* those fields, so
+        they stay on the object as provenance (still shown in ``repr``) but no longer
+        drive ``.pbr``.
+
+        Args:
+            value: The ``PbrProperties`` to return from now on.
+        """
+        self._pbr = value
 
     def __str__(self) -> str:
         """The underlying material's typical-value dump (physics only)."""
@@ -163,6 +197,10 @@ class FinishedMaterial(Generic[MaterialT]):
             parts.append(f"color={self.color!r}")
         if self.thickness_mm is not None:
             parts.append(f"thickness_mm={self.thickness_mm}")
+        if self.opacity is not None:
+            parts.append(f"opacity={self.opacity}")
+        if self.roughness is not None:
+            parts.append(f"roughness={self.roughness}")
         if self.scale != (1.0, 1.0):
             parts.append(f"scale={self.scale}")
         if self.rotation != 0.0:

@@ -75,6 +75,8 @@ def soda_lime(
     grade: SodaLime = SodaLime.GENERIC,
     color: Color | None = None,
     thickness_mm: float | None = None,
+    opacity: float | None = None,
+    roughness: float | None = None,
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
@@ -87,6 +89,11 @@ def soda_lime(
             RGB tuple.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
+        opacity: How see-through this part is, ``0.0`` (clear) to ``1.0`` (opaque);
+            ``None`` keeps the clear look. Set it for a frosted / etched pane.
+        roughness: Surface roughness, ``0.0`` (glossy) to ``1.0`` (matte / frosted);
+            ``None`` keeps the factory value. Raise it together with ``opacity`` for an
+            etched pane.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -102,6 +109,8 @@ def soda_lime(
         finish,
         color=color,
         thickness_mm=thickness_mm,
+        opacity=opacity,
+        roughness=roughness,
         process=process,
     )
 
@@ -140,6 +149,8 @@ def borosilicate(
     grade: Borosilicate = Borosilicate.GENERIC,
     color: Color | None = None,
     thickness_mm: float | None = None,
+    opacity: float | None = None,
+    roughness: float | None = None,
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
@@ -152,6 +163,11 @@ def borosilicate(
             RGB tuple.
         thickness_mm: Pane thickness in mm; used for the transmissive look (the material
             is transparent).
+        opacity: How see-through this part is, ``0.0`` (clear) to ``1.0`` (opaque);
+            ``None`` keeps the clear look. Set it for a frosted / etched pane.
+        roughness: Surface roughness, ``0.0`` (glossy) to ``1.0`` (matte / frosted);
+            ``None`` keeps the factory value. Raise it together with ``opacity`` for an
+            etched pane.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
@@ -167,6 +183,8 @@ def borosilicate(
         finish,
         color=color,
         thickness_mm=thickness_mm,
+        opacity=opacity,
+        roughness=roughness,
         process=process,
     )
 
@@ -197,6 +215,8 @@ def custom_glass(
     thermal_expansion: RangeInput = None,
     color: Color | None = None,
     thickness_mm: float | None = None,
+    opacity: float | None = None,
+    roughness: float | None = None,
     finish: FinishSpec = None,
     process: Process | None = None,
     pbr: PbrProperties | None = None,
@@ -217,6 +237,10 @@ def custom_glass(
         hardness_scale: Scale for ``hardness`` (``"HV"`` Vickers).
         color: Optional glass tint (name / hex / RGB tuple).
         thickness_mm: Pane thickness in mm for the transmissive look.
+        opacity: How see-through the part is, ``0.0`` (clear) to ``1.0`` (opaque);
+            meaningful only when ``transparent``. ``None`` keeps the clear look.
+        roughness: Surface roughness ``0.0`` (glossy) to ``1.0`` (matte / frosted);
+            meaningful only when ``transparent``. ``None`` keeps the factory value.
         finish: Surface finish -- mutually exclusive with ``process`` and ``pbr``.
         process: As-made surface hint -- mutually exclusive with ``finish`` and ``pbr``.
         pbr: A ready-made three.js look; overrides the resolved one.
@@ -246,6 +270,8 @@ def custom_glass(
         finish,
         color=color,
         thickness_mm=thickness_mm,
+        opacity=opacity,
+        roughness=roughness,
         process=process,
         pbr=pbr,
     )

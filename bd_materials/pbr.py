@@ -104,11 +104,40 @@ def _metal_tex_base(material: RangeMaterial, texture: str | None) -> PbrProperti
     return getattr(metal, name)()
 
 
+def _apply_transmissive(
+    base: PbrProperties, opacity: float | None, roughness: float | None
+) -> PbrProperties:
+    """Apply the per-part transmissive tweaks (opacity, roughness) to a clear look.
+
+    Args:
+        base: A transmissive ``PbrProperties`` (acrylic / glass).
+        opacity: ``0.0`` (fully clear) to ``1.0`` (opaque), or ``None`` for no change.
+            Maps to ``transmission = 1 - opacity`` -- an intermediate value reads as a
+            translucent/milky part (the diffuse base color shows through in proportion).
+        roughness: Surface roughness ``0.0`` (glossy) to ``1.0`` (matte/frosted), or
+            ``None`` to keep the factory value. Independent of opacity: a molded part is
+            glossy over a scattering interior, an etched pane is rough and translucent.
+
+    Returns:
+        The base, or a copy with the given values overridden.
+    """
+    overrides: dict[str, float] = {}
+    if opacity is not None:
+        overrides["transmission"] = 1.0 - opacity
+    if roughness is not None:
+        overrides["roughness"] = roughness
+    if not overrides:
+        return base
+    return base.override(**overrides)
+
+
 def _plain_base(
     material: RangeMaterial,
     texture: str | None,
     rgb: Color | None,
     thickness: float | None,
+    opacity: float | None = None,
+    roughness: float | None = None,
 ) -> PbrProperties:
     """Look for a material with no covering color finish -- substrate + texture.
 
@@ -121,6 +150,12 @@ def _plain_base(
         rgb: The base color as hex / RGB, or ``None`` for the factory default.
         thickness: Pane thickness (mm) for transmissive materials (glass and anything
             flagged ``transparent``); ignored otherwise.
+        opacity: How see-through the part is, ``0.0`` (clear) to ``1.0`` (opaque), for a
+            ``transparent`` material; ``None`` keeps the intrinsic clear look. Ignored
+            for non-transparent materials.
+        roughness: Surface roughness ``0.0`` (glossy) to ``1.0`` (matte/frosted) for a
+            ``transparent`` material; ``None`` keeps the factory value. Ignored for
+            non-transparent materials.
 
     Returns:
         The resolved ``PbrProperties``.
@@ -133,7 +168,9 @@ def _plain_base(
         factory = getattr(wood, fam, None)
         return (factory if factory is not None else wood.oak)(color=rgb)
     if cat == "glass":
-        return glass.glass(color=rgb, thickness=thickness)
+        return _apply_transmissive(
+            glass.glass(color=rgb, thickness=thickness), opacity, roughness
+        )
     if cat == "paper":
         factory = getattr(paper, fam, None)
         return (factory if factory is not None else paper.paper)(color=rgb)
@@ -143,8 +180,12 @@ def _plain_base(
     # plastic / resin (composites stay in this branch)
     if material.transparent:
         # transmissive: refraction depends on pane thickness (three.js acrylic
-        # approximates both PMMA and PC well enough)
-        return plastic.acrylic(color=rgb, thickness=thickness)
+        # approximates both PMMA and PC well enough); opacity dials it toward a
+        # translucent/opaque part (a milky PC V-wheel rather than a clear pane) and
+        # roughness tunes the surface gloss/frost.
+        return _apply_transmissive(
+            plastic.acrylic(color=rgb, thickness=thickness), opacity, roughness
+        )
     if _is_carbon(material):
         return plastic.carbon_fiber(color=rgb)
     if texture is not None:
@@ -336,6 +377,8 @@ def get_pbr_properties(
     process: Process | None = None,
     color: Color | None = None,
     thickness_mm: float | None = None,
+    opacity: float | None = None,
+    roughness: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
     pbr: PbrProperties | None = None,
@@ -351,6 +394,10 @@ def get_pbr_properties(
             covers it (e.g. a colored filament or tinted resin); ignored for bare
             metals, whose color is intrinsic.
         thickness_mm: Pane thickness (mm) for transmissive materials.
+        opacity: How see-through the part is, ``0.0`` (clear) to ``1.0`` (opaque), for a
+            ``transparent`` material; ``None`` keeps the intrinsic clear look.
+        roughness: Surface roughness ``0.0`` (glossy) to ``1.0`` (matte/frosted) for a
+            ``transparent`` material; ``None`` keeps the factory value.
         scale: Texture UV scale ``(u, v)`` for the substrate texture; a textured
             finish's own scale takes precedence.
         rotation: Texture rotation in degrees (counterclockwise); a textured finish's
@@ -383,7 +430,9 @@ def get_pbr_properties(
     if surface is None:
         # No covering/coloring finish -> the per-part color (case-2 selection);
         # bare metals pass color=None and render their intrinsic look.
-        result = _plain_base(material, texture, _color_value(color), thickness_mm)
+        result = _plain_base(
+            material, texture, _color_value(color), thickness_mm, opacity, roughness
+        )
     else:
         rgb = _color_value(surface_color)
         result = _SURFACE[surface](material, rgb, texture, surface_sheen)
