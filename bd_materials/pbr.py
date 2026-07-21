@@ -17,42 +17,53 @@ this module and ``FinishedMaterial.pbr`` pull it in).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from threejs_materials import coats, glass, metal, paper, plastic, textile, wood
 
 from . import finishes as fin
-from .core import FERROUS, RangeMaterial
-from .finished import Color, FinishSpec, Process
+from .core import FERROUS, Color, RangeMaterial
+from .finished import FinishSpec, Process
 from .finishes import AppliedFinish
 
 if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-free)
     from threejs_materials import PbrProperties
 
+# The internal normalized color: what the bundled three.js factories accept -- a color
+# name / "#rrggbb" hex string, or a 0..1 sRGB ``(r, g, b)`` tuple. ``_normalize_color``
+# coerces any accepted ``Color`` input (see ``core.Color``) down to this.
+_Rgb = str | tuple[float, float, float]
+
 # as-printed / as-built routes default to a rough surface; the rest stay smooth
 _ROUGH_PROCESSES = frozenset({Process.FDM, Process.SLS, Process.MJF, Process.SLM})
 
 # --- color names -> sRGB hex (None = leave factory default / not colorable) --
+# TRUE colors, not a curated palette: an OCCT/CSS-known name resolves to its literal
+# value, so a bare ``color="red"`` matches build123d's ``Color("red")`` exactly. The
+# material-metallic names (gunmetal / nickel / chrome / rose gold / champagne) have no
+# standard literal, so they keep a representative hex. The "not-so-black for legibility"
+# treatment is deliberately NOT applied here -- it is scoped to the dark *finishes* only
+# (``_BLACK_OXIDE_GREY`` for black oxide, ``_ECOAT_CHARCOAL`` for e-coat).
 _COLOR_HEX: dict[str, str | None] = {
     "natural": None,
     "clear": None,
-    "black": "#111111",
-    "white": "#f5f5f5",
+    "black": "#000000",
+    "white": "#ffffff",
     "gray": "#808080",
-    "gunmetal": "#2a3439",
+    "gunmetal": "#2a3439",  # material appearance; no standard literal
     "silver": "#c0c0c0",
-    "nickel": "#b8b8b0",
-    "chrome": "#c8ccce",
-    "gold": "#d4af37",
-    "rose gold": "#b76e79",
-    "champagne": "#e6c99a",
-    "brown": "#5c4033",
-    "red": "#c0392b",
-    "orange": "#e67e22",
-    "yellow": "#f1c40f",
-    "green": "#27ae60",
-    "blue": "#2e86de",
-    "purple": "#8e44ad",
+    "nickel": "#b8b8b0",  # material appearance; no standard literal
+    "chrome": "#c8ccce",  # material appearance; no standard literal
+    "gold": "#ffd700",
+    "rose gold": "#b76e79",  # material appearance; no standard literal
+    "champagne": "#e6c99a",  # material appearance; no standard literal
+    "brown": "#a52a2a",
+    "red": "#ff0000",
+    "orange": "#ffa500",
+    "yellow": "#ffff00",
+    "green": "#008000",
+    "blue": "#0000ff",
+    "purple": "#800080",
 }
 
 # metal families with a dedicated bundled factory (else steel / stainless)
@@ -69,16 +80,64 @@ _TEXTURE = {
 }
 
 
-def _color_value(color: Color | None) -> Color | None:
-    """A standard color name -> hex; hex / CSS name / RGB tuple pass through."""
+def _normalize_color(color: Color | None) -> _Rgb | None:
+    """Coerce any accepted ``Color`` input to the internal ``_Rgb`` (hex string or RGB).
+
+    Handles the same shapes as build123d's ``ColorLike`` (see ``core.Color``) -- a
+    palette/CSS/hex name string, a packed ``0xRRGGBB`` int, a ``(name, alpha)`` pair, an
+    ``(r, g, b[, a])`` iterable or a build123d ``Color`` (both ``Iterable[float]``), or a
+    raw OCP ``Quantity_ColorRGBA`` (duck-typed via ``GetRGB`` so no OCP type is named or
+    imported unless one is actually passed). Alpha is dropped -- transparency is the
+    dedicated ``opacity`` / ``thickness_mm`` axes.
+
+    Args:
+        color: The color input, or ``None``.
+
+    Returns:
+        A palette-resolved hex / pass-through name string, a ``(r, g, b)`` tuple, or
+        ``None``.
+    """
     if color is None:
         return None
     if isinstance(color, str):
         key = color.strip().lower()
-        if key in _COLOR_HEX:
-            return _COLOR_HEX[key]
-        return color
-    return color  # (r, g, b) tuple/list
+        return _COLOR_HEX[key] if key in _COLOR_HEX else color
+    if isinstance(color, bool):  # guard: bool is a subclass of int
+        raise TypeError(f"invalid color: {color!r}")
+    if isinstance(color, int):  # packed 0xRRGGBB
+        return f"#{color & 0xFFFFFF:06x}"
+    if isinstance(color, tuple) and len(color) == 2 and isinstance(color[0], str):
+        return _normalize_color(color[0])  # (name, alpha) -- alpha dropped
+    if hasattr(color, "GetRGB"):  # OCP Quantity_ColorRGBA, duck-typed
+        return _rgb_from_ocp(color)
+    seq = tuple(color)  # (0xRRGGBB, alpha) | (r, g, b[, a]) | build123d Color
+    if len(seq) == 2 and isinstance(seq[0], int) and not isinstance(seq[0], bool):
+        return f"#{seq[0] & 0xFFFFFF:06x}"  # (0xRRGGBB, alpha)
+    ch = [float(v) for v in seq]  # rgb(a) channels; any alpha dropped below
+    return (ch[0], ch[1], ch[2])
+
+
+def _rgb_from_ocp(color: Any) -> tuple[float, float, float]:
+    """0..1 sRGB from a duck-typed OCP ``Quantity_ColorRGBA`` (via ``GetRGB``).
+
+    Kept as an ``Any``-typed helper so the OCP color -- which this package cannot name
+    (build123d/OCP depend on us) -- is handled without a cast, and so ``OCP`` is imported
+    only if a raw OCP color is actually passed.
+
+    Args:
+        color: An object exposing OCCT's ``GetRGB()`` (a ``Quantity_ColorRGBA``).
+
+    Returns:
+        The ``(r, g, b)`` sRGB triple in 0..1; alpha is ignored.
+    """
+    rgb = color.GetRGB()
+    if hasattr(rgb, "Values"):
+        from OCP.Quantity import Quantity_TypeOfColor  # lazy: only for OCP colors
+
+        r, g, b = rgb.Values(Quantity_TypeOfColor.Quantity_TOC_sRGB)
+    else:
+        r, g, b = rgb.Red(), rgb.Green(), rgb.Blue()
+    return (float(r), float(g), float(b))
 
 
 def _metal_name(material: RangeMaterial) -> str:
@@ -134,7 +193,7 @@ def _apply_transmissive(
 def _plain_base(
     material: RangeMaterial,
     texture: str | None,
-    rgb: Color | None,
+    rgb: _Rgb | None,
     thickness: float | None,
     opacity: float | None = None,
     roughness: float | None = None,
@@ -205,7 +264,7 @@ _ECOAT_CHARCOAL = "#2e2e2e"
 # All handlers share this signature; sheen (gloss/matte) is only used by the
 # paint/coat handler, ignored by the rest.
 def _anodized(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Anodized look: recolor, keeping any brushed/blasted relief."""
     if m.family == "aluminum" and texture is None:
@@ -217,7 +276,7 @@ def _anodized(
 
 
 def _pvd(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """PVD look: "clear" shows the substrate metal; a color becomes a metallic coat."""
     if rgb is None:
@@ -228,7 +287,7 @@ def _pvd(
 
 
 def _black_oxide(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Black-oxide look: matte very-dark-grey (tool black), keeping relief or as a coat."""
     if texture is not None:  # keep the blasted/brushed relief
@@ -239,7 +298,7 @@ def _black_oxide(
 
 
 def _dyeing(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Dyed look: aluminum behaves like anodize; polymers tint the base."""
     if m.family == "aluminum":
@@ -248,28 +307,28 @@ def _dyeing(
 
 
 def _chrome(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Chrome-plated look."""
     return coats.chrome()
 
 
 def _gold(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Gold-plated look."""
     return metal.gold()
 
 
 def _silver(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Silver-plated look."""
     return metal.silver()
 
 
 def _nickel(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Nickel-plated look (tinted silver until metal.nickel is bundled)."""
     fn = getattr(metal, "nickel", None)  # adopt metal.nickel once bundled
@@ -279,7 +338,7 @@ def _nickel(
 
 
 def _tin(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Tin-plated look (matte / satin)."""
     # tin plating is matte/satin (matte tin is the solderability standard); prefer
@@ -291,7 +350,7 @@ def _tin(
 
 
 def _zinc(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Zinc-plated look (satin), optionally tinted."""
     # zinc plating is satin; prefer the matte zinc factory, else roughen the glossy
@@ -304,7 +363,7 @@ def _zinc(
 
 
 def _coat(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Painted / coated look in ``rgb``; gloss or matte per ``sheen``."""
     fn = coats.coat_matte if sheen == fin.Sheen.MATTE else coats.coat_gloss
@@ -312,7 +371,7 @@ def _coat(
 
 
 def _ecoat(
-    m: RangeMaterial, rgb: Color | None, texture: str | None, sheen: fin.Sheen | None
+    m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Electrophoretic e-coat look, split by substrate. Deep charcoal for "black"
     (its default/common color), never pitch black; other colors pass through.
@@ -431,10 +490,10 @@ def get_pbr_properties(
         # No covering/coloring finish -> the per-part color (case-2 selection);
         # bare metals pass color=None and render their intrinsic look.
         result = _plain_base(
-            material, texture, _color_value(color), thickness_mm, opacity, roughness
+            material, texture, _normalize_color(color), thickness_mm, opacity, roughness
         )
     else:
-        rgb = _color_value(surface_color)
+        rgb = _normalize_color(surface_color)
         result = _SURFACE[surface](material, rgb, texture, surface_sheen)
 
     # texture UV transform: a textured finish's own transform wins over the material's

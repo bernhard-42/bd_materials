@@ -222,6 +222,76 @@ def test_pbr_setter_pins_a_tuned_look():
     assert m.opacity == 0.45  # per-part fields stay as provenance
 
 
+# --- color input (ColorLike) normalization ---------------------------------
+
+
+@requires_threejs
+@pytest.mark.parametrize(
+    "color,expected",
+    [
+        (None, None),
+        ("white", "#ffffff"),  # name -> its true literal
+        ("#ff8800", "#ff8800"),  # hex passthrough
+        ("dodgerblue", "dodgerblue"),  # unknown/CSS name passthrough
+        ("  Red ", "#ff0000"),  # name is trimmed + case-folded, then resolved
+        (0xFF8800, "#ff8800"),  # packed 0xRRGGBB int
+        ((1.0, 0.5, 0.0), (1.0, 0.5, 0.0)),  # rgb tuple
+        ((1.0, 0.5, 0.0, 0.3), (1.0, 0.5, 0.0)),  # rgba -> alpha dropped
+        (("red", 0.5), "#ff0000"),  # (name, alpha)
+        ((0xFF8800, 0x80), "#ff8800"),  # (packed, alpha)
+    ],
+)
+def test_normalize_color_shapes(color, expected):
+    """Every accepted ColorLike shape coerces to a hex string or a 0..1 RGB triple."""
+    from bd_materials.pbr import _normalize_color
+
+    assert _normalize_color(color) == expected
+
+
+@requires_threejs
+def test_normalize_color_rejects_bool():
+    """A bool is not a valid color (guarded because bool is a subclass of int)."""
+    from bd_materials.pbr import _normalize_color
+
+    with pytest.raises(TypeError):
+        _normalize_color(True)
+
+
+@requires_threejs
+def test_normalize_color_accepts_build123d_color():
+    """A build123d ``Color`` (Iterable[float]) is accepted structurally, no import."""
+    b3d = pytest.importorskip("build123d")
+    from bd_materials.pbr import _normalize_color
+
+    r, g, b = _normalize_color(b3d.Color(0.2, 0.4, 0.6))
+    assert (round(r, 3), round(g, 3), round(b, 3)) == (0.2, 0.4, 0.6)
+
+
+@requires_threejs
+@pytest.mark.parametrize("name", ["white", "black", "red", "green", "blue"])
+def test_named_color_matches_build123d_literal(name):
+    """A named palette color resolves to the same value as build123d's ``Color(name)``."""
+    b3d = pytest.importorskip("build123d")
+    from bd_materials.pbr import _normalize_color
+
+    hex_str = _normalize_color(name)
+    r, g, b, _ = tuple(b3d.Color(name))
+    literal = f"#{round(r * 255):02x}{round(g * 255):02x}{round(b * 255):02x}"
+    assert hex_str == literal
+
+
+@requires_threejs
+def test_normalize_color_accepts_ocp_quantity_colorrgba():
+    """A raw OCP ``Quantity_ColorRGBA`` is accepted by duck typing (GetRGB)."""
+    q_mod = pytest.importorskip("OCP.Quantity")
+    from bd_materials.pbr import _normalize_color
+
+    srgb = q_mod.Quantity_TypeOfColor.Quantity_TOC_sRGB
+    q = q_mod.Quantity_ColorRGBA(q_mod.Quantity_Color(0.1, 0.2, 0.3, srgb), 1.0)
+    r, g, b = _normalize_color(q)
+    assert (round(r, 3), round(g, 3), round(b, 3)) == (0.1, 0.2, 0.3)
+
+
 @requires_threejs
 def test_texture_scale_and_rotation_apply():
     """scale/rotation reach the resolved texture UV; a finish's transform wins."""

@@ -20,13 +20,13 @@ import enum
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from .finishes import AppliedFinish
-from .core import RangeMaterial
+from .core import Color, RangeMaterial
 
 if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-free)
     from threejs_materials import PbrProperties
 
-# color input accepted by ``color=`` (name / hex string, or an RGB tuple)
-Color = str | tuple[float, float, float]
+# ``Color`` (the accepted per-part color input) is re-exported from ``core`` so the
+# family functions can keep importing it from here; see ``core.Color`` for the shapes.
 
 # finish input accepted by ``finish=`` (a single applied finish, a list, or none)
 FinishSpec = AppliedFinish | list[AppliedFinish] | None

@@ -16,6 +16,7 @@ helper and a pretty ``__str__`` dump aligned with those units.
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
 from dataclasses import dataclass, fields, replace
 from typing import Any, ClassVar, Literal, TypeVar, cast, get_args
 
@@ -225,6 +226,22 @@ def with_density(material: _MaterialT, density: float | None) -> _MaterialT:
     if density is None:
         return material
     return replace(material, density=density)
+
+
+# A color input accepted at any per-part boundary (a material's ``color=`` and the
+# finish verbs' ``color=``). This structurally mirrors build123d's ``ColorLike`` WITHOUT
+# importing build123d -- build123d depends on this package, so importing it (even under
+# TYPE_CHECKING) would be a circular, downstream dependency. The shapes:
+#   - ``str``              -- a palette name, CSS name, or "#rrggbb" / "#rrggbbaa" hex
+#   - ``int``              -- a packed ``0xRRGGBB`` code
+#   - ``tuple[str, float]``-- a (name, alpha) pair, e.g. ("red", 0.5)
+#   - ``Iterable[float]``  -- an (r, g, b[, a]) tuple, a (0xRRGGBB, alpha) pair, OR a
+#                             build123d ``Color`` (it is ``Iterable[float]``)
+# A raw OCP ``Quantity_ColorRGBA`` is also accepted at runtime by duck typing (see
+# ``pbr._normalize_color``) but cannot be named here. Alpha is ignored -- transparency is
+# the dedicated ``opacity`` / ``thickness_mm`` axes. Kept INTERNAL (never re-exported from
+# ``bd_materials``) so it can never shadow build123d's own ``ColorLike``.
+Color = str | int | tuple[str, float] | Iterable[float]
 
 
 # a property value accepted by the custom_<category> functions: a Range, a bare scalar

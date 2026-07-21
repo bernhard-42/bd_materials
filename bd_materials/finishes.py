@@ -25,6 +25,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum, auto
 
+from .core import Color
+
 
 class Sheen(Enum):
     """Surface sheen of a paint/coating -- a per-application choice like color."""
@@ -180,7 +182,7 @@ class AppliedFinish:
     finish functions below."""
 
     finish: Finish
-    color: str | None = None
+    color: Color | None = None
     sheen: Sheen | None = None  # None = finish has no sheen choice
     scale: tuple[float, float] = (1.0, 1.0)  # texture UV scale (u, v); 1 = as-authored
     rotation: float = 0.0  # texture rotation in degrees (counterclockwise)
@@ -243,7 +245,7 @@ def electropolish() -> AppliedFinish:
 
 
 # --- chemical --------------------------------------------------------------
-def anodize(color: str) -> AppliedFinish:
+def anodize(color: Color) -> AppliedFinish:
     """Anodized finish in ``color``.
 
     Args:
@@ -281,7 +283,7 @@ def pickle() -> AppliedFinish:
     return AppliedFinish(CHEMICAL_FINISHES[Chemical.PICKLING])
 
 
-def dye(color: str) -> AppliedFinish:
+def dye(color: Color) -> AppliedFinish:
     """Dyed finish in ``color`` (anodized aluminum or dyeable polymers).
 
     Args:
@@ -319,7 +321,7 @@ def tin_plate() -> AppliedFinish:
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.TIN_PLATING])
 
 
-def pvd(color: str = "clear") -> AppliedFinish:
+def pvd(color: Color = "clear") -> AppliedFinish:
     """PVD coating in ``color``.
 
     Args:
@@ -332,7 +334,7 @@ def pvd(color: str = "clear") -> AppliedFinish:
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.PVD], color)
 
 
-def zinc_plate(color: str = "clear") -> AppliedFinish:
+def zinc_plate(color: Color = "clear") -> AppliedFinish:
     """Zinc plating in ``color``.
 
     Args:
@@ -345,7 +347,7 @@ def zinc_plate(color: str = "clear") -> AppliedFinish:
     return AppliedFinish(METAL_PLATING_FINISHES[MetalPlating.ZINC_PLATING], color)
 
 
-def vacuum_plating(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
+def vacuum_plating(color: Color, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Vacuum-metallised plating in ``color``.
 
     Args:
@@ -361,7 +363,7 @@ def vacuum_plating(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
 
 
 # --- coating / paint (sheen: gloss default, matte optional) ----------------
-def powder_coat(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
+def powder_coat(color: Color, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Powder coat in ``color``.
 
     Args:
@@ -374,7 +376,7 @@ def powder_coat(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     return AppliedFinish(COATING_FINISHES[Coating.POWDER_COAT], color, sheen)
 
 
-def spray_paint(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
+def spray_paint(color: Color, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     """Spray paint in ``color``.
 
     Args:
@@ -387,7 +389,7 @@ def spray_paint(color: str, sheen: Sheen = Sheen.GLOSS) -> AppliedFinish:
     return AppliedFinish(COATING_FINISHES[Coating.SPRAY_PAINT], color, sheen)
 
 
-def electrophoresis(color: str = "black") -> AppliedFinish:
+def electrophoresis(color: Color = "black") -> AppliedFinish:
     """Electrophoretic e-coat in ``color`` (automotive-style dip coat).
 
     Args:
@@ -411,7 +413,7 @@ def etch() -> AppliedFinish:
     return AppliedFinish(MARKING_FINISHES[Marking.ETCHING])
 
 
-def silkscreen(color: str = "black") -> AppliedFinish:
+def silkscreen(color: Color = "black") -> AppliedFinish:
     """Silkscreen marking in ``color`` (default black).
 
     Args:

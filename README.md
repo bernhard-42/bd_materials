@@ -272,7 +272,7 @@ woven | felt | leather
 | Parameter      | Type                        | Categories                                                     | Meaning                                                                                                       |
 | -------------- | --------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `grade`        | grade enum                  | all                                                            | Which grade to build; **first-positional**. Single-grade families default it.                                |
-| `color`        | `str` / `(r, g, b)`         | plastics, resins, glass, textile, paper (not cardboard)        | Selectable base color — a palette name, hex string, or RGB tuple. Absent where the color is fixed intrinsic. |
+| `color`        | color-like (see below)      | plastics, resins, glass, textile, paper (not cardboard)        | Selectable base color. Absent where the color is fixed intrinsic. Also on the finish verbs (`anodize(color)` …). |
 | `thickness_mm` | `float`                     | transparent (pc, pmma, resin `transparent`, glass)             | Pane thickness (mm) driving the transmissive refraction/tint look.                                           |
 | `opacity`      | `float` `0.0–1.0`           | transparent (as above)                                         | `0.0` fully clear … `1.0` opaque; `None` keeps the clear look. A milky PC V-wheel ≈ `0.65`.                   |
 | `roughness`    | `float` `0.0–1.0`           | transparent (as above)                                         | `0.0` glossy … `1.0` matte/frosted; `None` keeps the factory value. **Independent of `opacity`.**            |
@@ -281,6 +281,21 @@ woven | felt | leather
 | `finish`       | `AppliedFinish` / `list`    | all                                                            | Surface finish(es), e.g. `anodize("blue")`. **Mutually exclusive with `process`.**                           |
 | `process`      | `Process`                   | all                                                            | As-made surface hint (`FDM`/`SLS`/`MJF`/`SLM` → rough). **Mutually exclusive with `finish`.**                 |
 | `density`      | `float`                     | all                                                            | Per-part override of the representative density (kg/m³) — cast-free copy of the material.                     |
+
+### Color inputs
+
+Anywhere a `color=` is accepted (material families and the finish verbs), the value is **color-like** — the same shapes as build123d's `ColorLike`:
+
+```python
+plastics.pla(color="red")                 # palette / CSS name
+plastics.pla(color="#ff8800")             # hex "#rrggbb" / "#rrggbbaa"
+plastics.pla(color=0xff8800)              # packed 0xRRGGBB int
+plastics.pla(color=(1.0, 0.5, 0.0))       # 0..1 RGB(A) tuple
+plastics.pla(color=("red", 0.5))          # (name, alpha)
+plastics.pc(color=Color("white"), opacity=0.45)   # a build123d Color
+```
+
+bd_materials **cannot import build123d** (build123d depends on bd_materials), so it accepts these **structurally**, never by importing the type — a build123d `Color` is `Iterable[float]`, and a raw OCP `Quantity_ColorRGBA` is duck-typed. Alpha is dropped: transparency is the dedicated `opacity` / `thickness_mm` axes, not a color channel.
 
 ### Beyond these parameters
 
