@@ -35,11 +35,11 @@ The taxonomy follows how parts are actually **made** and **finished**, not an ab
 
 | Category   | Families (grade enums)                                                                                                                   | Grades |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `metals`   | `Alu`, `Stainless`, `MildSteel`, `AlloySteel`, `ToolSteel`, `SpringSteel`, `Titanium`, `Brass`, `Copper`, `Magnesium`, `Bronze`, `Gold`, `Silver` | 38     |
+| `metals`   | `Alu`, `Stainless`, `MildSteel`, `AlloySteel`, `ToolSteel`, `SpringSteel`, `Titanium`, `Brass`, `Copper`, `Magnesium`, `Bronze`, `Gold`, `Silver` | 39     |
 | `plastics` | `PLA`, `ABS`, `Nylon`, `Peek`, `TPU`, `PC`, `PP`, `POM`, `PTFE`, `PMMA`, `PE`, `Phenolic`, `Rubber`, `PETG`, `PPS`, `FR4`, `CFRP`, `Asa` | 26     |
 | `resins`   | `Standard`, `Tough`, `HighTemp`, `Ceramic`, `Castable`, `Esd`, `Transparent`, `Flexible`                                                 | 8      |
 | `glass`    | `SodaLime`, `Borosilicate`                                                                                                               | 2      |
-| `wood`     | `Hardwood`, `Softwood`, `EngineeredWood`                                                                                                 | 12     |
+| `wood`     | `Hardwood`, `Softwood`, `EngineeredWood`                                                                                                 | 13     |
 | `paper`    | `Paper`, `Cardboard`, `Foamboard`                                                                                                        | 3      |
 | `textile`  | `Woven`, `Felt`, `Leather`                                                                                                               | 3      |
 

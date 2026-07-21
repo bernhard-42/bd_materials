@@ -395,12 +395,37 @@ def stainless(
 
 # --- Mild steel --------------------------------------------------------------
 class MildSteel(Enum):
+    PLAIN_CARBON_GENERIC = auto()
     G1018_COLD_DRAWN = auto()
     G1045_COLD_DRAWN = auto()
     GA36_HOT_ROLLED = auto()
 
 
 MILD_STEEL_MATERIALS: dict[MildSteel, MetalMaterial] = {
+    # Generic plain (low)-carbon steel -- deliberately wide bands that bracket the common
+    # "Plain Carbon Steel" reference (SolidWorks default: E 210, yield 220, tensile 400,
+    # density 7800). shear_strength is a derived estimate.
+    MildSteel.PLAIN_CARBON_GENERIC: MetalMaterial(
+        # identity
+        name="MildSteel_PLAIN_CARBON_GENERIC",
+        family="mild_steel",
+        # mechanical properties
+        density=7800,
+        hardness=Range(110, 200),
+        hardness_scale="HB",
+        modulus_of_elasticity=Range(195, 210),
+        poisson_ratio=Range(0.27, 0.31),
+        shear_modulus=Range(75, 82),
+        shear_strength=Range(220, 350),
+        tensile_strength=Range(350, 600),
+        yield_strength=Range(200, 400),
+        # thermal properties
+        max_service_temp=Range(200, 500),
+        melting_temperature=Range(1450, 1530),
+        specific_heat_capacity=Range(440, 500),
+        thermal_conductivity=Range(40, 60),
+        thermal_expansion=Range(11e-6, 13e-6),
+    ),
     MildSteel.G1018_COLD_DRAWN: MetalMaterial(
         # identity
         name="MildSteel_G1018_COLD_DRAWN",
@@ -468,7 +493,7 @@ MILD_STEEL_MATERIALS: dict[MildSteel, MetalMaterial] = {
 
 
 def mild_steel(
-    grade: MildSteel = MildSteel.G1018_COLD_DRAWN,
+    grade: MildSteel = MildSteel.PLAIN_CARBON_GENERIC,
     finish: FinishSpec = None,
     process: Process | None = None,
     density: float | None = None,
@@ -476,7 +501,7 @@ def mild_steel(
     """Mild steel as a ``FinishedMaterial``.
 
     Args:
-        grade: Grade to select; defaults to 1018 cold-drawn.
+        grade: Grade to select; defaults to generic plain (low)-carbon steel.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
         process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with

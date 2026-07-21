@@ -48,6 +48,7 @@ class WoodMaterial(RangeMaterial):
 # --- Hardwood ----------------------------------------------------------------
 class Hardwood(Enum):
     GENERIC = auto()  # early-phase, before a species is chosen
+    AMERICAN_CHERRY = auto()
     ASH = auto()
     BEECH = auto()
     BIRCH = auto()
@@ -70,6 +71,21 @@ HARDWOOD_MATERIALS: dict[Hardwood, WoodMaterial] = {
         # thermal properties
         specific_heat_capacity=Range(1200, 1700),
         thermal_conductivity=Range(0.12, 0.18),
+    ),
+    # American (black) cherry, Prunus serotina, ~12% MC; a light furniture hardwood.
+    Hardwood.AMERICAN_CHERRY: WoodMaterial(
+        # identity
+        name="Hardwood_AMERICAN_CHERRY",
+        family="cherry",
+        # mechanical properties
+        compressive_strength_parallel=Range(45, 55),
+        density=570,
+        janka_hardness=Range(3900, 4500),
+        modulus_of_elasticity=Range(9, 11),
+        modulus_of_rupture=Range(80, 100),
+        # thermal properties
+        specific_heat_capacity=Range(1200, 1700),
+        thermal_conductivity=Range(0.11, 0.16),
     ),
     Hardwood.ASH: WoodMaterial(
         # identity
@@ -189,6 +205,22 @@ def hardwood(
         process=process,
         scale=scale,
         rotation=rotation,
+    )
+
+
+def american_cherry(
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+    scale: tuple[float, float] = (1.0, 1.0),
+    rotation: float = 0.0,
+) -> FinishedMaterial[WoodMaterial]:
+    """American cherry hardwood as a ``FinishedMaterial``.
+
+    See :func:`hardwood` for the args.
+    """
+    return hardwood(
+        Hardwood.AMERICAN_CHERRY, finish, process, density, scale, rotation
     )
 
 
