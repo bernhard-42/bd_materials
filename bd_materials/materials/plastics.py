@@ -140,6 +140,9 @@ class ABS(Enum):
 
 
 ABS_MATERIALS: dict[ABS, PlasticMaterial] = {
+    # density 1050 is vendor-representative; filament ABS runs ~1020-1090 (SunLu 1020,
+    # eSun/Flashforge 1040-1060, Anycubic 1050, Elegoo 1090). For a specific spool
+    # (e.g. SunLu's 1020) pass density= rather than changing this default.
     ABS.GENERIC: PlasticMaterial(
         # identity
         name="ABS_GENERIC",
