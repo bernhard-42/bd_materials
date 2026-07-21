@@ -1113,6 +1113,235 @@ def magnesium(
     )
 
 
+# --- Bronze ------------------------------------------------------------------
+class Bronze(Enum):
+    C51000_PHOSPHOR = auto()
+    C90500_TIN = auto()
+    C93200_BEARING = auto()
+
+
+BRONZE_MATERIALS: dict[Bronze, MetalMaterial] = {
+    # Wrought phosphor bronze (C51000): springs, bushings, fasteners. Bands span temper
+    # (annealed -> hard); shear_strength is a derived estimate and the melting band is
+    # the broad solidus->liquidus range.
+    Bronze.C51000_PHOSPHOR: MetalMaterial(
+        # identity
+        name="Bronze_C51000_PHOSPHOR",
+        family="bronze",
+        # mechanical properties
+        density=8800,
+        hardness=Range(70, 200),
+        hardness_scale="HB",
+        modulus_of_elasticity=Range(100, 120),
+        poisson_ratio=Range(0.33, 0.35),
+        shear_modulus=Range(40, 44),
+        shear_strength=Range(220, 360),
+        tensile_strength=Range(300, 550),
+        yield_strength=Range(130, 450),
+        # thermal properties
+        max_service_temp=Range(150, 250),
+        melting_temperature=Range(900, 1000),
+        specific_heat_capacity=Range(370, 380),
+        thermal_conductivity=Range(50, 75),
+        thermal_expansion=Range(17e-6, 19e-6),
+    ),
+    # Cast tin bronze / "gunmetal" (C90500, ~88Cu-10Sn-2Zn): valves, gears, bushings.
+    # shear_strength derived; melting is the solidus->liquidus band.
+    Bronze.C90500_TIN: MetalMaterial(
+        # identity
+        name="Bronze_C90500_TIN",
+        family="bronze",
+        # mechanical properties
+        density=8800,
+        hardness=Range(65, 110),
+        hardness_scale="HB",
+        modulus_of_elasticity=Range(95, 110),
+        poisson_ratio=Range(0.33, 0.35),
+        shear_modulus=Range(38, 44),
+        shear_strength=Range(180, 280),
+        tensile_strength=Range(275, 380),
+        yield_strength=Range(130, 200),
+        # thermal properties
+        max_service_temp=Range(150, 250),
+        melting_temperature=Range(850, 1000),
+        specific_heat_capacity=Range(370, 380),
+        thermal_conductivity=Range(65, 75),
+        thermal_expansion=Range(17e-6, 19e-6),
+    ),
+    # Cast leaded bearing bronze (C93200 / SAE 660, ~83Cu-7Sn-7Pb-3Zn): sleeve bearings,
+    # bushings. shear_strength derived; melting is the solidus->liquidus band.
+    Bronze.C93200_BEARING: MetalMaterial(
+        # identity
+        name="Bronze_C93200_BEARING",
+        family="bronze",
+        # mechanical properties
+        density=8900,
+        hardness=Range(55, 75),
+        hardness_scale="HB",
+        modulus_of_elasticity=Range(90, 105),
+        poisson_ratio=Range(0.33, 0.35),
+        shear_modulus=Range(36, 42),
+        shear_strength=Range(160, 240),
+        tensile_strength=Range(240, 310),
+        yield_strength=Range(110, 150),
+        # thermal properties
+        max_service_temp=Range(150, 250),
+        melting_temperature=Range(850, 980),
+        specific_heat_capacity=Range(370, 380),
+        thermal_conductivity=Range(45, 60),
+        thermal_expansion=Range(17e-6, 19e-6),
+    ),
+}
+
+
+def bronze(
+    grade: Bronze = Bronze.C51000_PHOSPHOR,
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+) -> FinishedMaterial[MetalMaterial]:
+    """Bronze as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to C51000 phosphor bronze.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(BRONZE_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
+
+
+# --- Gold --------------------------------------------------------------------
+class Gold(Enum):
+    PURE = auto()
+
+
+GOLD_MATERIALS: dict[Gold, MetalMaterial] = {
+    # Pure gold (Au 99.9%); bands span annealed (very soft) -> cold-worked. Gold is a
+    # precious metal used structurally only in niche cases (contacts, jewelry); as a
+    # coating it is the ``gold_plate`` finish. shear_strength + max_service_temp are
+    # derived/nominal estimates.
+    Gold.PURE: MetalMaterial(
+        # identity
+        name="Gold_PURE",
+        family="gold",
+        # mechanical properties
+        density=19300,
+        hardness=Range(25, 60),
+        hardness_scale="HB",
+        modulus_of_elasticity=Range(77, 79),
+        poisson_ratio=Range(0.42, 0.44),
+        shear_modulus=Range(26, 28),
+        shear_strength=Range(70, 110),
+        tensile_strength=Range(100, 220),
+        yield_strength=Range(30, 200),
+        # thermal properties
+        max_service_temp=Range(200, 400),
+        melting_temperature=Range(1063, 1064),
+        specific_heat_capacity=Range(128, 130),
+        thermal_conductivity=Range(315, 320),
+        thermal_expansion=Range(14e-6, 14.5e-6),
+    ),
+}
+
+
+def gold(
+    grade: Gold = Gold.PURE,
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+) -> FinishedMaterial[MetalMaterial]:
+    """Gold as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to pure gold.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(GOLD_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
+
+
+# --- Silver ------------------------------------------------------------------
+class Silver(Enum):
+    PURE = auto()
+
+
+SILVER_MATERIALS: dict[Silver, MetalMaterial] = {
+    # Pure silver (Ag 99.9%); bands span annealed -> cold-worked. Like gold, a precious
+    # metal used structurally only in niche cases; as a coating it is the ``silver_plate``
+    # finish. shear_strength + max_service_temp are derived/nominal estimates.
+    Silver.PURE: MetalMaterial(
+        # identity
+        name="Silver_PURE",
+        family="silver",
+        # mechanical properties
+        density=10490,
+        hardness=Range(25, 70),
+        hardness_scale="HB",
+        modulus_of_elasticity=Range(76, 83),
+        poisson_ratio=Range(0.36, 0.38),
+        shear_modulus=Range(29, 31),
+        shear_strength=Range(100, 140),
+        tensile_strength=Range(125, 200),
+        yield_strength=Range(40, 140),
+        # thermal properties
+        max_service_temp=Range(200, 400),
+        melting_temperature=Range(961, 962),
+        specific_heat_capacity=Range(233, 236),
+        thermal_conductivity=Range(420, 430),
+        thermal_expansion=Range(18.5e-6, 19.5e-6),
+    ),
+}
+
+
+def silver(
+    grade: Silver = Silver.PURE,
+    finish: FinishSpec = None,
+    process: Process | None = None,
+    density: float | None = None,
+) -> FinishedMaterial[MetalMaterial]:
+    """Silver as a ``FinishedMaterial``.
+
+    Args:
+        grade: Grade to select; defaults to pure silver.
+        finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
+            exclusive with ``process``.
+        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+            ``finish``.
+        density: Override the material's single representative density (kg/m³) for this
+            part.
+
+    Returns:
+        A ``FinishedMaterial`` for the selected grade.
+    """
+    return FinishedMaterial(
+        with_density(SILVER_MATERIALS[grade], density),
+        finish,
+        process=process,
+    )
+
+
 ALL_METALS = (
     *ALU_MATERIALS.values(),
     *STAINLESS_MATERIALS.values(),
@@ -1124,6 +1353,9 @@ ALL_METALS = (
     *BRASS_MATERIALS.values(),
     *COPPER_MATERIALS.values(),
     *MAGNESIUM_MATERIALS.values(),
+    *BRONZE_MATERIALS.values(),
+    *GOLD_MATERIALS.values(),
+    *SILVER_MATERIALS.values(),
 )
 
 

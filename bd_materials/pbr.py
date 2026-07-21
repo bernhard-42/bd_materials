@@ -68,7 +68,17 @@ _COLOR_HEX: dict[str, str | None] = {
 
 # metal families with a dedicated bundled factory (else steel / stainless)
 _BARE_METALS = frozenset(
-    {"aluminum", "brass", "copper", "stainless", "titanium", "tin", "gold", "silver"}
+    {
+        "aluminum",
+        "brass",
+        "bronze",
+        "copper",
+        "stainless",
+        "titanium",
+        "tin",
+        "gold",
+        "silver",
+    }
 )
 
 # mechanical finishes -> metal surface-relief variant (None elsewhere = smooth)
