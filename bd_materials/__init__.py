@@ -17,6 +17,13 @@ table), ``.pbr`` is the three.js look.
     print(metals.aluminum().material)                  # typical-value dump (__str__)
     metals.aluminum().pbr                              # resolved three.js look
 
+Materials are also reachable **by name**, for consumers that assign one as a string::
+
+    resolve("aluminum")                                # == metals.aluminum()
+    resolve("Alu_G7075_T6")                            # a specific grade
+    factory("aluminum")(finish=finishes.anodize("blue"))   # with per-part arguments
+    material_names()                                   # every accepted name
+
 Intrinsic identity (``family``, ``category``, ``transparent``) lives on the
 ``Material``; per-part choices (``color``, ``thickness_mm``, ``finish``,
 ``process``) live on the ``FinishedMaterial`` (``finish`` and ``process`` are
@@ -27,9 +34,10 @@ mutually exclusive). Each category exposes grade enums + family functions +
 
 from __future__ import annotations
 
-from . import applicability, core, finishes
+from . import applicability, core, finishes, registry
 from .applicability import typical_finishes, typical_materials
 from .finished import FinishedMaterial, Process
+from .registry import canonical_name, factory, material_names, resolve
 from .materials import (
     glass,
     metals,
@@ -56,6 +64,12 @@ __all__ = [
     "applicability",
     "typical_finishes",
     "typical_materials",
+    # name -> material lookup (assign a material by string)
+    "registry",
+    "resolve",
+    "factory",
+    "material_names",
+    "canonical_name",
     # user-facing types
     "FinishedMaterial",
     "Process",

@@ -184,6 +184,15 @@ metals.custom_metal(name="MyAlloy", density=4500, family="titanium",
 #   each property is a Range(lo, hi) band, a bare number (exact value, min == max),
 #   None (missing) or NOT_SUITABLE (n/a). Returns a FinishedMaterial, so finishes /
 #   color / scale apply just like a catalog material; pass pbr=... for a ready-made look.
+
+# 10 — look a material up by name (for consumers that assign one as a string)
+from bd_materials import resolve, factory, material_names, canonical_name
+resolve("aluminum")                                  # == metals.aluminum()
+resolve("oak"), resolve("felt"), resolve("mild steel")
+resolve("Alu_G7075_T6")                              # a specific grade, by its name
+factory("aluminum")(finish=finishes.anodize("blue")) # the family function, un-called
+canonical_name(resolve("aluminum"))                  # -> "Alu_G6061_T6" (round-trips)
+material_names()                                     # all 155 accepted names
 ```
 
 Grade enums live on their module (`metals.Alu`, `glass.Borosilicate`, …) or import directly: `from bd_materials.materials.metals import Alu`. Families with a single grade (e.g. `glass.borosilicate()`, `resins.tough()`) default to it, so you never need the enum until a family has more than one grade.
@@ -315,6 +324,32 @@ The per-part fields stay on the object as provenance; `.pbr` now returns the pin
 
 Each category exposes `custom_<category>(name, density, *, …)` — `metals.custom_metal`, `plastics.custom_plastic`, `resins.custom_resin`, `glass.custom_glass`, `wood.custom_wood`, `paper.custom_paper`, `textile.custom_textile`. `name` and `density` are required positional; everything else is keyword-only: the rest of the **identity** (`family` PBR key, `transparent`, `hardness_scale` where it applies), **every property field** as a `Range` / bare number (exact value) / `None` / `NOT_SUITABLE`, the **same per-part trailer as that category** (so a transparent `custom_plastic` accepts `thickness_mm`/`opacity`/`roughness`, a `custom_wood` accepts `scale`/`rotation`, …), plus `pbr=` for a ready-made look. Returns a `FinishedMaterial`.
 
+### Lookup by name
+
+For consumers that assign a material as a string — `part.material = "aluminum"` — the catalog is also reachable by name, without importing a category module or a grade enum:
+
+```python
+from bd_materials import resolve, factory, material_names, canonical_name
+
+resolve("aluminum")          # -> FinishedMaterial, == metals.aluminum()
+resolve("Alu_G7075_T6")      # -> that specific grade
+factory("oak")(scale=(2, 2)) # the family function itself, for the per-part arguments
+canonical_name(resolve("aluminum"))   # -> "Alu_G6061_T6"
+```
+
+Two key sets, both **derived** from the catalog, so a new family or grade is addressable the day it lands:
+
+| Key set          | Count | Example                            | Resolves to           |
+| ---------------- | ----- | ---------------------------------- | --------------------- |
+| **family names** | 61    | `aluminum`, `mild_steel`, `oak`, `felt`, `pla` | that family's default grade |
+| **grade names**  | 94    | `Alu_G7075_T6`, `Hardwood_OAK`, `PETG_CF`      | that exact grade      |
+
+The family names are the family/species function names (`abs_` is keyed `abs`); the grade names are the materials' own `name`s. Matching folds case, and reads spaces and hyphens as underscores (`"Mild Steel"` == `"mild_steel"`). An unknown name raises `ValueError` naming the closest matches.
+
+- **`resolve(name)`** returns a **fresh** `FinishedMaterial` per call — it is mutable, so a shared instance would let one part's `color`/`pbr` change leak into another. It also passes a `FinishedMaterial` through unchanged and wraps a bare `Material`, so a caller accepting a material in any of the three forms normalizes it with one call.
+- **`factory(name)`** returns the family function **un-called**, so the per-part arguments still apply: `factory("Alu_G7075_T6")(density=2790)`. A grade name binds only the grade, so both key sets take the same arguments.
+- **`canonical_name(material)`** is the reverse: the material's catalog name, always the *grade* name so it stays exact if a family's default grade ever changes. It names the material only — a `FinishedMaterial`'s color/finish/process are not encoded. A `custom_*` material has no registry entry and raises.
+
 ---
 
 ## 6. Material classes
@@ -344,6 +379,7 @@ FinishedMaterial(material, finish=None, *, color=None, thickness_mm=None,
                  opacity=None, roughness=None, scale=(1, 1), rotation=0,
                  process=None, pbr=None)
     .material   # the physics (a shared, immutable range table)
+    .name       # the material's catalog name (== .material.name)
     .pbr        # the resolved three.js look (get; set to pin a tuned look)
 ```
 

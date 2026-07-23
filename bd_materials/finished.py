@@ -145,6 +145,11 @@ class FinishedMaterial(Generic[MaterialT]):
         self._pbr = pbr
 
     @property
+    def name(self) -> str:
+        """The underlying material's catalog name (e.g. ``"Alu_G6061_T6"``)."""
+        return self.material.name
+
+    @property
     def pbr(self) -> PbrProperties:
         """The resolved three.js look (needs ``threejs_materials``).
 

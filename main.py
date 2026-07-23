@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from bd_materials import (
     Process,
+    canonical_name,
     finishes,
     glass,
+    material_names,
     metals,
     paper,
     plastics,
     resins,
+    resolve,
     textile,
     wood,
 )
@@ -38,6 +41,11 @@ for _fm in (metals.aluminum(), metals.titanium(), plastics.pla(color="black")):
 # a typical-value range dump (print uses the material's __str__)
 print("\ntypical values (Alu 7075-T6):")
 print(metals.aluminum(Alu.G7075_T6).material)
+
+# lookup by name -- the string entry point (part.material = "aluminum")
+print(f"\nmaterials reachable by name: {len(material_names())}")
+for _name in ("aluminum", "oak", "felt", "Alu_G7075_T6", "mild steel"):
+    print(f"  {_name:15s} -> {canonical_name(resolve(_name))}")
 
 # --- visualization: FinishedMaterial -> three.js PBR ---------------------------
 # Building a FinishedMaterial needs no threejs; only .pbr imports threejs_materials.
