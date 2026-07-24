@@ -524,6 +524,7 @@ class AlloySteel(Enum):
     G4140_QUENCHED_TEMPERED = auto()
     G4340_QUENCHED_TEMPERED = auto()
     G1215_COLD_DRAWN = auto()
+    G52100_THROUGH_HARDENED = auto()
 
 
 ALLOY_STEEL_MATERIALS: dict[AlloySteel, MetalMaterial] = {
@@ -589,6 +590,27 @@ ALLOY_STEEL_MATERIALS: dict[AlloySteel, MetalMaterial] = {
         specific_heat_capacity=Range(460, 490),
         thermal_conductivity=Range(45, 55),
         thermal_expansion=Range(11e-6, 13e-6),
+    ),
+    AlloySteel.G52100_THROUGH_HARDENED: MetalMaterial(
+        # identity
+        name="AlloySteel_G52100_THROUGH_HARDENED",
+        family="alloy_steel",
+        # mechanical properties
+        density=7800,
+        hardness=Range(58, 65),
+        hardness_scale="HRC",
+        modulus_of_elasticity=Range(190, 210),
+        poisson_ratio=Range(0.27, 0.30),
+        shear_modulus=Range(80, 80),
+        shear_strength=Range(1300, 1400),
+        tensile_strength=Range(2200, 2300),
+        yield_strength=Range(1700, 2000),
+        # thermal properties
+        max_service_temp=Range(120, 200),
+        melting_temperature=Range(1420, 1460),
+        specific_heat_capacity=Range(460, 480),
+        thermal_conductivity=Range(40, 47),
+        thermal_expansion=Range(11.9e-6, 12e-6),
     ),
 }
 
