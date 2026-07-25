@@ -42,8 +42,8 @@ requires_threejs = pytest.mark.skipif(
 
 
 def test_catalog_size_and_unique_names():
-    """The catalog holds the expected 94 materials, each with a unique name."""
-    assert len(ALL_MATERIALS) == 94
+    """The catalog holds the expected 95 materials, each with a unique name."""
+    assert len(ALL_MATERIALS) == 95
     names = [m.name for m in ALL_MATERIALS]
     assert len(names) == len(set(names))
 
