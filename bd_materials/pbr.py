@@ -105,16 +105,6 @@ _TEXTURE = {
     _MECH[fin.Mechanical.FINE_SANDING]: "matte",
 }
 
-# Plastic in threejs-materials follows the metal base/finish shape: a scalar base plus
-# ``_rough`` / ``_fdm`` relief variants. Both names below are bound the adopt-when-
-# bundled way the metal handlers use for ``metal.nickel`` / ``metal.tin_matte``, so an
-# older release still works: ``plastic`` was called ``plastic_clean`` before the rename
-# (the old name resolves but warns), and ``plastic_fdm`` degrades to the generic rough
-# surface where the layer-line map is not bundled yet.
-_plastic_base = getattr(plastic, "plastic", plastic.plastic_clean)
-_plastic_fdm = getattr(plastic, "plastic_fdm", plastic.plastic_rough)
-_plastic_fdm_skin = getattr(plastic, "plastic_fdm_skin", plastic.plastic_rough)
-
 
 def _normalize_color(color: Color | None) -> _Rgb | None:
     """Coerce any accepted ``Color`` input to the internal ``_Rgb`` (hex string or RGB).
@@ -372,15 +362,15 @@ def _plain_base(
         return plastic.carbon_fiber(color=rgb)
     if texture == "fdm_skin":
         # the solid top/bottom surface: side-by-side infill beads at the extrusion width
-        return _plastic_fdm_skin(color=rgb)
+        return plastic.plastic_fdm_skin(color=rgb)
     if texture == "fdm":
         # printed layer lines; the map is authored at a real-world scale (a 6.4 mm tile
         # of 0.2 mm layers) and carries its own millimetre-true UV transform -- see
         # ``_apply_uv``, which preserves it rather than renormalizing the UVs
-        return _plastic_fdm(color=rgb)
+        return plastic.plastic_fdm(color=rgb)
     if texture is not None:
         return plastic.plastic_rough(color=rgb)
-    return _plastic_base(color=rgb)
+    return plastic.plastic(color=rgb)
 
 
 # Dark conversion / e-coat finishes render as a very dark neutral grey, not an
@@ -461,33 +451,23 @@ def _silver(
 def _nickel(
     m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
-    """Nickel-plated look (tinted silver until metal.nickel is bundled)."""
-    fn = getattr(metal, "nickel", None)  # adopt metal.nickel once bundled
-    if fn is not None:
-        return fn()
-    return metal.silver().override(color="#b9b9b2")
+    """Nickel-plated look."""
+    return metal.nickel()
 
 
 def _tin(
     m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Tin-plated look (matte / satin)."""
-    # tin plating is matte/satin (matte tin is the solderability standard); prefer
-    # the matte factory, else roughen the glossy plain-tin factory
-    fn = getattr(metal, "tin_matte", None)
-    if fn is not None:
-        return fn()
-    return metal.tin().override(roughness=0.4)
+    # matte tin is the solderability standard, so the matte factory, not plain tin
+    return metal.tin_matte()
 
 
 def _zinc(
     m: RangeMaterial, rgb: _Rgb | None, texture: str | None, sheen: fin.Sheen | None
 ) -> PbrProperties:
     """Zinc-plated look (satin), optionally tinted."""
-    # zinc plating is satin; prefer the matte zinc factory, else roughen the glossy
-    # plain-zinc factory
-    fn = getattr(metal, "zinc_matte", None)
-    base = fn() if fn is not None else metal.zinc().override(roughness=0.4)
+    base = metal.zinc_matte()  # zinc plating is satin, not the glossy plain zinc
     if rgb is not None:
         return base.override(color=rgb)
     return base

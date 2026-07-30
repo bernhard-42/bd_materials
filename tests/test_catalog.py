@@ -53,24 +53,6 @@ requires_threejs = pytest.mark.skipif(
     not HAS_THREEJS, reason="threejs_materials not installed"
 )
 
-if HAS_THREEJS:
-    from threejs_materials import plastic as _tjs_plastic
-
-    HAS_FDM_MAP = hasattr(_tjs_plastic, "plastic_fdm")
-else:
-    HAS_FDM_MAP = False
-
-# ``pbr`` degrades to the generic rough surface where the layer-line map is not
-# bundled, so the tests that assert the printed look need the newer release
-requires_fdm_map = pytest.mark.skipif(
-    not HAS_FDM_MAP, reason="threejs_materials has no bundled FDM map"
-)
-
-HAS_FDM_SKIN_MAP = HAS_THREEJS and hasattr(_tjs_plastic, "plastic_fdm_skin")
-requires_fdm_skin_map = pytest.mark.skipif(
-    not HAS_FDM_SKIN_MAP, reason="threejs_materials has no bundled FDM skin map"
-)
-
 
 def test_catalog_size_and_unique_names():
     """The catalog holds the expected 95 materials, each with a unique name."""
@@ -209,14 +191,14 @@ _FDM_FAMILIES = [
 ]
 
 
-@requires_fdm_map
+@requires_threejs
 @pytest.mark.parametrize("family", _FDM_FAMILIES, ids=lambda f: f.__name__)
 def test_fdm_process_renders_layer_lines(family):
     """``fdm()`` renders any filament family as printed layer lines."""
     assert family(process=fdm()).pbr.name == "plastic_fdm"
 
 
-@requires_fdm_map
+@requires_threejs
 @pytest.mark.parametrize("rotation", [0, 90, 45], ids=["flat", "quarter", "diagonal"])
 def test_fdm_keeps_its_millimetre_true_uv_transform(rotation):
     """The printed pitch survives resolution, rotated or not.
@@ -233,7 +215,7 @@ def test_fdm_keeps_its_millimetre_true_uv_transform(rotation):
     assert (look.texture_rotation or 0) == rotation
 
 
-@requires_fdm_map
+@requires_threejs
 @pytest.mark.parametrize(
     ("layer_height_mm", "tile_mm"), [(0.2, 6.4), (0.1, 3.2), (0.3, 9.6)]
 )
@@ -244,7 +226,7 @@ def test_fdm_layer_height_scales_the_authored_tile(layer_height_mm, tile_mm):
     assert tuple(look.texture_repeat) == pytest.approx((1 / tile_mm, 1 / tile_mm))
 
 
-@requires_fdm_map
+@requires_threejs
 @pytest.mark.parametrize("mm_per_uv", [1.0, 10.0, 25.0], ids=["metric", "r10", "r25"])
 def test_mm_per_uv_corrects_a_non_metric_parameterization(mm_per_uv):
     """``mm_per_uv`` divides the authored tile, so the printed pitch survives raw UVs.
@@ -262,7 +244,7 @@ def test_mm_per_uv_corrects_a_non_metric_parameterization(mm_per_uv):
     )
 
 
-@requires_fdm_map
+@requires_threejs
 def test_mm_per_uv_composes_with_layer_height():
     """The two corrections are independent ratios on the same tile."""
     look = plastics.asa(process=fdm(layer_height_mm=0.1, mm_per_uv=10)).pbr
@@ -270,7 +252,7 @@ def test_mm_per_uv_composes_with_layer_height():
     assert tuple(look.texture_repeat) == pytest.approx((1 / 0.32, 1 / 0.32))
 
 
-@requires_fdm_skin_map
+@requires_threejs
 def test_fdm_skin_renders_the_solid_infill_surface():
     """``fdm_skin()`` is the same route as ``fdm()`` -- a different face of the print."""
     skin = plastics.asa(color="red", process=fdm_skin())
@@ -279,7 +261,7 @@ def test_fdm_skin_renders_the_solid_infill_surface():
     assert skin.process.skin is True
 
 
-@requires_fdm_skin_map
+@requires_threejs
 @pytest.mark.parametrize("rotation", [45, -45, 0], ids=["top", "bottom", "axis"])
 def test_fdm_skin_rotation_selects_the_infill_direction(rotation):
     """The authored 45 deg is a baked UV rotation; ``-45`` is the bottom face."""
@@ -289,7 +271,7 @@ def test_fdm_skin_rotation_selects_the_infill_direction(rotation):
     assert (look.texture_rotation or 0) == rotation
 
 
-@requires_fdm_skin_map
+@requires_threejs
 @pytest.mark.parametrize(
     ("line_width_mm", "tile_mm"), [(0.4, 6.4), (0.2, 3.2), (0.6, 9.6)]
 )
@@ -299,7 +281,7 @@ def test_fdm_skin_line_width_scales_the_authored_tile(line_width_mm, tile_mm):
     assert tuple(look.texture_repeat) == pytest.approx((1 / tile_mm, 1 / tile_mm))
 
 
-@requires_fdm_skin_map
+@requires_threejs
 def test_fdm_wall_and_skin_pitches_are_measured_separately():
     """The two maps share a tile but not a pitch, so equal numbers must differ in tile.
 
@@ -359,10 +341,7 @@ def test_powder_bed_processes_render_rough(process):
 def test_smooth_processes_keep_the_clean_base(process):
     """Routes with no as-made relief keep the untextured plastic base."""
     look = plastics.pla(color="red", process=process).pbr
-    assert look.name in (
-        "plastic",
-        "plastic_clean",
-    )  # pre-rename name on an older release
+    assert look.name == "plastic"
     assert look.maps.normal is None  # no relief grafted on
 
 
