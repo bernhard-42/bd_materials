@@ -17,7 +17,8 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, ClassVar
 
-from ..finished import Color, FinishedMaterial, FinishSpec, Process
+from ..finished import Color, FinishedMaterial, FinishSpec
+from ..processes import ProcessSpec
 from ..core import (
     NOT_SUITABLE,
     PolymerMaterial,
@@ -80,7 +81,7 @@ def standard(
     grade: Standard = Standard.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     """Standard resin as a ``FinishedMaterial``.
@@ -92,7 +93,8 @@ def standard(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -144,7 +146,7 @@ def tough(
     grade: Tough = Tough.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     """Tough resin as a ``FinishedMaterial``.
@@ -156,7 +158,8 @@ def tough(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -208,7 +211,7 @@ def high_temp(
     grade: HighTemp = HighTemp.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     """High-temperature resin as a ``FinishedMaterial``.
@@ -220,7 +223,8 @@ def high_temp(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -273,7 +277,7 @@ def ceramic(
     grade: Ceramic = Ceramic.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     """Ceramic-filled resin as a ``FinishedMaterial``.
@@ -285,7 +289,8 @@ def ceramic(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -337,7 +342,7 @@ def castable(
     grade: Castable = Castable.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     """Castable resin as a ``FinishedMaterial``.
@@ -349,7 +354,8 @@ def castable(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -402,7 +408,7 @@ def esd(
     grade: Esd = Esd.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     """ESD (static-dissipative) resin as a ``FinishedMaterial``.
@@ -414,7 +420,8 @@ def esd(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -470,7 +477,7 @@ def transparent(
     opacity: float | None = None,
     roughness: float | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     """Transparent resin as a ``FinishedMaterial``.
@@ -488,7 +495,8 @@ def transparent(
             ``None`` keeps the factory value. Independent of ``opacity``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -543,7 +551,7 @@ def flexible(
     grade: Flexible = Flexible.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     """Flexible resin as a ``FinishedMaterial``.
@@ -555,7 +563,8 @@ def flexible(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -609,7 +618,7 @@ def custom_resin(
     opacity: float | None = None,
     roughness: float | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     pbr: PbrProperties | None = None,
 ) -> FinishedMaterial[ResinMaterial]:
     """Define a custom resin and return it as a ``FinishedMaterial``.

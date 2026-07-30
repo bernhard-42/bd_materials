@@ -20,7 +20,8 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, ClassVar
 
-from ..finished import FinishedMaterial, FinishSpec, Process
+from ..finished import FinishedMaterial, FinishSpec
+from ..processes import ProcessSpec
 from ..core import Range, RangeInput, RangeMaterial, as_range, with_density
 
 if TYPE_CHECKING:
@@ -177,7 +178,7 @@ HARDWOOD_MATERIALS: dict[Hardwood, WoodMaterial] = {
 def hardwood(
     grade: Hardwood = Hardwood.GENERIC,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -188,7 +189,8 @@ def hardwood(
         grade: Grade to select; defaults to generic species.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -210,7 +212,7 @@ def hardwood(
 
 def american_cherry(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -219,14 +221,12 @@ def american_cherry(
 
     See :func:`hardwood` for the args.
     """
-    return hardwood(
-        Hardwood.AMERICAN_CHERRY, finish, process, density, scale, rotation
-    )
+    return hardwood(Hardwood.AMERICAN_CHERRY, finish, process, density, scale, rotation)
 
 
 def ash(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -237,7 +237,7 @@ def ash(
 
 def beech(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -248,7 +248,7 @@ def beech(
 
 def birch(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -259,7 +259,7 @@ def birch(
 
 def maple(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -270,7 +270,7 @@ def maple(
 
 def oak(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -281,7 +281,7 @@ def oak(
 
 def walnut(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -346,7 +346,7 @@ SOFTWOOD_MATERIALS: dict[Softwood, WoodMaterial] = {
 def softwood(
     grade: Softwood = Softwood.GENERIC,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -357,7 +357,8 @@ def softwood(
         grade: Grade to select; defaults to generic species.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -379,7 +380,7 @@ def softwood(
 
 def spruce(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -390,7 +391,7 @@ def spruce(
 
 def pine(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -440,7 +441,7 @@ ENGINEERED_WOOD_MATERIALS: dict[EngineeredWood, WoodMaterial] = {
 def engineered_wood(
     grade: EngineeredWood = EngineeredWood.MDF,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -451,7 +452,8 @@ def engineered_wood(
         grade: Grade to select; defaults to MDF.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -473,7 +475,7 @@ def engineered_wood(
 
 def mdf(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -486,7 +488,7 @@ def mdf(
 
 def osb(
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -519,7 +521,7 @@ def custom_wood(
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     pbr: PbrProperties | None = None,
 ) -> FinishedMaterial[WoodMaterial]:
     """Define a custom wood and return it as a ``FinishedMaterial``.

@@ -9,7 +9,7 @@ from bd_materials import (
     glass,
     resins,
     finishes,
-    Process,
+    processes,
     typical_finishes,
     typical_materials,
 )
@@ -105,7 +105,7 @@ show(sb)
 
 ## 5 — process nudges the *bare* as-made surface (a print reads rough)
 
-sb.material = plastics.pla(color="black", process=Process.FDM)
+sb.material = plastics.pla(color="black", process=processes.fdm())
 show(sb)
 
 # %% compared to

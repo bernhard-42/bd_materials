@@ -16,7 +16,8 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, ClassVar
 
-from ..finished import Color, FinishedMaterial, FinishSpec, Process
+from ..finished import Color, FinishedMaterial, FinishSpec
+from ..processes import ProcessSpec
 from ..core import Range, RangeInput, SolidMaterial, as_range, with_density
 
 if TYPE_CHECKING:
@@ -78,7 +79,7 @@ def soda_lime(
     opacity: float | None = None,
     roughness: float | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[GlassMaterial]:
     """Soda-lime glass as a ``FinishedMaterial``.
@@ -97,7 +98,8 @@ def soda_lime(
             etched pane.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -153,7 +155,7 @@ def borosilicate(
     opacity: float | None = None,
     roughness: float | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[GlassMaterial]:
     """Borosilicate glass as a ``FinishedMaterial``.
@@ -172,7 +174,8 @@ def borosilicate(
             etched pane.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -220,7 +223,7 @@ def custom_glass(
     opacity: float | None = None,
     roughness: float | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     pbr: PbrProperties | None = None,
 ) -> FinishedMaterial[GlassMaterial]:
     """Define a custom glass and return it as a ``FinishedMaterial``.

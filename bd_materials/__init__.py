@@ -34,9 +34,10 @@ mutually exclusive). Each category exposes grade enums + family functions +
 
 from __future__ import annotations
 
-from . import applicability, core, finishes, registry
+from . import applicability, core, finishes, processes, registry
 from .applicability import typical_finishes, typical_materials
-from .finished import FinishedMaterial, Process
+from .finished import FinishedMaterial
+from .processes import AppliedProcess, Process
 from .registry import canonical_name, factory, material_names, resolve
 from .materials import (
     glass,
@@ -57,8 +58,9 @@ __all__ = [
     "wood",
     "paper",
     "textile",
-    # finishes + shared core primitives
+    # finishes / processes + shared core primitives
     "finishes",
+    "processes",
     "core",
     # material<->finish applicability (advisory hints)
     "applicability",
@@ -72,5 +74,6 @@ __all__ = [
     "canonical_name",
     # user-facing types
     "FinishedMaterial",
+    "AppliedProcess",
     "Process",
 ]

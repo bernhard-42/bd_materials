@@ -16,11 +16,12 @@ Threejs stays out of ``import bd_materials`` -- only ``.pbr`` pulls it in.
 
 from __future__ import annotations
 
-import enum
+import warnings
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from .finishes import AppliedFinish
 from .core import Color, RangeMaterial
+from .processes import AppliedProcess, Process, ProcessSpec
 
 if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-free)
     from threejs_materials import PbrProperties
@@ -36,18 +37,23 @@ FinishSpec = AppliedFinish | list[AppliedFinish] | None
 MaterialT = TypeVar("MaterialT", bound=RangeMaterial)
 
 
-class Process(enum.Enum):
-    """How a part is produced -- a use-time hint for the default surface look."""
+def _normalize_process(process: ProcessSpec) -> AppliedProcess | None:
+    """Coerce the ``process=`` input to an ``AppliedProcess``.
 
-    FDM = "fdm"
-    SLS = "sls"
-    MJF = "mjf"
-    SLM = "slm"  # metal powder-bed / additive
-    VAT = "vat"  # SLA / DLP resin
-    MOLDED = "molded"
-    MACHINED = "machined"
-    CAST = "cast"
-    WROUGHT = "wrought"
+    A bare ``Process`` member reads as that route's defaults -- it carries no per-part
+    geometry, which is why it is deprecated (see ``FinishedMaterial.__init__``).
+
+    Args:
+        process: ``None``, an ``AppliedProcess``, or a bare ``Process``.
+
+    Returns:
+        The applied process, or ``None``.
+    """
+    if process is None:
+        return None
+    if isinstance(process, Process):
+        return AppliedProcess(process)
+    return process
 
 
 class FinishedMaterial(Generic[MaterialT]):
@@ -73,7 +79,7 @@ class FinishedMaterial(Generic[MaterialT]):
         roughness: float | None = None,
         scale: tuple[float, float] = (1.0, 1.0),
         rotation: float = 0.0,
-        process: Process | None = None,
+        process: ProcessSpec = None,
         pbr: PbrProperties | None = None,
     ) -> None:
         """Bundle a material with the per-part choices.
@@ -98,7 +104,10 @@ class FinishedMaterial(Generic[MaterialT]):
                 fabric weave, ...); ``(2, 2)`` tiles it twice as fine. A textured
                 finish's own scale takes precedence over this. Default ``(1, 1)``.
             rotation: Texture rotation in degrees (counterclockwise). Default ``0``.
-            process: An as-made surface hint; mutually exclusive with ``finish``.
+            process: How the part was made -- an ``AppliedProcess`` from a process
+                function (e.g. ``fdm(rotation=90)``), which nudges the bare as-made
+                surface. Mutually exclusive with ``finish``. A bare ``Process`` member
+                is accepted but deprecated (it carries no per-part geometry).
             pbr: A ready-made look that overrides everything else; cannot be combined
                 with ``finish`` / ``process`` / ``color`` / ``thickness_mm`` /
                 ``opacity`` / ``roughness`` / ``scale`` / ``rotation``.
@@ -139,9 +148,17 @@ class FinishedMaterial(Generic[MaterialT]):
         self.thickness_mm = thickness_mm
         self.opacity = opacity
         self.roughness = roughness
+        if isinstance(process, Process):
+            warnings.warn(
+                f"process={process} is deprecated; call the process function instead "
+                f"-- process={process.value}() (from bd_materials.processes), which is "
+                "also the only way to pass the per-part geometry, e.g. fdm(rotation=90)",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         self.scale = scale
         self.rotation = rotation
-        self.process = process
+        self.process = _normalize_process(process)
         self._pbr = pbr
 
     @property

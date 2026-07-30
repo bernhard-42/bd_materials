@@ -13,7 +13,8 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, ClassVar
 
-from ..finished import Color, FinishedMaterial, FinishSpec, Process
+from ..finished import Color, FinishedMaterial, FinishSpec
+from ..processes import ProcessSpec
 from ..core import ArealMaterial, Range, RangeInput, as_range, with_density
 
 if TYPE_CHECKING:
@@ -55,7 +56,7 @@ def woven(
     grade: Woven = Woven.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -69,7 +70,8 @@ def woven(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -116,7 +118,7 @@ def felt(
     grade: Felt = Felt.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -130,7 +132,8 @@ def felt(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -177,7 +180,7 @@ def leather(
     grade: Leather = Leather.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -191,7 +194,8 @@ def leather(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -234,7 +238,7 @@ def custom_textile(
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     pbr: PbrProperties | None = None,
 ) -> FinishedMaterial[TextileMaterial]:
     """Define a custom textile and return it as a ``FinishedMaterial``.

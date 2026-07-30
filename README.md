@@ -58,6 +58,62 @@ Grades encode the **condition** that governs properties — e.g. `Alu.G7075_T6` 
 Finishes are **advisory hints, not gates** — any finish may be applied to any material.
 The `applicability` module answers "which finish typically suits which material" without restricting.
 
+### Processes — the as-made surface, before any finish
+
+`processes.…` mirrors `finishes.…`: a flat verb function binds the per-part texture
+geometry to a production route and returns an `AppliedProcess`. Which geometry each one
+exposes follows what its surface looks like — the same rule the finishes use.
+
+| Process (`processes.…`)          | Takes                          | Surface                          |
+| -------------------------------- | ------------------------------ | -------------------------------- |
+| `fdm`                            | `layer_height_mm`, `rotation`, `mm_per_uv` | wall: stacked layer lines |
+| `fdm_skin`                       | `line_width_mm`, `rotation`    | top/bottom: solid infill at 45°  |
+| `sls`, `mjf`, `slm`              | `scale`                        | sintered powder (isotropic)      |
+| `vat`, `molded`, `machined`, `cast`, `wrought` | —                | smooth, no as-made relief        |
+
+Both FDM maps are authored over a millimetre-true tile, so the printed spacing stays
+accurate on a part of any size, and their pitch argument scales the tile by the same
+ratio. The two pitches measure **different things**: a wall's beads are stacked, so its
+pitch is the layer height (0.2 mm authored); a skin's sit side by side, so its pitch is
+the extrusion width (0.4 mm authored). That is why they are separate functions rather
+than a flag — a single one would carry a dead argument in each mode.
+
+`rotation` differs too: on the wall it lays the lines parallel to the base plate (which
+depends on how the part sits on it); on the skin it is the infill direction, authored at
+45° with `-45` giving the bottom face, the way slicers alternate. Both still report
+`Process.FDM` — same print, different face:
+
+```python
+faces = box.faces().sort_by()
+top, bot = faces[-1], faces[0]
+top.material = plastics.asa(color="red", process=processes.fdm_skin())
+bot.material = plastics.asa(color="red", process=processes.fdm_skin(rotation=-45))
+for w in faces - [top, bot]:
+    w.material = plastics.asa(color="red", process=processes.fdm(rotation=90))
+show(bot, top, faces - [top, bot])   # show the faces you assigned to
+```
+
+#### Curved faces — `mm_per_uv`
+
+The layer map is sampled in **surface-parameter space**, so its spacing depends on how
+each face is parameterized. Planar faces and a cylinder's lateral surface are already
+metric along the build axis — one UV unit is one millimetre — and need nothing. A
+sphere's latitude is an **angle**: it spans π radians whatever the radius, so one UV
+unit is the radius in mm, and without saying so every sphere renders the same fixed
+~16 layers. Tell it the conversion:
+
+```python
+sphere.faces()[0].material = plastics.asa(process=processes.fdm(mm_per_uv=radius))
+```
+
+`rotation` and `mm_per_uv` are the same kind of knob — both compensate for the face's
+parameterization, one for direction and one for spacing.
+
+There is a limit worth knowing: real layers are planes of constant world Z, while a UV
+texture follows the surface, so on a doubly-curved face the spacing can only be right
+on average (exact at a sphere's equator, slightly compressed near the poles). Only
+triplanar projection, which samples in world space, is exact everywhere.
+
 ---
 
 ## 3. Examples
@@ -125,7 +181,7 @@ The `applicability` module answers "which finish typically suits which material"
 Every family function returns a **`FinishedMaterial`**: `.material` is the physics, `.pbr` is the look.
 
 ```python
-from bd_materials import metals, plastics, glass, wood, finishes, Process
+from bd_materials import metals, plastics, glass, wood, finishes, processes
 ```
 
 ```python
@@ -157,8 +213,16 @@ wood.hardwood(wood.Hardwood.OAK, scale=(2, 2))       # tile the wood-grain textu
 #   brushed takes scale+rotation (directional); bead_blast/fine_sanding are isotropic
 #   (scale only). wood/textile/paper take both; a textured finish's transform wins.
 
-# 6 — process nudges the *bare* as-made surface (a print reads rough)
-plastics.pla(color="black", process=Process.FDM)
+# 6 — process nudges the *bare* as-made surface (how the part was produced)
+plastics.pla(color="black", process=processes.fdm())              # printed layer lines
+plastics.pla(color="black", process=processes.fdm(rotation=90))   # lines || base plate
+plastics.pla(color="black", process=processes.fdm(layer_height_mm=0.1))  # finer layers
+plastics.nylon(process=processes.sls())              # powder-bed: as-built matte
+plastics.pla(color="black", process=processes.molded())  # smooth, like the bare default
+#   process functions mirror the finish functions: fdm is directional (rotation +
+#   layer_height_mm, a real millimetre pitch held at any part size), sls/mjf/slm are
+#   isotropic (scale only), and the rest take nothing. Passing a bare Process member
+#   still works but is deprecated -- it cannot carry the per-part geometry.
 #   note: finish and process are mutually exclusive (a finished part is smooth)
 
 # 7 — inspect the physics, compute mass, resolve the look
@@ -288,7 +352,7 @@ woven | felt | leather
 | `scale`        | `(u, v)`                    | wood, paper, textile                                           | Substrate-texture UV scale; `(2, 2)` tiles it twice as fine. Default `(1, 1)`.                                |
 | `rotation`     | `float` (degrees, CCW)      | wood, paper, textile                                           | Substrate-texture rotation. Default `0`.                                                                      |
 | `finish`       | `AppliedFinish` / `list`    | all                                                            | Surface finish(es), e.g. `anodize("blue")`. **Mutually exclusive with `process`.**                           |
-| `process`      | `Process`                   | all                                                            | As-made surface hint (`FDM`/`SLS`/`MJF`/`SLM` → rough). **Mutually exclusive with `finish`.**                 |
+| `process`      | `AppliedProcess`            | all                                                            | How the part was made, from a process function — `fdm()` → layer lines; `sls()`/`mjf()`/`slm()` → matte. **Mutually exclusive with `finish`.** |
 | `density`      | `float`                     | all                                                            | Per-part override of the representative density (kg/m³) — cast-free copy of the material.                     |
 
 ### Color inputs

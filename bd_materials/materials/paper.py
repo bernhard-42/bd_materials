@@ -13,7 +13,8 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, ClassVar
 
-from ..finished import Color, FinishedMaterial, FinishSpec, Process
+from ..finished import Color, FinishedMaterial, FinishSpec
+from ..processes import ProcessSpec
 from ..core import ArealMaterial, Range, RangeInput, as_range, with_density
 
 if TYPE_CHECKING:
@@ -55,7 +56,7 @@ def paper(
     grade: Paper = Paper.OFFICE,
     color: Color | None = "white",
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -69,7 +70,8 @@ def paper(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -116,7 +118,7 @@ CARDBOARD_MATERIALS: dict[Cardboard, PaperMaterial] = {
 def cardboard(
     grade: Cardboard = Cardboard.CORRUGATED,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -127,7 +129,8 @@ def cardboard(
         grade: Grade to select; defaults to corrugated.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -173,7 +176,7 @@ def foamboard(
     grade: Foamboard = Foamboard.GENERIC,
     color: Color | None = "white",
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
@@ -187,7 +190,8 @@ def foamboard(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -230,7 +234,7 @@ def custom_paper(
     scale: tuple[float, float] = (1.0, 1.0),
     rotation: float = 0.0,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     pbr: PbrProperties | None = None,
 ) -> FinishedMaterial[PaperMaterial]:
     """Define a custom paper/board and return it as a ``FinishedMaterial``.

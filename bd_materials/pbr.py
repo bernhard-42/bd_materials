@@ -8,8 +8,11 @@ the ``FinishedMaterial.pbr`` property (the user-facing entry, in ``finished``).
 ``spray_paint("blue")``) or a list of them; each carries its color. Finishes
 split on two axes: **texture** (brushed / bead-blast -> metal relief variants)
 and **surface/color** (anodize/PVD override; paint covers; plating replaces).
-``process`` (a ``Process``) nudges the default surface: printed/as-built routes
-render rough, everything else smooth. ``pbr`` (if given) is returned unchanged.
+``process`` is an ``AppliedProcess`` (from a process function like ``fdm(rotation=90)``)
+and nudges the default surface: FDM renders as printed layer lines, the powder-bed
+routes as an as-built matte, everything else smooth. It carries that surface's own
+texture geometry, the way a textured finish does. ``pbr`` (if given) is returned
+unchanged.
 
 Requires ``threejs_materials`` (kept out of ``bd_materials``'s core imports; only
 this module and ``FinishedMaterial.pbr`` pull it in).
@@ -24,8 +27,14 @@ from threejs_materials import coats, glass, metal, paper, plastic, textile, wood
 
 from . import finishes as fin
 from .core import FERROUS, Color, RangeMaterial
-from .finished import FinishSpec, Process
+from .finished import FinishSpec
 from .finishes import AppliedFinish
+from .processes import (
+    AUTHORED_LAYER_HEIGHT_MM,
+    AUTHORED_LINE_WIDTH_MM,
+    AppliedProcess,
+    Process,
+)
 
 if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-free)
     from threejs_materials import PbrProperties
@@ -35,8 +44,25 @@ if TYPE_CHECKING:  # real types for checkers; never imported at runtime (viz-fre
 # coerces any accepted ``Color`` input (see ``core.Color``) down to this.
 _Rgb = str | tuple[float, float, float]
 
-# as-printed / as-built routes default to a rough surface; the rest stay smooth
-_ROUGH_PROCESSES = frozenset({Process.FDM, Process.SLS, Process.MJF, Process.SLM})
+# as-printed / as-built routes and the relief each leaves behind. FDM is the one route
+# with a surface of its own -- extruded layer lines; the powder-bed routes (SLS/MJF, and
+# SLM for metal) sinter to an isotropic matte, the same relief a bead-blast leaves. The
+# routes not listed (VAT, MOLDED, MACHINED, CAST, WROUGHT) stay smooth.
+_PROCESS_TEXTURE = {
+    Process.FDM: "fdm",
+    Process.SLS: "matte",
+    Process.MJF: "matte",
+    Process.SLM: "matte",
+}
+
+# The two FDM reliefs and the printed pitch each bundled map is authored at. Both are
+# millimetre-true (see ``_fdm_scale``), but they measure different things: the wall's
+# beads are stacked, so its pitch is the layer height; the skin's sit side by side, so
+# its pitch is the extrusion width.
+_FDM_AUTHORED_PITCH = {
+    "fdm": AUTHORED_LAYER_HEIGHT_MM,
+    "fdm_skin": AUTHORED_LINE_WIDTH_MM,
+}
 
 # --- bd_materials-specific color names -> sRGB hex (None = no tint) -----------
 # CSS3 named colors are NOT listed here: they are resolved by ``webcolors`` (the same
@@ -78,6 +104,16 @@ _TEXTURE = {
     _MECH[fin.Mechanical.BEAD_BLAST]: "matte",
     _MECH[fin.Mechanical.FINE_SANDING]: "matte",
 }
+
+# Plastic in threejs-materials follows the metal base/finish shape: a scalar base plus
+# ``_rough`` / ``_fdm`` relief variants. Both names below are bound the adopt-when-
+# bundled way the metal handlers use for ``metal.nickel`` / ``metal.tin_matte``, so an
+# older release still works: ``plastic`` was called ``plastic_clean`` before the rename
+# (the old name resolves but warns), and ``plastic_fdm`` degrades to the generic rough
+# surface where the layer-line map is not bundled yet.
+_plastic_base = getattr(plastic, "plastic", plastic.plastic_clean)
+_plastic_fdm = getattr(plastic, "plastic_fdm", plastic.plastic_rough)
+_plastic_fdm_skin = getattr(plastic, "plastic_fdm_skin", plastic.plastic_rough)
 
 
 def _normalize_color(color: Color | None) -> _Rgb | None:
@@ -169,9 +205,85 @@ def _is_carbon(material: RangeMaterial) -> bool:
 def _metal_tex_base(material: RangeMaterial, texture: str | None) -> PbrProperties:
     """Bare metal, optionally with a brushed/matte relief variant."""
     name = _metal_name(material)
+    if texture in _FDM_AUTHORED_PITCH:
+        # extruded filament surfaces; a metal has no such map (and the metal printed
+        # route, SLM, is powder-bed anyway) -- fall back to the sintered matte
+        texture = "matte"
     if texture is not None:
         return getattr(metal, f"{name}_{texture}")()
     return getattr(metal, name)()
+
+
+def _apply_uv(
+    base: PbrProperties, scale: tuple[float, float], rotation: float
+) -> PbrProperties:
+    """Apply the per-part texture UV transform, preserving any baked one.
+
+    ``scale=(2, 2)`` makes the texture read twice as large; ``rotation`` turns it
+    counterclockwise in degrees. Most bundled materials normalize their UVs to the
+    part's bounding box, so the transform simply replaces theirs.
+
+    A material that ships a **baked** transform instead (``normalize_uvs=False`` --
+    ``plastic_fdm``, whose map is authored at a real millimetre tile so the printed
+    layer pitch holds on a part of any size) must keep normalization **off**: the
+    ``fixed=True`` default of ``PbrProperties.scale`` would hand the pitch back to the
+    bounding box, so merely rotating a print would silently lose its 0.2 mm layers.
+    For those, ``scale`` is already in the map's own authored units (see
+    ``_fdm_scale``), not a multiplier.
+
+    Args:
+        base: The resolved look to transform.
+        scale: The per-part UV scale ``(u, v)``.
+        rotation: The per-part texture rotation in degrees (counterclockwise).
+
+    Returns:
+        A transformed copy of ``base``.
+    """
+    u, v = scale
+    if base.normalize_uvs is False:
+        return base.scale(u, v, rotation=rotation, fixed=False)
+    return base.scale(u, v, rotation=rotation)
+
+
+def _fdm_scale(
+    base: PbrProperties,
+    pitch_mm: float | None,
+    texture: str,
+    mm_per_uv: float = 1.0,
+) -> tuple[float, float]:
+    """The FDM map's tile scale for a printed pitch, in the map's own units.
+
+    Each bundled FDM map is authored at a known printed pitch over a tile of some
+    millimetre size, and carries that size baked in as its texture repeat. A part
+    printed at a different pitch scales the tile by the same ratio -- half the pitch,
+    half the tile -- which keeps the printed spacing true at any part size.
+
+    The authored tile is read off the material rather than hardcoded, so a re-authored
+    upstream map stays correct; only the pitch it was drawn at is fixed here.
+
+    Args:
+        base: The FDM look, carrying the baked transform.
+        pitch_mm: The printed pitch in mm -- the layer height on a wall, the extrusion
+            width on a skin -- or ``None`` for the authored one.
+        texture: The relief key, ``"fdm"`` or ``"fdm_skin"``; selects which authored
+            pitch ``pitch_mm`` is measured against.
+        mm_per_uv: How many mm one UV unit spans on the face this is going onto. The
+            baked tile is in millimetres but the map is sampled in raw parameter space,
+            so a face whose parameter is not metric (a sphere's latitude, in radians)
+            needs the tile divided by this to keep the spacing true.
+
+    Returns:
+        The ``(u, v)`` tile scale to pass to ``_apply_uv``.
+    """
+    repeat = base.texture_repeat
+    if repeat is None:  # no baked transform (an older bundled map) -- leave it alone
+        return (1.0, 1.0)
+    tile_u = 1.0 / repeat[0] / mm_per_uv
+    tile_v = 1.0 / repeat[1] / mm_per_uv
+    if pitch_mm is None:
+        return (tile_u, tile_v)
+    ratio = pitch_mm / _FDM_AUTHORED_PITCH[texture]
+    return (tile_u * ratio, tile_v * ratio)
 
 
 def _apply_transmissive(
@@ -258,9 +370,17 @@ def _plain_base(
         )
     if _is_carbon(material):
         return plastic.carbon_fiber(color=rgb)
+    if texture == "fdm_skin":
+        # the solid top/bottom surface: side-by-side infill beads at the extrusion width
+        return _plastic_fdm_skin(color=rgb)
+    if texture == "fdm":
+        # printed layer lines; the map is authored at a real-world scale (a 6.4 mm tile
+        # of 0.2 mm layers) and carries its own millimetre-true UV transform -- see
+        # ``_apply_uv``, which preserves it rather than renormalizing the UVs
+        return _plastic_fdm(color=rgb)
     if texture is not None:
         return plastic.plastic_rough(color=rgb)
-    return plastic.plastic_clean(color=rgb)
+    return _plastic_base(color=rgb)
 
 
 # Dark conversion / e-coat finishes render as a very dark neutral grey, not an
@@ -444,7 +564,7 @@ def _normalize(finish: FinishSpec) -> list[AppliedFinish]:
 def get_pbr_properties(
     material: RangeMaterial,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: AppliedProcess | None = None,
     color: Color | None = None,
     thickness_mm: float | None = None,
     opacity: float | None = None,
@@ -459,7 +579,9 @@ def get_pbr_properties(
         material: The material being rendered (dispatched on its ``category``).
         finish: An ``AppliedFinish`` (e.g. from ``spray_paint("blue")``) or a list of
             them -- each carries its own color.
-        process: A ``Process`` that nudges the default surface (printed -> rough).
+        process: An ``AppliedProcess`` (e.g. from ``fdm(rotation=90)``) that nudges the
+            default surface -- FDM to printed layer lines, the powder-bed routes to an
+            as-built matte -- and carries that surface's per-part geometry.
         color: The material's own base color -- any build123d ``ColorLike`` -- applied
             only when no surface finish covers it (e.g. a colored filament or tinted
             resin); ignored for bare metals, whose color is intrinsic.
@@ -494,8 +616,12 @@ def get_pbr_properties(
             surface = f
             surface_color = af.color
             surface_sheen = af.sheen
-    if texture is None and process in _ROUGH_PROCESSES:
-        texture = "matte"  # as-printed / as-built relief
+    if texture is None and process is not None:
+        texture = _PROCESS_TEXTURE.get(process.process)  # as-printed / as-built relief
+        if texture == "fdm" and process.skin:
+            # same route, different face: the solid top/bottom surface shows the skin,
+            # not the extruded layer lines of the walls
+            texture = "fdm_skin"
 
     if surface is None:
         # No covering/coloring finish -> the per-part color (case-2 selection);
@@ -507,11 +633,32 @@ def get_pbr_properties(
         rgb = _normalize_color(surface_color)
         result = _SURFACE[surface](material, rgb, texture, surface_sheen)
 
-    # texture UV transform: a textured finish's own transform wins over the material's
+    # texture UV transform: the transform of whatever created the texture -- a textured
+    # finish or the process -- wins over the material's own. (finish and process are
+    # mutually exclusive, so at most one of these applies.)
     if finish_uv is not None and finish_uv != ((1.0, 1.0), 0.0):
         scale, rotation = finish_uv
+    elif process is not None:
+        if texture is not None and texture in _FDM_AUTHORED_PITCH:
+            # the extrusion maps are authored in millimetres, so the per-part scale is
+            # the tile size the printed pitch implies, not a multiplier. The rotation
+            # they are authored at is read off the material (the skin bakes 45 deg, the
+            # wall none), so a face that asks for exactly that keeps the plain id.
+            baked_rotation = (
+                0.0 if result.texture_rotation is None else result.texture_rotation
+            )
+            process_uv = (
+                _fdm_scale(result, process.pitch_mm, texture, process.mm_per_uv),
+                process.rotation,
+            )
+            as_authored = (_fdm_scale(result, None, texture), baked_rotation)
+        else:
+            process_uv = (process.scale, process.rotation)
+            as_authored = ((1.0, 1.0), 0.0)
+        if process_uv != as_authored:  # else the look already carries this transform
+            scale, rotation = process_uv
     if scale != (1.0, 1.0) or rotation != 0.0:
-        result = result.scale(scale[0], scale[1], rotation=rotation)
+        result = _apply_uv(result, scale, rotation)
     return result
 
 

@@ -12,11 +12,24 @@ categories. These tests target what those do *not* cover:
   which nothing else exercises. These are skipped when ``threejs_materials`` is absent.
 """
 
+import warnings
+
 import pytest
 
 from bd_materials import finishes
 from bd_materials.core import ALLOWED_CATEGORIES, NOT_SUITABLE, Range
-from bd_materials.finished import FinishedMaterial, Process
+from bd_materials.finished import FinishedMaterial
+from bd_materials.processes import (
+    AppliedProcess,
+    Process,
+    fdm,
+    fdm_skin,
+    machined,
+    mjf,
+    molded,
+    slm,
+    sls,
+)
 from bd_materials.finishes import Sheen
 from bd_materials.materials import (
     ALL_MATERIALS,
@@ -38,6 +51,24 @@ except ImportError:
 
 requires_threejs = pytest.mark.skipif(
     not HAS_THREEJS, reason="threejs_materials not installed"
+)
+
+if HAS_THREEJS:
+    from threejs_materials import plastic as _tjs_plastic
+
+    HAS_FDM_MAP = hasattr(_tjs_plastic, "plastic_fdm")
+else:
+    HAS_FDM_MAP = False
+
+# ``pbr`` degrades to the generic rough surface where the layer-line map is not
+# bundled, so the tests that assert the printed look need the newer release
+requires_fdm_map = pytest.mark.skipif(
+    not HAS_FDM_MAP, reason="threejs_materials has no bundled FDM map"
+)
+
+HAS_FDM_SKIN_MAP = HAS_THREEJS and hasattr(_tjs_plastic, "plastic_fdm_skin")
+requires_fdm_skin_map = pytest.mark.skipif(
+    not HAS_FDM_SKIN_MAP, reason="threejs_materials has no bundled FDM skin map"
 )
 
 
@@ -80,7 +111,7 @@ def test_density_override_is_per_part_and_cast_free():
 def test_finish_and_process_are_mutually_exclusive():
     """Passing both ``finish`` and ``process`` raises (a finish defines the surface)."""
     with pytest.raises(ValueError):
-        metals.aluminum(finish=finishes.anodize("black"), process=Process.MACHINED)
+        metals.aluminum(finish=finishes.anodize("black"), process=machined())
 
 
 @requires_threejs
@@ -97,7 +128,7 @@ def test_pbr_override_excludes_other_look_inputs():
 _PBR_CASES = {
     # bare substrates (case-1 / case-2 color, transmissive, composite)
     "alu_bare": lambda: metals.aluminum(),
-    "pla_color_fdm": lambda: plastics.pla(color="red", process=Process.FDM),
+    "pla_color_fdm": lambda: plastics.pla(color="red", process=fdm()),
     "pmma_clear_pane": lambda: plastics.pmma(color="clear", thickness_mm=3),
     "pc_pane": lambda: plastics.pc(thickness_mm=4),
     "pc_translucent": lambda: plastics.pc(color="white", opacity=0.65, roughness=0.3),
@@ -110,7 +141,7 @@ _PBR_CASES = {
     # texture (mechanical) finishes
     "alu_brushed": lambda: metals.aluminum(finish=finishes.brushed()),
     "alu_bead_blast": lambda: metals.aluminum(finish=finishes.bead_blast()),
-    "steel_slm_rough": lambda: metals.mild_steel(process=Process.SLM),
+    "steel_slm_rough": lambda: metals.mild_steel(process=slm()),
     # surface (color) finishes -- one per _SURFACE handler
     "alu_anodize": lambda: metals.aluminum(finish=finishes.anodize("blue")),
     "steel_black_oxide": lambda: metals.mild_steel(finish=finishes.black_oxide()),
@@ -162,6 +193,183 @@ def test_every_material_resolves_a_pbr_look(material):
 def test_finish_color_process_paths_resolve(build):
     """Every finish / color / process path in pbr.py resolves without error."""
     assert build().pbr is not None
+
+
+# --- the process axis: the as-made surface a production route leaves behind ---
+
+# the filament families, which all print on the same FDM route
+_FDM_FAMILIES = [
+    plastics.pla,
+    plastics.abs_,
+    plastics.asa,
+    plastics.petg,
+    plastics.tpu,
+    plastics.nylon,
+    plastics.pp,
+]
+
+
+@requires_fdm_map
+@pytest.mark.parametrize("family", _FDM_FAMILIES, ids=lambda f: f.__name__)
+def test_fdm_process_renders_layer_lines(family):
+    """``fdm()`` renders any filament family as printed layer lines."""
+    assert family(process=fdm()).pbr.name == "plastic_fdm"
+
+
+@requires_fdm_map
+@pytest.mark.parametrize("rotation", [0, 90, 45], ids=["flat", "quarter", "diagonal"])
+def test_fdm_keeps_its_millimetre_true_uv_transform(rotation):
+    """The printed pitch survives resolution, rotated or not.
+
+    ``plastic_fdm``'s map is authored at a real-world scale (a 6.4 mm tile of 0.2 mm
+    layers) and ships ``normalize_uvs=False``. Rotating it -- the whole point of
+    ``fdm(rotation=...)``, which lays the layer lines parallel to the base plate -- must
+    not hand the pitch back to the bounding box, which is what the ``fixed=True``
+    default of ``PbrProperties.scale`` would do.
+    """
+    look = plastics.pla(color="red", process=fdm(rotation=rotation)).pbr
+    assert look.normalize_uvs is False
+    assert tuple(look.texture_repeat) == pytest.approx((1 / 6.4, 1 / 6.4))
+    assert (look.texture_rotation or 0) == rotation
+
+
+@requires_fdm_map
+@pytest.mark.parametrize(
+    ("layer_height_mm", "tile_mm"), [(0.2, 6.4), (0.1, 3.2), (0.3, 9.6)]
+)
+def test_fdm_layer_height_scales_the_authored_tile(layer_height_mm, tile_mm):
+    """``layer_height_mm`` scales the tile by the same ratio -- half the pitch, half the tile."""
+    look = plastics.pla(process=fdm(layer_height_mm=layer_height_mm)).pbr
+    assert look.normalize_uvs is False
+    assert tuple(look.texture_repeat) == pytest.approx((1 / tile_mm, 1 / tile_mm))
+
+
+@requires_fdm_map
+@pytest.mark.parametrize("mm_per_uv", [1.0, 10.0, 25.0], ids=["metric", "r10", "r25"])
+def test_mm_per_uv_corrects_a_non_metric_parameterization(mm_per_uv):
+    """``mm_per_uv`` divides the authored tile, so the printed pitch survives raw UVs.
+
+    The map is sampled in surface-parameter space. Where that space is metric along the
+    build axis (planes, a cylinder's lateral face) one UV unit is one mm and the default
+    ``1`` is right; where it is angular (a sphere's latitude, spanning pi radians at any
+    size) one UV unit is the radius, and without saying so every sphere renders the same
+    fixed layer count.
+    """
+    look = plastics.asa(process=fdm(mm_per_uv=mm_per_uv)).pbr
+    assert look.normalize_uvs is False
+    assert tuple(look.texture_repeat) == pytest.approx(
+        (mm_per_uv / 6.4, mm_per_uv / 6.4)
+    )
+
+
+@requires_fdm_map
+def test_mm_per_uv_composes_with_layer_height():
+    """The two corrections are independent ratios on the same tile."""
+    look = plastics.asa(process=fdm(layer_height_mm=0.1, mm_per_uv=10)).pbr
+    # tile = 6.4 * (0.1 / 0.2) / 10
+    assert tuple(look.texture_repeat) == pytest.approx((1 / 0.32, 1 / 0.32))
+
+
+@requires_fdm_skin_map
+def test_fdm_skin_renders_the_solid_infill_surface():
+    """``fdm_skin()`` is the same route as ``fdm()`` -- a different face of the print."""
+    skin = plastics.asa(color="red", process=fdm_skin())
+    assert skin.pbr.name == "plastic_fdm_skin"
+    assert skin.process.process is Process.FDM  # still an FDM part
+    assert skin.process.skin is True
+
+
+@requires_fdm_skin_map
+@pytest.mark.parametrize("rotation", [45, -45, 0], ids=["top", "bottom", "axis"])
+def test_fdm_skin_rotation_selects_the_infill_direction(rotation):
+    """The authored 45 deg is a baked UV rotation; ``-45`` is the bottom face."""
+    look = plastics.asa(process=fdm_skin(rotation=rotation)).pbr
+    assert look.normalize_uvs is False
+    assert tuple(look.texture_repeat) == pytest.approx((1 / 6.4, 1 / 6.4))
+    assert (look.texture_rotation or 0) == rotation
+
+
+@requires_fdm_skin_map
+@pytest.mark.parametrize(
+    ("line_width_mm", "tile_mm"), [(0.4, 6.4), (0.2, 3.2), (0.6, 9.6)]
+)
+def test_fdm_skin_line_width_scales_the_authored_tile(line_width_mm, tile_mm):
+    """The skin's pitch is the extrusion width (0.4 authored), not the layer height."""
+    look = plastics.asa(process=fdm_skin(line_width_mm=line_width_mm)).pbr
+    assert tuple(look.texture_repeat) == pytest.approx((1 / tile_mm, 1 / tile_mm))
+
+
+@requires_fdm_skin_map
+def test_fdm_wall_and_skin_pitches_are_measured_separately():
+    """The two maps share a tile but not a pitch, so equal numbers must differ in tile.
+
+    The wall is authored at a 0.2 mm layer height and the skin at a 0.4 mm extrusion
+    width, so asking both for 0.4 must scale the wall's tile and leave the skin's alone.
+    """
+    wall = plastics.asa(process=fdm(layer_height_mm=0.4)).pbr
+    skin = plastics.asa(process=fdm_skin(line_width_mm=0.4)).pbr
+    assert tuple(wall.texture_repeat) == pytest.approx((1 / 12.8, 1 / 12.8))
+    assert tuple(skin.texture_repeat) == pytest.approx((1 / 6.4, 1 / 6.4))
+
+
+@requires_threejs
+def test_fdm_skin_on_metal_falls_back_to_matte():
+    """Extruded filament surfaces have no metal map -- both FDM faces degrade together."""
+    assert metals.aluminum(process=fdm_skin()).pbr.name == "aluminum_matte"
+
+
+@requires_threejs
+def test_powder_bed_scale_is_a_plain_multiplier():
+    """An isotropic sintered surface tiles like any other texture -- no baked transform."""
+    look = plastics.nylon(process=sls(scale=(2, 2))).pbr
+    assert look.normalize_uvs is True
+    assert tuple(look.texture_repeat) == pytest.approx((0.5, 0.5))
+
+
+@requires_threejs
+def test_bare_process_enum_is_deprecated_but_still_resolves():
+    """The pre-process-function spelling warns, and reads as that route's defaults."""
+    with pytest.warns(DeprecationWarning, match=r"process=fdm\(\)"):
+        deprecated = plastics.pla(color="red", process=Process.FDM)
+    assert deprecated.process == AppliedProcess(Process.FDM)
+    assert deprecated.pbr.name == plastics.pla(color="red", process=fdm()).pbr.name
+
+
+@requires_threejs
+def test_process_function_does_not_warn():
+    """The supported spelling is warning-free."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        assert plastics.pla(process=fdm(rotation=90)).pbr is not None
+
+
+@requires_threejs
+@pytest.mark.parametrize("process", [sls(), mjf()], ids=["sls", "mjf"])
+def test_powder_bed_processes_render_rough(process):
+    """The polymer powder-bed routes render as the as-built matte, not layer lines."""
+    assert plastics.nylon(process=process).pbr.name == "plastic_rough"
+
+
+@requires_threejs
+@pytest.mark.parametrize(
+    "process",
+    [None, molded(), machined()],
+    ids=["none", "molded", "machined"],
+)
+def test_smooth_processes_keep_the_clean_base(process):
+    """Routes with no as-made relief keep the untextured plastic base."""
+    look = plastics.pla(color="red", process=process).pbr
+    assert look.name in (
+        "plastic",
+        "plastic_clean",
+    )  # pre-rename name on an older release
+    assert look.maps.normal is None  # no relief grafted on
+
+
+@requires_threejs
+def test_fdm_process_on_metal_falls_back_to_matte():
+    """Layer lines are a filament surface: a metal asked for FDM gets the sintered matte."""
+    assert metals.aluminum(process=fdm()).pbr.name == "aluminum_matte"
 
 
 @requires_threejs

@@ -19,7 +19,8 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING, ClassVar
 
-from ..finished import Color, FinishedMaterial, FinishSpec, Process
+from ..finished import Color, FinishedMaterial, FinishSpec
+from ..processes import ProcessSpec
 from ..core import (
     NOT_SUITABLE,
     PolymerMaterial,
@@ -105,7 +106,7 @@ def pla(
     grade: PLA = PLA.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """PLA as a ``FinishedMaterial``.
@@ -117,7 +118,8 @@ def pla(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -196,7 +198,7 @@ def abs_(
     grade: ABS = ABS.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """ABS as a ``FinishedMaterial``.
@@ -208,7 +210,8 @@ def abs_(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -332,7 +335,7 @@ def nylon(
     grade: Nylon = Nylon.PA12,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """Nylon (PA) as a ``FinishedMaterial``.
@@ -344,7 +347,8 @@ def nylon(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -420,7 +424,7 @@ def peek(
     grade: Peek = Peek.MOLDED,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """PEEK as a ``FinishedMaterial``.
@@ -432,7 +436,8 @@ def peek(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -508,7 +513,7 @@ def tpu(
     grade: TPU = TPU.SHORE_95A,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """TPU as a ``FinishedMaterial``.
@@ -520,7 +525,8 @@ def tpu(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -576,7 +582,7 @@ def pc(
     opacity: float | None = None,
     roughness: float | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """Polycarbonate (PC) as a ``FinishedMaterial``.
@@ -596,7 +602,8 @@ def pc(
             V-wheel is glossy, an etched pane is rough.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -651,7 +658,7 @@ def pp(
     grade: PP = PP.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """Polypropylene (PP) as a ``FinishedMaterial``.
@@ -663,7 +670,8 @@ def pp(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -715,7 +723,7 @@ def pom(
     grade: POM = POM.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """Acetal (POM) as a ``FinishedMaterial``.
@@ -727,7 +735,8 @@ def pom(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -779,7 +788,7 @@ def ptfe(
     grade: PTFE = PTFE.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """PTFE as a ``FinishedMaterial``.
@@ -791,7 +800,8 @@ def ptfe(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -847,7 +857,7 @@ def pmma(
     opacity: float | None = None,
     roughness: float | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """Acrylic (PMMA) as a ``FinishedMaterial``.
@@ -865,7 +875,8 @@ def pmma(
             ``None`` keeps the factory value. Independent of ``opacity``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -920,7 +931,7 @@ def pe(
     grade: PE = PE.HDPE,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """Polyethylene (PE) as a ``FinishedMaterial``.
@@ -932,7 +943,8 @@ def pe(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -984,7 +996,7 @@ def phenolic(
     grade: Phenolic = Phenolic.BAKELITE,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """Phenolic as a ``FinishedMaterial``.
@@ -996,7 +1008,8 @@ def phenolic(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -1048,7 +1061,7 @@ def rubber(
     grade: Rubber = Rubber.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """Rubber as a ``FinishedMaterial``.
@@ -1060,7 +1073,8 @@ def rubber(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -1136,7 +1150,7 @@ def petg(
     grade: PETG = PETG.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """PETG as a ``FinishedMaterial``.
@@ -1148,7 +1162,8 @@ def petg(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -1202,7 +1217,7 @@ def asa(
     grade: Asa = Asa.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """ASA as a ``FinishedMaterial``.
@@ -1214,7 +1229,8 @@ def asa(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -1267,7 +1283,7 @@ def pps(
     grade: PPS = PPS.CF,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """PPS as a ``FinishedMaterial``.
@@ -1279,7 +1295,8 @@ def pps(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -1332,7 +1349,7 @@ def fr4(
     grade: FR4 = FR4.GENERIC,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """FR4 as a ``FinishedMaterial``.
@@ -1344,7 +1361,8 @@ def fr4(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -1396,7 +1414,7 @@ def cfrp(
     grade: CFRP = CFRP.PLATE,
     color: Color | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     density: float | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """CFRP as a ``FinishedMaterial``.
@@ -1408,7 +1426,8 @@ def cfrp(
             ``Color``.
         finish: Surface finish -- an ``AppliedFinish`` or a list of them. Mutually
             exclusive with ``process``.
-        process: As-made surface hint (e.g. ``Process.FDM``). Mutually exclusive with
+        process: How the part was made, from a process function (e.g. ``fdm()``).
+            Mutually exclusive with
             ``finish``.
         density: Override the material's single representative density (kg/m³) for this
             part.
@@ -1472,7 +1491,7 @@ def custom_plastic(
     opacity: float | None = None,
     roughness: float | None = None,
     finish: FinishSpec = None,
-    process: Process | None = None,
+    process: ProcessSpec = None,
     pbr: PbrProperties | None = None,
 ) -> FinishedMaterial[PlasticMaterial]:
     """Define a custom plastic and return it as a ``FinishedMaterial``.
